@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.kevin.trail">
 
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -18,8 +17,7 @@
         </activity>
         <activity android:name=".runActivity" />
         <activity android:name=".hikeActivity" />
-        <activity android:name=".bikeActivity" />
-        <activity android:name=".gpsActivity"></activity>
+        <activity android:name=".bikeActivity"></activity>
     </application>
 
 </manifest>
