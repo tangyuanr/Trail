@@ -59,11 +59,11 @@
         android:id="@+id/bikeButton" />
 
     <Button
-        android:text="TBD or Remove"
+        android:text="GET LOCATION"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/bikeButton"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="15dp"
-        android:id="@+id/button4" />
+        android:id="@+id/gpsButton" />
 </RelativeLayout>

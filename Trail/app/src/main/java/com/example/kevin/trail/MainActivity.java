@@ -11,6 +11,7 @@ public class MainActivity extends AppCompatActivity {
     protected Button runButtonlink =null;
     protected Button hikeButtonlink =null;
     protected Button bikeButtonlink =null;
+    protected Button gpsButtonlink=null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -19,6 +20,7 @@ public class MainActivity extends AppCompatActivity {
         runButtonlink = (Button) findViewById(R.id.runButton);
         hikeButtonlink = (Button) findViewById(R.id.hikeButton);
         bikeButtonlink = (Button) findViewById(R.id.bikeButton);
+        gpsButtonlink=(Button) findViewById(R.id.gpsButton);
 
         runButtonlink.setOnClickListener(new View.OnClickListener() {
          public void onClick(View view){
@@ -37,6 +39,12 @@ public class MainActivity extends AppCompatActivity {
                 goToBikeActivity();
             }
         });
+
+        gpsButtonlink.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view){
+                goToGPSActivity();
+            }
+        });
     }
 
     void goToRunActivity(){
@@ -50,6 +58,11 @@ public class MainActivity extends AppCompatActivity {
 
     void goToBikeActivity(){
         Intent intent = new Intent(MainActivity.this, bikeActivity.class);
+        startActivity(intent);
+    }
+
+    void goToGPSActivity(){
+        Intent intent=new Intent(MainActivity.this, gpsActivity.class);
         startActivity(intent);
     }
 
