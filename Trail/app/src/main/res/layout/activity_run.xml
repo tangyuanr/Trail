@@ -10,4 +10,45 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.kevin.trail.runActivity">
 
+    <Button
+        android:text="Restart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/startB"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginRight="80dp"
+        android:layout_marginEnd="80dp"
+        android:id="@+id/button2" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/timerTextView"
+        android:hint="00:00"
+        android:layout_above="@+id/button2"
+        android:layout_toLeftOf="@+id/button2"
+        android:layout_toStartOf="@+id/button2"
+        android:layout_marginBottom="54dp" />
+
+    <Button
+        android:text="Start"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/startB"
+        android:layout_centerVertical="true"
+        android:layout_toLeftOf="@+id/timerTextView"
+        android:layout_toStartOf="@+id/timerTextView" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="44dp"
+        android:id="@+id/recordedTextView"
+        android:hint="Last recorded"
+        android:layout_below="@+id/button2"
+        android:layout_alignLeft="@+id/startB"
+        android:layout_alignStart="@+id/startB"
+        android:layout_marginLeft="55dp"
+        android:layout_marginStart="55dp" />
 </RelativeLayout>
