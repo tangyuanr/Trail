@@ -35,32 +35,34 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/textView3"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="35dp"
-        android:id="@+id/button" />
+        android:layout_marginTop="25dp"
+        android:id="@+id/runButton"
+        android:onClick="startActivity"
+        />
 
     <Button
         android:text="Hiking"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/button"
+        android:layout_below="@+id/runButton"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="15dp"
-        android:id="@+id/button2" />
+        android:id="@+id/hikeButton" />
 
     <Button
         android:text="Biking"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/button2"
+        android:layout_below="@+id/hikeButton"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="15dp"
-        android:id="@+id/button3" />
+        android:id="@+id/bikeButton" />
 
     <Button
         android:text="TBD or Remove"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/button3"
+        android:layout_below="@+id/bikeButton"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="15dp"
         android:id="@+id/button4" />

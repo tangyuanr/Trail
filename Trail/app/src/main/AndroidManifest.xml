@@ -15,6 +15,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".runActivity" />
+        <activity android:name=".hikeActivity" />
+        <activity android:name=".bikeActivity"></activity>
     </application>
 
 </manifest>
