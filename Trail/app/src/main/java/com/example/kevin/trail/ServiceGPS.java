@@ -28,16 +28,18 @@ import rx.functions.Action1;
 public class ServiceGPS extends Service {
 
     private final IBinder mBinder = new LocalService();
-    private int samplingTime = 10000; //in milliseconds
+    private int samplingTime = 20000; //in milliseconds
     Subscription subscription;
     private double totalDistance = 0;
+    private double previousDistance = 0;
+    private double pace = 0;
     int sample = 0;
     private double currentLatitude = 0;
     private double currentLongitude = 0;
     private double previousLatitude = 0;
     private double previousLongitude = 0;
     private static final String TAG = "ServiceGPS";
-    public static final String BROADCAST_ACTION = "TOTALDISTANCE";
+    public static final String BROADCAST_ACTION = "STATS";
     private final Handler handler = new Handler();
     Intent intent_sender;
 
@@ -73,12 +75,14 @@ public class ServiceGPS extends Service {
                     } else {
                         currentLatitude = location.getLatitude();
                         currentLongitude = location.getLongitude();
-                        totalDistance += distance(previousLatitude, previousLongitude, currentLatitude, currentLongitude);
+                        previousDistance = totalDistance;
+                        totalDistance += calculateDistance(previousLatitude, previousLongitude, currentLatitude, currentLongitude);
+                        pace = calculatePace(previousDistance,totalDistance,samplingTime/1000);
                         previousLatitude = currentLatitude;
                         previousLongitude = currentLongitude;
                     }
                     sample++;
-                    String string = String.valueOf(currentLatitude) + "," + String.valueOf(currentLongitude) + "," + String.valueOf(totalDistance);
+                    String string = String.valueOf(currentLatitude) + "," + String.valueOf(currentLongitude) + "," + String.valueOf(totalDistance) + "," + String.valueOf(pace);
                     saveText(string);
                 }
             });
@@ -101,7 +105,7 @@ public class ServiceGPS extends Service {
     @Override
     public void onDestroy() {
         subscription.unsubscribe();
-        Toast.makeText(this, "Service stopped", Toast.LENGTH_SHORT).show();   //displaying this for debug purposes
+        //Toast.makeText(this, "Service stopped", Toast.LENGTH_SHORT).show();   //displaying this for debug purposes
         super.onDestroy();
     }
 
@@ -118,11 +122,11 @@ public class ServiceGPS extends Service {
         try {
             //open file for writing
             //filename should be generated dynamically once we figure out implementation of route managing
-            OutputStreamWriter out = new OutputStreamWriter(openFileOutput(String.valueOf(samplingTime / 1000) + "_SECONDS_DATA.txt", this.MODE_APPEND));
+            OutputStreamWriter out = new OutputStreamWriter(openFileOutput(String.valueOf(samplingTime / 1000) + "_DATAx.txt", this.MODE_APPEND));
             out.write(string);
             out.write('\n');
             out.close();
-            Toast.makeText(this, "ADDED 1 ENTRY", Toast.LENGTH_SHORT).show(); //displaying this for debug purposes
+            //Toast.makeText(this, "ADDED 1 ENTRY", Toast.LENGTH_SHORT).show();
 
         } catch (java.io.IOException e) {
             //if caught
@@ -140,14 +144,19 @@ public class ServiceGPS extends Service {
 
     private void packageUpdates() {
 
-        intent_sender.putExtra("distance", getTotalDistance());
+        intent_sender.putExtra("distance", totalDistance);
+        intent_sender.putExtra("pace", pace);
         sendBroadcast(intent_sender);
         Log.d(TAG, "entered PackageUpdates");
     }
-    
+
+    private double calculatePace(double previousDist, double totalDist, int samplingPeriod) {
+        return 1/(((totalDist-previousDist)/samplingPeriod)*60); //minutes per km
+    }
+
 
     //methods to calculate the distance between two sets of longitude-latitude coordinates. copied-pasted from http://stackoverflow.com/a/6981955
-    private double distance(double lat1, double lon1, double lat2, double lon2) {
+    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
         double theta = lon1 - lon2;
         double dist = Math.sin(deg2rad(lat1))
                 * Math.sin(deg2rad(lat2))
@@ -170,4 +179,3 @@ public class ServiceGPS extends Service {
 
 
 }
-

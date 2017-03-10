@@ -8,11 +8,9 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.Toast;
 
 import static android.content.Context.BIND_AUTO_CREATE;
 import com.example.kevin.trail.ServiceGPS.LocalService;
-import com.intentfilter.androidpermissions.BroadcastService;
 
 /**
  * Created by Ezekiel on 3/9/2017.
@@ -28,6 +26,7 @@ public class activityHelper {
     private Intent intent;
     //private Intent intent_message;
     double totalDistance = 0;
+    double pace = 0;
     private static final String TAG = "activityHelper";
 
     public activityHelper(Context context, int activityType) {
@@ -55,6 +54,8 @@ public class activityHelper {
         return totalDistance;
     }
 
+    public double getPace() {return pace;}
+
 
     ServiceConnection mConnection = new ServiceConnection() {
 
@@ -79,6 +80,7 @@ public class activityHelper {
 
     private void updateData(Intent intent) {
         totalDistance = intent.getDoubleExtra("distance", 1);
+        pace = intent.getDoubleExtra("pace", 0);
         Log.d(TAG, String.valueOf(totalDistance)+"data received");
     }
 

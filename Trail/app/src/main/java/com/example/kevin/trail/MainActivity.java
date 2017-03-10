@@ -17,7 +17,7 @@ public class MainActivity extends AppCompatActivity {
     protected Button hikeButtonlink =null;
     protected Button bikeButtonlink =null;
     protected Button gpsButtonlink=null;
-    protected Button samplingTestButtonlink=null;
+    protected Button runningEzekielButton =null;
 
 
     @Override
@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
         hikeButtonlink = (Button) findViewById(R.id.hikeButton);
         bikeButtonlink = (Button) findViewById(R.id.bikeButton);
         gpsButtonlink=(Button) findViewById(R.id.gpsButton);
-        samplingTestButtonlink = (Button) findViewById(R.id.samplingTestButton);
+        runningEzekielButton = (Button) findViewById(R.id.runningEzekielButton);
 
 
 
@@ -60,9 +60,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        samplingTestButtonlink.setOnClickListener(new View.OnClickListener() {
+        runningEzekielButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view){
-                goToSamplingTestActivity();
+                goToRunningEzekielActivity();
             }
         });
     }
@@ -86,8 +86,8 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    void goToSamplingTestActivity(){
-        Intent intent = new Intent(MainActivity.this, SamplingTest.class);
+    void goToRunningEzekielActivity(){
+        Intent intent = new Intent(MainActivity.this, runActivityEzekiel.class);
         startActivity(intent);
     }
 
