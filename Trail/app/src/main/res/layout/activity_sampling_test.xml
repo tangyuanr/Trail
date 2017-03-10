@@ -19,4 +19,12 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="137dp"
         android:id="@+id/StartStop"/>
+
+    <TextView
+        android:text="0"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/totalDistance"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"/>
 </RelativeLayout>
