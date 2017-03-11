@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
         runButtonlink = (Button) findViewById(R.id.runButton);
         hikeButtonlink = (Button) findViewById(R.id.hikeButton);
         bikeButtonlink = (Button) findViewById(R.id.bikeButton);
-        gpsButtonlink=(Button) findViewById(R.id.gpsButton);
+        gpsButtonlink=(Button) findViewById(R.id.historyButton);
         runningEzekielButton = (Button) findViewById(R.id.runningEzekielButton);
 
 
@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void goToGPSActivity(){
-        Intent intent=new Intent(MainActivity.this, gpsActivity.class);
+        Intent intent=new Intent(MainActivity.this, historyActivity.class);
         startActivity(intent);
     }
 

@@ -30,15 +30,14 @@
         android:layout_centerHorizontal="true" />
 
     <Button
-        android:text="Running"
+        android:id="@+id/runButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/textView3"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="25dp"
-        android:id="@+id/runButton"
         android:onClick="startActivity"
-        />
+        android:text="TIMER" />
 
     <Button
         android:text="Hiking"
@@ -59,19 +58,19 @@
         android:id="@+id/bikeButton" />
 
     <Button
-        android:text="GET LOCATION"
+        android:id="@+id/historyButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/bikeButton"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="15dp"
-        android:id="@+id/gpsButton" />
+        android:text="RUN HISTORY" />
 
     <Button
         android:text="Running Ezekiel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/gpsButton"
+        android:layout_below="@+id/historyButton"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="15dp"
         android:id="@+id/runningEzekielButton" />
