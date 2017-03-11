@@ -28,12 +28,14 @@ import rx.functions.Action1;
 public class ServiceGPS extends Service {
 
     private final IBinder mBinder = new LocalService();
-    private int samplingTime = 20000; //in milliseconds
+    private int samplingTime = 1000; //in milliseconds
+    private final int numberOfSamplePerAverage = 10;
+    private int effectiveSamplingPeriod;
     Subscription subscription;
     private double totalDistance = 0;
     private double previousDistance = 0;
     private double pace = 0;
-    int sample = 0;
+    private int sample = 0;
     private double currentLatitude = 0;
     private double currentLongitude = 0;
     private double previousLatitude = 0;
@@ -42,7 +44,9 @@ public class ServiceGPS extends Service {
     public static final String BROADCAST_ACTION = "STATS";
     private final Handler handler = new Handler();
     Intent intent_sender;
-
+    int counter = 0;
+    double totalLongitude = 0;
+    double totalLatitude = 0;
 
     public double getTotalDistance() {
         return totalDistance;
@@ -57,6 +61,7 @@ public class ServiceGPS extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Trail trail = ((Trail) getApplicationContext());
+        effectiveSamplingPeriod = samplingTime*numberOfSamplePerAverage;
 
         if (trail.getGPSStatus()) {
             LocationRequest request = LocationRequest.create().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).setInterval(samplingTime);
@@ -64,26 +69,33 @@ public class ServiceGPS extends Service {
             subscription = locationProvider.getUpdatedLocation(request).subscribe(new Action1<Location>() {
                 @Override
                 public void call(Location location) {
-                    //if it's the first sample
-                    if (sample == 0) {
+                    if (counter > numberOfSamplePerAverage - 1) {
+                        currentLongitude = totalLongitude / (numberOfSamplePerAverage);
+                        currentLatitude = totalLatitude /  (numberOfSamplePerAverage);
 
-                        previousLongitude = location.getLongitude();
-                        previousLatitude = location.getLatitude();
-                        currentLatitude = previousLatitude;
-                        currentLongitude = previousLongitude;
+                        if (sample == 0) {
+                            previousLongitude = currentLongitude;
+                            previousLatitude = currentLatitude;
+                        } else {
+                            previousDistance = totalDistance;
+                            totalDistance += calculateDistance(previousLatitude, previousLongitude, currentLatitude, currentLongitude);
+                            pace = calculatePace(previousDistance, totalDistance, effectiveSamplingPeriod / 1000);
+                            previousLatitude = currentLatitude;
+                            previousLongitude = currentLongitude;
+                        }
 
-                    } else {
-                        currentLatitude = location.getLatitude();
-                        currentLongitude = location.getLongitude();
-                        previousDistance = totalDistance;
-                        totalDistance += calculateDistance(previousLatitude, previousLongitude, currentLatitude, currentLongitude);
-                        pace = calculatePace(previousDistance,totalDistance,samplingTime/1000);
-                        previousLatitude = currentLatitude;
-                        previousLongitude = currentLongitude;
+                        String string = String.valueOf(currentLatitude) + "," + String.valueOf(currentLongitude) + "," + String.valueOf(pace);
+                        saveText(string);
+                        counter = 0;
+                        sample++;
+                        totalLongitude = 0;
+                        totalLatitude = 0;
                     }
-                    sample++;
-                    String string = String.valueOf(currentLatitude) + "," + String.valueOf(currentLongitude) + "," + String.valueOf(totalDistance) + "," + String.valueOf(pace);
-                    saveText(string);
+                    else {
+                        totalLongitude += location.getLongitude();
+                        totalLatitude += location.getLatitude();
+                        counter++;}
+
                 }
             });
 
@@ -122,11 +134,11 @@ public class ServiceGPS extends Service {
         try {
             //open file for writing
             //filename should be generated dynamically once we figure out implementation of route managing
-            OutputStreamWriter out = new OutputStreamWriter(openFileOutput(String.valueOf(samplingTime / 1000) + "_DATAx.txt", this.MODE_APPEND));
+            OutputStreamWriter out = new OutputStreamWriter(openFileOutput(String.valueOf(effectiveSamplingPeriod / 1000) + "_DATA_TEST_FRIDAY.TXT", this.MODE_APPEND));
             out.write(string);
             out.write('\n');
             out.close();
-            //Toast.makeText(this, "ADDED 1 ENTRY", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "ADDED 1 ENTRY", Toast.LENGTH_SHORT).show();
 
         } catch (java.io.IOException e) {
             //if caught
