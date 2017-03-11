@@ -1,34 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools"
-          package="com.example.kevin.trail">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.kevin.trail">
 
-    <uses-sdk tools:overrideLibrary="com.intentfilter.androidpermissions"/>
+    <uses-sdk tools:overrideLibrary="com.intentfilter.androidpermissions" />
 
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name=".Trail"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:name=".Trail"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".MainActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".runActivity"/>
-        <activity android:name=".hikeActivity"/>
-        <activity android:name=".bikeActivity"/>
-        <activity android:name=".gpsActivity"/>
-        <service android:name=".ServiceGPS"/>
-        <activity android:name=".runActivityEzekiel">
-        </activity>
+        <activity android:name=".runActivity" />
+        <activity android:name=".hikeActivity" />
+        <activity android:name=".bikeActivity" />
+
+        <service android:name=".ServiceGPS" />
+
+        <activity android:name=".runActivityEzekiel"></activity>
+        <activity android:name=".historyActivity"></activity>
     </application>
 
 </manifest>

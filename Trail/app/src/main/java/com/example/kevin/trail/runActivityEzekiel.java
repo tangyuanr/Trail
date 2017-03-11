@@ -1,5 +1,6 @@
 package com.example.kevin.trail;
 
+import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.icu.text.DecimalFormat;
 import android.support.v7.app.AppCompatActivity;
@@ -15,6 +16,14 @@ public class runActivityEzekiel extends AppCompatActivity {
     TextView totalDistance;
     TextView latestPace;
     private static final String TAG = "runActivityEzekiel";
+
+    /*
+    * modified by JY on 3/11/2017
+    * add info (coordinate data filename, total time, tital distance) into database
+    */
+    DBHandler dbHandler=new DBHandler(this);
+
+
 
     /**
      * Created by Ezekiel on 3/9/2017.
@@ -45,6 +54,8 @@ public class runActivityEzekiel extends AppCompatActivity {
                     RunningHelper.stopActivity();
                     logging = false;
                     Toast.makeText(runActivityEzekiel.this, "You've stopped running",Toast.LENGTH_SHORT).show();
+                    //append stuff to the database
+                    dbHandler.addRecord("dummy filename", "some distance", "some total time");
                 }
 
             }
