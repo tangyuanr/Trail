@@ -11,6 +11,8 @@ public class Trail extends Application {
 
     private boolean isGPSEnabled = false;
 
+
+
     public boolean getGPSStatus() {
         return isGPSEnabled;
     }
