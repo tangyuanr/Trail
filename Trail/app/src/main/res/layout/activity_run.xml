@@ -48,7 +48,7 @@
         android:id="@+id/WHAT_PACE"/>
 
     <TextView
-        android:text="0"
+        android:text="--"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/WHAT_PACE"

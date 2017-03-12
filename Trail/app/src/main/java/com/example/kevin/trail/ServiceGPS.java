@@ -49,6 +49,8 @@ public class ServiceGPS extends Service {
     int counter = 0;
     double totalLongitude = 0;
     double totalLatitude = 0;
+    private long tStart = 0;
+    private long tSample = 0;
 
     public double getTotalDistance() {
         return totalDistance;
@@ -79,18 +81,19 @@ public class ServiceGPS extends Service {
         if (trail.getGPSStatus()) {
             LocationRequest request = LocationRequest.create().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).setInterval(samplingTime);
             ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(this);
-
             //configure output filename
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
             String currentDateandTime = sdf.format(new Date());
             Log.d(TAG, "getting current date and time: "+currentDateandTime);
             filename=String.valueOf(effectiveSamplingPeriod / 1000) + currentDateandTime +".TXT";
             Log.d(TAG,"forming output filename: "+filename);
+            tStart = System.currentTimeMillis();    //start time, used to return the total time elapsed between 1st and last sample
 
             subscription = locationProvider.getUpdatedLocation(request).subscribe(new Action1<Location>() {
                 @Override
                 public void call(Location location) {
                     if (counter > numberOfSamplePerAverage - 1) {
+                        Log.d(TAG,"Entered A");
                         currentLongitude = totalLongitude / (numberOfSamplePerAverage);
                         currentLatitude = totalLatitude /  (numberOfSamplePerAverage);
 
@@ -105,6 +108,7 @@ public class ServiceGPS extends Service {
                             previousLongitude = currentLongitude;
                         }
 
+                        tSample = System.currentTimeMillis() - tStart;  //time of last sample
                         String string = String.valueOf(currentLatitude) + "," + String.valueOf(currentLongitude) + "," + String.valueOf(pace);
                         saveText(string);
                         counter = 0;
@@ -113,6 +117,7 @@ public class ServiceGPS extends Service {
                         totalLatitude = 0;
                     }
                     else {
+                        Log.d(TAG,"Entered B");
                         totalLongitude += location.getLongitude();
                         totalLatitude += location.getLatitude();
                         counter++;}
@@ -125,7 +130,7 @@ public class ServiceGPS extends Service {
         }
 
         handler.removeCallbacks(sendUpdates);
-        handler.postDelayed(sendUpdates, 10000); // 10 seconds
+        handler.postDelayed(sendUpdates, 5000); // 10 seconds
 
         return START_NOT_STICKY;
     }
@@ -171,7 +176,7 @@ public class ServiceGPS extends Service {
     private Runnable sendUpdates = new Runnable() {
         public void run() {
             packageUpdates();
-            handler.postDelayed(this, 20000); // 5 seconds
+            handler.postDelayed(this, 10000); // 5 seconds
         }
     };
 
@@ -179,6 +184,7 @@ public class ServiceGPS extends Service {
 
         intent_sender.putExtra("distance", totalDistance);
         intent_sender.putExtra("pace", pace);
+        intent_sender.putExtra("time_of_last_sample", tSample);
         sendBroadcast(intent_sender);
         Log.d(TAG, "entered PackageUpdates");
     }

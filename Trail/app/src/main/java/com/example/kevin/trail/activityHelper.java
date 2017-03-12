@@ -27,6 +27,7 @@ public class activityHelper {
     //private Intent intent_message;
     double totalDistance = 0;
     double pace = 0;
+    private long tLastSample = 0;
 
     private static final String TAG = "activityHelper";
 
@@ -57,6 +58,26 @@ public class activityHelper {
 
     public double getPace() {return pace;}
 
+    //method to return pace formatted properly
+    //1st version: returning the final average pace
+    public String getFinalAveragePaceFormatted() {
+        double finalPace =  tLastSample/(60000*totalDistance); //min per km
+        if((finalPace > 30) || Double.isNaN(finalPace) || finalPace == 0 ) {
+            return "--";
+        }
+        else {return String.format("%.2f", finalPace);}
+    }
+
+    //version for returning recent pace
+    public String getPaceFormatted() {
+        if((pace > 30) || Double.isNaN(pace) || pace == 0 ) {
+            return "--";
+        }
+        else {return String.format("%.2f", pace);}
+    }
+
+    public long getTimeLastsample() {return tLastSample;}
+
 
     ServiceConnection mConnection = new ServiceConnection() {
 
@@ -82,7 +103,8 @@ public class activityHelper {
     private void updateData(Intent intent) {
         totalDistance = intent.getDoubleExtra("distance", 1);
         pace = intent.getDoubleExtra("pace", 0);
-        Log.d(TAG, String.valueOf(totalDistance)+"data received");
+        tLastSample = intent.getLongExtra("time_of_last_sample",0);
+        Log.d(TAG, String.valueOf(totalDistance)+"data received"+tLastSample);
     }
 
 
