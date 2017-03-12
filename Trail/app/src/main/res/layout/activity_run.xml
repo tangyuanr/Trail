@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_run"
+    android:id="@+id/activity_sampling_test"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingBottom="@dimen/activity_vertical_margin"
@@ -11,44 +12,47 @@
     tools:context="com.example.kevin.trail.runActivity">
 
     <Button
-        android:text="Restart"
+        android:text="Start/Stop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/startB"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginRight="80dp"
-        android:layout_marginEnd="80dp"
-        android:id="@+id/button2" />
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="137dp"
+        android:id="@+id/StartStop"/>
 
     <TextView
+        android:text="0"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/timerTextView"
-        android:hint="00:00"
-        android:layout_above="@+id/button2"
-        android:layout_toLeftOf="@+id/button2"
-        android:layout_toStartOf="@+id/button2"
-        android:layout_marginBottom="54dp" />
-
-    <Button
-        android:text="Start"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/startB"
+        android:id="@+id/totalDistance"
         android:layout_centerVertical="true"
-        android:layout_toLeftOf="@+id/timerTextView"
-        android:layout_toStartOf="@+id/timerTextView" />
+        android:layout_centerHorizontal="true"/>
 
     <TextView
+        android:text="Total distance (km)"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="44dp"
-        android:id="@+id/recordedTextView"
-        android:hint="Last recorded"
-        android:layout_below="@+id/button2"
-        android:layout_alignLeft="@+id/startB"
-        android:layout_alignStart="@+id/startB"
-        android:layout_marginLeft="55dp"
-        android:layout_marginStart="55dp" />
+        android:id="@+id/WHAT_TOTALDISTANCE"
+        android:layout_above="@+id/totalDistance"
+        android:layout_alignLeft="@+id/StartStop"
+        android:layout_alignStart="@+id/StartStop"
+        android:layout_marginBottom="10dp"/>
+
+    <TextView
+        android:text="Pace (minutes/km)"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/totalDistance"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="45dp"
+        android:id="@+id/WHAT_PACE"/>
+
+    <TextView
+        android:text="0"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/WHAT_PACE"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/latestpace"/>
+
 </RelativeLayout>
