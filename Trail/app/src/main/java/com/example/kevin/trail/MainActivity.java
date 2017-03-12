@@ -16,7 +16,7 @@ public class MainActivity extends AppCompatActivity {
     protected Button runButtonlink =null;
     protected Button hikeButtonlink =null;
     protected Button bikeButtonlink =null;
-    protected Button gpsButtonlink=null;
+    protected Button historyButtonlink=null;
     protected Button runningEzekielButton =null;
 
 
@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
         runButtonlink = (Button) findViewById(R.id.runButton);
         hikeButtonlink = (Button) findViewById(R.id.hikeButton);
         bikeButtonlink = (Button) findViewById(R.id.bikeButton);
-        gpsButtonlink=(Button) findViewById(R.id.historyButton);
+        historyButtonlink=(Button) findViewById(R.id.historyButton);
         runningEzekielButton = (Button) findViewById(R.id.runningEzekielButton);
 
 
@@ -54,21 +54,21 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        gpsButtonlink.setOnClickListener(new View.OnClickListener() {
+        historyButtonlink.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view){
-                goToGPSActivity();
+                goToHistoryActivity();
             }
         });
 
         runningEzekielButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view){
-                goToRunningEzekielActivity();
+                goToRunningActivity();
             }
         });
     }
 
     void goToRunActivity(){
-        Intent intent = new Intent(MainActivity.this, runActivity.class);
+        Intent intent = new Intent(MainActivity.this, timerActivity.class);
         startActivity(intent);
     }
     void goToHikeActivity(){
@@ -81,13 +81,13 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    void goToGPSActivity(){
+    void goToHistoryActivity(){
         Intent intent=new Intent(MainActivity.this, historyActivity.class);
         startActivity(intent);
     }
 
-    void goToRunningEzekielActivity(){
-        Intent intent = new Intent(MainActivity.this, runActivityEzekiel.class);
+    void goToRunningActivity(){
+        Intent intent = new Intent(MainActivity.this, runActivity.class);
         startActivity(intent);
     }
 

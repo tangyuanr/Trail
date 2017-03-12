@@ -1,85 +1,98 @@
 package com.example.kevin.trail;
 
-import android.os.Handler;
+import android.content.BroadcastReceiver;
+import android.content.Intent;
+import android.icu.text.DecimalFormat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-
-import org.w3c.dom.Text;
+import android.widget.Toast;
 
 public class runActivity extends AppCompatActivity {
+    private boolean logging = false;
+    activityHelper RunningHelper;
+    TextView totalDistance;
+    TextView latestPace;
+    private static final String TAG = "runActivity";
 
-    TextView timerTextViewL;
-    TextView recordedTextViewL;
-    long startTime= 0;
-    long pauseTime= 0;
+    /*
+    * modified by JY on 3/11/2017
+    * add info (coordinate data filename, total time, tital distance) into database
+    */
+    DBHandler dbHandler=new DBHandler(this);
+    ServiceGPS servicegps=new ServiceGPS();
 
-    Handler timerHandler = new Handler();
-    Runnable timerRunnable = new Runnable() {
-        @Override
-        public void run() {
 
-            long millis = System.currentTimeMillis() - startTime;
-            int seconds = (int) (millis/1000);
-            int minutes = seconds/60;
-            seconds = seconds % 60;
 
-            timerTextViewL.setText(String.format("%d:%02d", minutes, seconds));
-
-            timerHandler.postDelayed(this, 500);
-        }
-    };
+    /**
+     * Created by Ezekiel on 3/9/2017.
+     * Example activity that calls the ServiceGPS service.
+     */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_run);
 
-        timerTextViewL = (TextView) findViewById(R.id.timerTextView);
+        Button startStopButton = (Button) findViewById(R.id.StartStop);
+        totalDistance = (TextView) findViewById(R.id.totalDistance);
+        latestPace = (TextView) findViewById(R.id.latestpace);
+        final Intent intent = new Intent(this, ServiceGPS.class);
+        RunningHelper = new activityHelper(runActivity.this,0); //instantiate a running helper object, the int parameter is the type of activity. 0 for running.
 
-        Button button = (Button) findViewById(R.id.startB);
-        recordedTextViewL = (TextView) findViewById(R.id.recordedTextView);
+        startStopButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                if(!logging) {
+                    //TODO implement timer with start/stop button
 
-        button.setOnClickListener(new View.OnClickListener(){
-
-            @Override
-            public void onClick(View v){
-                Button button = (Button) v;
-                if (button.getText().equals("stop")) {
-                    timerHandler.removeCallbacks(timerRunnable);
-                    recordedTextViewL.setText(timerTextViewL.getText());
-                    //timerTextViewL.setText("0:00");
-                    pauseTime = System.currentTimeMillis();
-                    button.setText("resume");
-                } /*else if (button.getText().equals("resume")){
-                    pauseTime = System.currentTimeMillis();
-                    timerHandler.postDelayed(timerRunnable,0);
-                    //pauseTime = System.currentTimeMillis();
-                    button.setText("stop");
-                } */else{
-                    startTime = System.currentTimeMillis();
-                    timerHandler.postDelayed(timerRunnable,0);
-                    button.setText("stop");
+                    RunningHelper.startActivity(); //when the user clicks start, running activity (activity in the traditional sense, not android sense) starts and data starts being collected.
+                    logging = true; //boolean so that the same button acts as an on/off toggle
+                    Toast.makeText(runActivity.this, "You've started running",Toast.LENGTH_SHORT).show();
+                    startUpdateStatsThread(); //start the thread that receives updates from the service
                 }
+                else{
+                    RunningHelper.stopActivity();
+                    logging = false;
+                    Toast.makeText(runActivity.this, "You've stopped running",Toast.LENGTH_SHORT).show();
+                    //append stuff to the database
+                    dbHandler.addRecord(servicegps.getFilename(), String.valueOf(RunningHelper.getTotalDistance()), "some total time");
+                }
+
             }
         });
     }
 
     @Override
-    public void onPause(){
-        super.onPause();
-        //pauseTime = System.currentTimeMillis();
-
-        //timerHandler.removeCallbacks(timerRunnable);
-        Button start = (Button) findViewById(R.id.startB);
-        start.setText("start");
+    protected void onDestroy(){
+        super.onDestroy();
+        if (logging)// if logging is still true
+            RunningHelper.stopActivity();
     }
 
-    public void onResume(){
-        super.onResume();
+    //thread that receives distance updates from the service
+    private void startUpdateStatsThread() {
+        Thread th = new Thread(new Runnable() {
 
-        //timerHandler.post(timerRunnable);
+            public void run() {
+                while (logging == true) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            totalDistance.setText(String.format("%.2f", RunningHelper.getTotalDistance()));
+                            latestPace.setText(String.format("%.2f", RunningHelper.getPace()));
+                        }
+                    });
+                    try {
+                        Thread.sleep(5000);
+                    }
+                    catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        th.start();
     }
 }
