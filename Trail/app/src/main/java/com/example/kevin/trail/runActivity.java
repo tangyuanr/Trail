@@ -1,10 +1,13 @@
 package com.example.kevin.trail;
 
 import android.content.BroadcastReceiver;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.icu.text.DecimalFormat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -53,9 +56,15 @@ public class runActivity extends AppCompatActivity {
                     startUpdateStatsThread(); //start the thread that receives updates from the service
                 }
                 else{
+
+                 /*   return some final stats. one possible problem is that the time displayed in
+                    the dialog will be slightly different from the time displayed in the eventual "clockwatch" timer we will have due to sampling.*/
+                    long timelastSample = RunningHelper.getTimeLastsample();    //get final stats for display
+                    double FinalDistance = RunningHelper.getTotalDistance();    //get final stats for display
+                    showDialog(timelastSample, FinalDistance);
                     RunningHelper.stopActivity();
                     logging = false;
-                    Toast.makeText(runActivity.this, "You've stopped running",Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(runActivity.this, "You've stopped running",Toast.LENGTH_SHORT).show();
                     //append stuff to the database
                     dbHandler.addRecord(servicegps.getFilename(), String.valueOf(RunningHelper.getTotalDistance()), "some total time");
                 }
@@ -81,7 +90,7 @@ public class runActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             totalDistance.setText(String.format("%.2f", RunningHelper.getTotalDistance()));
-                            latestPace.setText(String.format("%.2f", RunningHelper.getPace()));
+                            latestPace.setText(RunningHelper.getPaceFormatted());
                         }
                     });
                     try {
@@ -94,5 +103,22 @@ public class runActivity extends AppCompatActivity {
             }
         });
         th.start();
+    }
+
+    //dialog that displays final stats
+    private void showDialog(long timeLastSample, double FinalDistance) {
+
+        long time = timeLastSample/(60000); //in minutes
+        AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+        alertDialog.setTitle("Run ended");
+        alertDialog.setMessage("You have runned " + String.format("%.2f", FinalDistance) + " km in " + (time) + " minutes.\n"
+                + "Average pace: " + RunningHelper.getFinalAveragePaceFormatted() + " min/km." );
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        alertDialog.show();
     }
 }
