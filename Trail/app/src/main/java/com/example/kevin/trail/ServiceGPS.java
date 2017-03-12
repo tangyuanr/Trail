@@ -13,6 +13,8 @@ import android.widget.Toast;
 import com.google.android.gms.location.LocationRequest;
 
 import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
 import rx.Subscription;
@@ -52,6 +54,17 @@ public class ServiceGPS extends Service {
         return totalDistance;
     }
 
+    /*
+    * modified by JY on 11/03/2017
+    * added member variable (filename) and its getter function
+    * changed output filename to CURRENT TIME in the format of yyyyMMdd_HHmmss
+    * */
+    private static String filename;
+    public String getFilename(){
+        Log.d(TAG, "returned filename: "+filename);
+        return filename;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -66,6 +79,14 @@ public class ServiceGPS extends Service {
         if (trail.getGPSStatus()) {
             LocationRequest request = LocationRequest.create().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).setInterval(samplingTime);
             ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(this);
+
+            //configure output filename
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+            String currentDateandTime = sdf.format(new Date());
+            Log.d(TAG, "getting current date and time: "+currentDateandTime);
+            filename=String.valueOf(effectiveSamplingPeriod / 1000) + currentDateandTime +".TXT";
+            Log.d(TAG,"forming output filename: "+filename);
+
             subscription = locationProvider.getUpdatedLocation(request).subscribe(new Action1<Location>() {
                 @Override
                 public void call(Location location) {
@@ -134,7 +155,7 @@ public class ServiceGPS extends Service {
         try {
             //open file for writing
             //filename should be generated dynamically once we figure out implementation of route managing
-            OutputStreamWriter out = new OutputStreamWriter(openFileOutput(String.valueOf(effectiveSamplingPeriod / 1000) + "_DATA_TEST_FRIDAY.TXT", this.MODE_APPEND));
+            OutputStreamWriter out = new OutputStreamWriter(openFileOutput(filename, this.MODE_APPEND));
             out.write(string);
             out.write('\n');
             out.close();

@@ -27,6 +27,7 @@ public class activityHelper {
     //private Intent intent_message;
     double totalDistance = 0;
     double pace = 0;
+
     private static final String TAG = "activityHelper";
 
     public activityHelper(Context context, int activityType) {
