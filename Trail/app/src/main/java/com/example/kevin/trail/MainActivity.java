@@ -13,11 +13,11 @@ import static java.util.Collections.singleton;
 
 public class MainActivity extends AppCompatActivity {
 
-    protected Button runButtonlink =null;
+    protected Button timerButtonlink =null;
     protected Button hikeButtonlink =null;
     protected Button bikeButtonlink =null;
     protected Button historyButtonlink=null;
-    protected Button runningEzekielButton =null;
+    protected Button runButtonlink =null;
 
 
     @Override
@@ -28,17 +28,17 @@ public class MainActivity extends AppCompatActivity {
 
         Trail trail = ((Trail)getApplicationContext());     //used to access global variable to check if permissions are right
         checkAndAskPermissions(trail);
-        runButtonlink = (Button) findViewById(R.id.runButton);
+        timerButtonlink = (Button) findViewById(R.id.timerButton);
         hikeButtonlink = (Button) findViewById(R.id.hikeButton);
         bikeButtonlink = (Button) findViewById(R.id.bikeButton);
         historyButtonlink=(Button) findViewById(R.id.historyButton);
-        runningEzekielButton = (Button) findViewById(R.id.runningEzekielButton);
+        runButtonlink = (Button) findViewById(R.id.runButton);
 
 
 
-        runButtonlink.setOnClickListener(new View.OnClickListener() {
+        timerButtonlink.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view){
-                goToRunActivity();
+                goToTimerActivity();
             }
         });
 
@@ -60,14 +60,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        runningEzekielButton.setOnClickListener(new View.OnClickListener() {
+        runButtonlink.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view){
                 goToRunningActivity();
             }
         });
     }
 
-    void goToRunActivity(){
+    void goToTimerActivity(){
         Intent intent = new Intent(MainActivity.this, timerActivity.class);
         startActivity(intent);
     }

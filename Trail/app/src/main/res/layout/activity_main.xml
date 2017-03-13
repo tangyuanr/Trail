@@ -30,7 +30,7 @@
         android:layout_centerHorizontal="true" />
 
     <Button
-        android:id="@+id/runButton"
+        android:id="@+id/timerButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/textView3"
@@ -43,7 +43,7 @@
         android:text="Hiking"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/runButton"
+        android:layout_below="@+id/timerButton"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="15dp"
         android:id="@+id/hikeButton" />
@@ -67,11 +67,11 @@
         android:text="RUN HISTORY" />
 
     <Button
-        android:text="Running Ezekiel"
+        android:id="@+id/runButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/historyButton"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="15dp"
-        android:id="@+id/runningEzekielButton" />
+        android:text="Running" />
 </RelativeLayout>
