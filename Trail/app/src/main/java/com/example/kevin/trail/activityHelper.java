@@ -45,9 +45,9 @@ public class activityHelper {
     }
 
     public void stopActivity() {
+        context.unregisterReceiver(broadcastReceiver);
         context.unbindService(mConnection);
         context.stopService(intent);
-
     }
 
 
@@ -104,7 +104,7 @@ public class activityHelper {
         totalDistance = intent.getDoubleExtra("distance", 1);
         pace = intent.getDoubleExtra("pace", 0);
         tLastSample = intent.getLongExtra("time_of_last_sample",0);
-        Log.d(TAG, String.valueOf(totalDistance)+"data received"+tLastSample);
+        Log.d(TAG, String.valueOf(totalDistance)+" data received "+tLastSample);
     }
 
 
