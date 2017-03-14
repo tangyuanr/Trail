@@ -15,21 +15,30 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        <activity android:name=".hikeActivity" />
-        <activity android:name=".bikeActivity" />
-        <activity android:name=".timerActivity" />
 
-        <service android:name=".ServiceGPS" />
+        </activity>
+        <activity android:name=".hikeActivity"
+                  android:screenOrientation="portrait"/>
+        <activity android:name=".bikeActivity"
+                  android:screenOrientation="portrait"/>
+        <activity android:name=".timerActivity"
+                  android:screenOrientation="portrait"/>
+
+        <service android:name=".ServiceGPS"
+                 android:screenOrientation="portrait"/>
 
         <activity android:name=".historyActivity" />
-        <activity android:name=".runActivity"></activity>
+        <activity android:name=".runActivity"
+                  android:screenOrientation="portrait">
+        </activity>
     </application>
 
 </manifest>
