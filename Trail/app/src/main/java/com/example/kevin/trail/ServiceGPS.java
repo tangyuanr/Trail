@@ -3,6 +3,9 @@ package com.example.kevin.trail;
 import android.app.Service;
 import android.content.Intent;
 import android.location.Location;
+
+import com.google.android.gms.location.LocationListener;
+
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -10,15 +13,16 @@ import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
-import rx.Subscription;
-import rx.functions.Action1;
 
 
 /**
@@ -27,152 +31,129 @@ import rx.functions.Action1;
  * This runs as a service and can be called from any activity.
  */
 
-public class ServiceGPS extends Service {
+public class ServiceGPS extends Service implements LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
+    LocationRequest locationRequestQuery;
+    GoogleApiClient googleApi;
+    Location currentLocation;
     private final IBinder mBinder = new LocalService();
-    private int samplingTime = 1000; //in milliseconds
+    private int SUBSAMPLINGPERIOD = 1000; //in milliseconds
     private final int numberOfSamplePerAverage = 10;
-    private int effectiveSamplingPeriod;
-    Subscription subscription;
-    private double totalDistance = 0;
-    private double previousDistance = 0;
-    private double pace = 0;
-    private int sample = 0;
-    private double currentLatitude = 0;
-    private double currentLongitude = 0;
-    private double previousLatitude = 0;
-    private double previousLongitude = 0;
-    private static final String TAG = "ServiceGPS";
+    private int EFFECTIVESAMPLINGPERIOD;
+    private static final String TAG = "SERVICEGPS";
+    Intent intent_sender;
     public static final String BROADCAST_ACTION = "STATS";
     private final Handler handler = new Handler();
-    Intent intent_sender;
     int counter = 0;
+    private double totalDistance = 0;
+    private int sample = 0;
+    private double averageLatitude = 0;
+    private double averageLongitude = 0;
     double totalLongitude = 0;
     double totalLatitude = 0;
+    private Location averageLocation;
+    private Location previousLocation;
+    private double previousDistance = 0;
     private long tStart = 0;
     private long tSample = 0;
+    private double pace = 0;
 
-    public double getTotalDistance() {
-        return totalDistance;
-    }
 
-    /*
-    * modified by JY on 11/03/2017
-    * added member variable (filename) and its getter function
-    * changed output filename to CURRENT TIME in the format of yyyyMMdd_HHmmss
-    * */
-    private static String filename;
-    public String getFilename(){
-        Log.d(TAG, "returned filename: "+filename);
-        return filename;
-    }
+
 
     @Override
     public void onCreate() {
         super.onCreate();
+        locationRequestQuery = new LocationRequest();
+        locationRequestQuery.setInterval(SUBSAMPLINGPERIOD);
+        locationRequestQuery.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        googleApi = new GoogleApiClient.Builder(this).addApi(LocationServices.API).addConnectionCallbacks(this).addOnConnectionFailedListener(this).build();
         intent_sender = new Intent(BROADCAST_ACTION);
+        //configure output filename
+        EFFECTIVESAMPLINGPERIOD = SUBSAMPLINGPERIOD*numberOfSamplePerAverage;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+        String currentDateandTime = sdf.format(new Date());
+        Log.d(TAG, "getting current date and time: "+currentDateandTime);
+        filename = String.valueOf(EFFECTIVESAMPLINGPERIOD / 1000) + currentDateandTime +".TXT";
+        Log.d(TAG,"forming output filename: "+filename);
     }
 
-    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Trail trail = ((Trail) getApplicationContext());
-        effectiveSamplingPeriod = samplingTime*numberOfSamplePerAverage;
-
-        if (trail.getGPSStatus()) {
-            LocationRequest request = LocationRequest.create().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).setInterval(samplingTime);
-            ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(this);
-            //configure output filename
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
-            String currentDateandTime = sdf.format(new Date());
-            Log.d(TAG, "getting current date and time: "+currentDateandTime);
-            filename=String.valueOf(effectiveSamplingPeriod / 1000) + currentDateandTime +".TXT";
-            Log.d(TAG,"forming output filename: "+filename);
-            tStart = System.currentTimeMillis();    //start time, used to return the total time elapsed between 1st and last sample
-
-            subscription = locationProvider.getUpdatedLocation(request).subscribe(new Action1<Location>() {
-                @Override
-                public void call(Location location) {
-                    if (counter > numberOfSamplePerAverage - 1) {
-                        Log.d(TAG,"Entered A");
-                        currentLongitude = totalLongitude / (numberOfSamplePerAverage);
-                        currentLatitude = totalLatitude /  (numberOfSamplePerAverage);
-
-                        if (sample == 0) {
-                            previousLongitude = currentLongitude;
-                            previousLatitude = currentLatitude;
-                        } else {
-                            previousDistance = totalDistance;
-                            totalDistance += calculateDistance(previousLatitude, previousLongitude, currentLatitude, currentLongitude);
-                            pace = calculatePace(previousDistance, totalDistance, effectiveSamplingPeriod / 1000);
-                            previousLatitude = currentLatitude;
-                            previousLongitude = currentLongitude;
-                        }
-
-                        tSample = System.currentTimeMillis() - tStart;  //time of last sample
-                        String string = String.valueOf(currentLatitude) + "," + String.valueOf(currentLongitude) + "," + String.valueOf(pace);
-                        saveText(string);
-                        counter = 0;
-                        sample++;
-                        totalLongitude = 0;
-                        totalLatitude = 0;
-                    }
-                    else {
-                        Log.d(TAG,"Entered B");
-                        totalLongitude += location.getLongitude();
-                        totalLatitude += location.getLatitude();
-                        counter++;}
-
-                }
-            });
-
-        } else {
-            //Toast.makeText(this, "GPS Disabled", Toast.LENGTH_SHORT).show();
-        }
-
+        Log.d(TAG, "Starting ServiceGPS service");
+        googleApi.connect();
+        tStart = System.currentTimeMillis();    //start time, used to return the total time elapsed between 1st and last sample
         handler.removeCallbacks(sendUpdates);
         handler.postDelayed(sendUpdates, 5000); // 10 seconds
-
         return START_NOT_STICKY;
     }
 
     @Override
-    public IBinder onBind(Intent intent) {
-        return mBinder;
+    public void onConnected(Bundle bundle) {
+        PendingResult<Status> pendingResult = LocationServices.FusedLocationApi.requestLocationUpdates(googleApi, locationRequestQuery, this);
     }
 
     @Override
-    public void onDestroy() {
-        subscription.unsubscribe();
-        //Toast.makeText(this, "Service stopped", Toast.LENGTH_SHORT).show();   //displaying this for debug purposes
-        super.onDestroy();
+    public void onConnectionSuspended(int i) {
     }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+    }
+
+
+
+    @Override
+    public void onLocationChanged(Location location) {
+        //Log.d(TAG, "onLocationChanged googleAPI");
+        currentLocation = location;
+
+        if (counter > numberOfSamplePerAverage - 1) {
+            averageLongitude = totalLongitude / (numberOfSamplePerAverage);
+            averageLatitude = totalLatitude / (numberOfSamplePerAverage);
+            averageLocation = new Location("");
+            averageLocation.setLatitude(averageLatitude);
+            averageLocation.setLongitude(averageLongitude);
+
+            if (!(sample == 0)) {
+                previousDistance = totalDistance;
+                double latestDistance = (previousLocation.distanceTo(averageLocation))/1000; //in km
+                Log.d(TAG, "latest distance "+latestDistance);
+                if(latestDistance > 0.0025) {totalDistance += latestDistance;} //if not, user is probably standing still
+                pace = calculatePace(previousDistance, totalDistance, EFFECTIVESAMPLINGPERIOD / 1000);
+                Log.d(TAG, "totalDistance "+totalDistance);
+                Log.d(TAG, "pace "+pace);
+            }
+
+            tSample = System.currentTimeMillis() - tStart;  //time of last sample
+            String string = String.valueOf(averageLocation.getLatitude()) + "," + String.valueOf(averageLocation.getLongitude()) + "," + totalDistance + "," + tSample;
+            //String string = String.valueOf(averageLocation.getLatitude()) + "," + String.valueOf(averageLocation.getLongitude()) + "," + totalDistance + "," + String.valueOf(pace) + "," + tSample;
+            saveText(string);
+            Log.d(TAG, "saved sample"+string);
+            counter = 0;
+            sample++;
+            totalLongitude = 0;
+            totalLatitude = 0;
+            previousLocation = averageLocation;
+        } else {
+
+            //Log.d(TAG, "Entered B");
+            totalLongitude += currentLocation.getLongitude();
+            totalLatitude += currentLocation.getLatitude();
+            counter++;
+        }
+
+    }
+
 
     public class LocalService extends Binder {
 
         public ServiceGPS getServerInstance() {
             return ServiceGPS.this;
         }
+
     }
 
-
-    private void saveText(String string) {
-
-        try {
-            //open file for writing
-            //filename should be generated dynamically once we figure out implementation of route managing
-            OutputStreamWriter out = new OutputStreamWriter(openFileOutput(filename, this.MODE_APPEND));
-            out.write(string);
-            out.write('\n');
-            out.close();
-            Toast.makeText(this, "ADDED 1 ENTRY", Toast.LENGTH_SHORT).show();
-
-        } catch (java.io.IOException e) {
-            //if caught
-            Toast.makeText(this, "Problem", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    //broadcasting updates 
+    //broadcasting updates
     private Runnable sendUpdates = new Runnable() {
         public void run() {
             packageUpdates();
@@ -189,31 +170,45 @@ public class ServiceGPS extends Service {
         Log.d(TAG, "entered PackageUpdates");
     }
 
+    @Override
+    public IBinder onBind(Intent intent) {
+        return mBinder;
+    }
+
+    private static String filename;
+    public String getFilename() {
+        Log.d(TAG, "returned filename: " + filename);
+        return filename;
+    }
+
+
+    private void saveText(String string) {
+
+        try {
+            //open file for writing
+            //filename should be generated dynamically once we figure out implementation of route managing
+            OutputStreamWriter out = new OutputStreamWriter(openFileOutput(filename, MODE_APPEND));
+            out.write(string);
+            out.write('\n');
+            out.close();
+            Toast.makeText(this, "ADDED 1 ENTRY", Toast.LENGTH_SHORT).show();
+
+        } catch (java.io.IOException e) {
+            //if caught
+            Toast.makeText(this, "Problem", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        handler.removeCallbacks(sendUpdates);
+        googleApi.disconnect();
+        Toast.makeText(this, "Service stopped", Toast.LENGTH_SHORT).show();   //displaying this for debug purposes
+        super.onDestroy();
+    }
+
     private double calculatePace(double previousDist, double totalDist, int samplingPeriod) {
         return 1/(((totalDist-previousDist)/samplingPeriod)*60); //minutes per km
-    }
-
-
-    //methods to calculate the distance between two sets of longitude-latitude coordinates. copied-pasted from http://stackoverflow.com/a/6981955
-    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-        double theta = lon1 - lon2;
-        double dist = Math.sin(deg2rad(lat1))
-                * Math.sin(deg2rad(lat2))
-                + Math.cos(deg2rad(lat1))
-                * Math.cos(deg2rad(lat2))
-                * Math.cos(deg2rad(theta));
-        dist = Math.acos(dist);
-        dist = rad2deg(dist);
-        dist = dist * 60 * 1.1515;
-        return (dist);
-    }
-    
-    private double deg2rad(double deg) {
-        return (deg * Math.PI / 180.0);
-    }
-
-    private double rad2deg(double rad) {
-        return (rad * 180.0 / Math.PI);
     }
 
 
