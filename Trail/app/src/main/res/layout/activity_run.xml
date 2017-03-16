@@ -48,11 +48,16 @@
         android:id="@+id/WHAT_PACE"/>
 
     <TextView
-        android:text="--"
+        android:text="0"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/WHAT_PACE"
         android:layout_centerHorizontal="true"
         android:id="@+id/latestpace"/>
+
+    <FrameLayout
+        android:id="@+id/FragmentContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
 
 </RelativeLayout>
