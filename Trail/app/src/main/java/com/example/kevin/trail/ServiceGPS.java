@@ -22,6 +22,7 @@ import com.google.android.gms.location.LocationServices;
 
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 
@@ -57,6 +58,7 @@ public class ServiceGPS extends Service implements LocationListener, GoogleApiCl
     private long tStart = 0;
     private long tSample = 0;
     private double pace = 0;
+    ArrayList<Location> coordinatesArray = new ArrayList<>();
 
 
 
@@ -128,6 +130,7 @@ public class ServiceGPS extends Service implements LocationListener, GoogleApiCl
             String string = String.valueOf(averageLocation.getLatitude()) + "," + String.valueOf(averageLocation.getLongitude()) + "," + totalDistance + "," + tSample;
             //String string = String.valueOf(averageLocation.getLatitude()) + "," + String.valueOf(averageLocation.getLongitude()) + "," + totalDistance + "," + String.valueOf(pace) + "," + tSample;
             saveText(string);
+            coordinatesArray.add(averageLocation);
             Log.d(TAG, "saved sample"+string);
             counter = 0;
             sample++;
@@ -142,6 +145,10 @@ public class ServiceGPS extends Service implements LocationListener, GoogleApiCl
             counter++;
         }
 
+    }
+
+    public ArrayList<Location> getArrayCoordinates() {
+        return coordinatesArray;
     }
 
 
