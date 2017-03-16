@@ -37,6 +37,7 @@ public class runActivity extends AppCompatActivity {
     ArrayList<Route> listOfRoutes = new ArrayList<Route>();
     private String inputRouteName = "";
     private boolean isNewRoute = true;
+    private int routeID;
 
     /*
     * modified by JY on 3/11/2017
@@ -55,6 +56,8 @@ public class runActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_run);
+
+        routeID = getIntent().getIntExtra("ROUTEID",-1);    //the first item in the list has position 0, the second has position 1, etc.
 
         Button startStopButton = (Button) findViewById(R.id.StartStop);
         totalDistance = (TextView) findViewById(R.id.totalDistance);
@@ -80,7 +83,7 @@ public class runActivity extends AppCompatActivity {
                     double FinalDistance = RunningHelper.getTotalDistance();    //get final stats for display
                     RunningHelper.stopActivity();
                     showDialog(timelastSample, FinalDistance);
-                    if (isNewRoute && !(RunningHelper.getTimeLastsample() == 0)) {
+                    if ((routeID == -1) && !(RunningHelper.getTimeLastsample() == 0)) {
                         NewRouteDialog();
                     }
                     logging = false;

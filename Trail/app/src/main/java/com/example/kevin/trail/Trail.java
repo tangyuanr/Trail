@@ -2,9 +2,6 @@ package com.example.kevin.trail;
 
 import android.app.Application;
 
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
-
 
 /**
  * Created by Ezekiel
