@@ -37,7 +37,7 @@ public class runActivity extends AppCompatActivity {
     ArrayList<Route> listOfRoutes = new ArrayList<Route>();
     private String inputRouteName = "";
     private boolean isNewRoute = true;
-    private int routeID;
+    private int routeID = -1; //initialize this to -1. (don't remove it)
 
     /*
     * modified by JY on 3/11/2017
@@ -57,7 +57,9 @@ public class runActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_run);
 
-        routeID = getIntent().getIntExtra("ROUTEID",-1);    //the first item in the list has position 0, the second has position 1, etc.
+        //get the intent sent from SelectRouteRunning activity. we need to know what the user has selected.
+        //the first item in the list has position 0, the second has position 1, etc. the "-1" in blue is the default value (needed by this method)
+        routeID = getIntent().getIntExtra("ROUTEID",-1);
 
         Button startStopButton = (Button) findViewById(R.id.StartStop);
         totalDistance = (TextView) findViewById(R.id.totalDistance);
@@ -82,8 +84,11 @@ public class runActivity extends AppCompatActivity {
                     long timelastSample = RunningHelper.getTimeLastsample();    //get final stats for display
                     double FinalDistance = RunningHelper.getTotalDistance();    //get final stats for display
                     RunningHelper.stopActivity();
-                    showDialog(timelastSample, FinalDistance);
-                    if ((routeID == -1) && !(RunningHelper.getTimeLastsample() == 0)) {
+                    showDialog(timelastSample, FinalDistance);  //show stats dialog
+
+                    //here we determine if we need to ask the user if he wants to save the route
+                    //if the user has selected "New Route" and there have been more than 5 samples collected, ask the user if he wants to save
+                    if ((routeID == -1) && (RunningHelper.getCurrentNumberOfSamples() > 2)) {
                         NewRouteDialog();
                     }
                     logging = false;
@@ -96,6 +101,7 @@ public class runActivity extends AppCompatActivity {
         });
     }
 
+    //dialog that asks the user if he wants to save the route
     private void NewRouteDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Save Route?");
@@ -105,7 +111,7 @@ public class runActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 inputRouteName = input.getText().toString();
-                RunningHelper.addNewRoute(inputRouteName);
+                RunningHelper.addNewRoute(inputRouteName);  //activityHelper method that adds the New Route
 
             }
         });
@@ -128,9 +134,6 @@ public class runActivity extends AppCompatActivity {
             RunningHelper.stopActivity();
     }
 
-    public ArrayList<Route> getListRoutes() {
-        return listOfRoutes;
-    }
 
     //thread that receives distance updates from the service
     private void startUpdateStatsThread() {

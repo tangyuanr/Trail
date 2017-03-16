@@ -42,9 +42,17 @@ public class DBHandler extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db){
+
+        //MASTER_RUN_TABLE holds the routeID (autoincrement row id), the route name and the URL to google static map API. downloading the image and storing the filename of the image is better.
         String CREATE_MASTER_RUN_TABLE="CREATE TABLE "+MASTER_TABLE_RUN+" ("+ROUTE_ID+" INTEGER PRIMARY KEY AUTOINCREMENT, "+RUN_ROUTE_NAME+" TEXT, "+STATIC_MAP_URL + " TEXT)";
         Log.e(TAG, CREATE_MASTER_RUN_TABLE);
         db.execSQL(CREATE_MASTER_RUN_TABLE);
+        //TABLE_RUN_ATTEMPTS holds a record of every attempt.
+        //1st column is the ID of the attempt (autoincrement), the 2nd column is the ID of the route it is associated with (should write some code to enforce sqlite foreign key)
+        //3rd column is the total time of the attempt, 4th time is the distance, 5th time is the filename of the data
+        //the Distance should probably be stored in the MASTER_TABLE_RUN instead. what do you think?
+        //keeping the data coordinates for every attempt is not needed, so we should probably remove this column.
+        //instead we could keep one file for a specific route and hold its name in the MASTER_RUN_TABLE
         String CREATE_RUNS_TABLE="CREATE TABLE "+TABLE_RUN_ATTEMPTS+" ("+RUN_ATTEMPT_ID+" INTEGER PRIMARY KEY AUTOINCREMENT, "+ROUTE_ID+" INT, "+RUN_TIME + " REAL, "
                 + RUN_DISTANCE + " REAL, " + RUN_DATA + " TEXT)";
         Log.e(TAG, CREATE_RUNS_TABLE);
@@ -59,6 +67,7 @@ public class DBHandler extends SQLiteOpenHelper {
     }
 
 
+    //builds an arraylist of Route objects and returns it
     public ArrayList<Route> getAllRoutes() {
         ArrayList<Route> routesList = new ArrayList<>();
         String query = "SELECT * FROM " + MASTER_TABLE_RUN;
@@ -94,16 +103,18 @@ public class DBHandler extends SQLiteOpenHelper {
 //        db.close();
 //    }
 
+    //add new Route to Master table
     public long addMasterRoute(String routeName, String url) {
         SQLiteDatabase db=this.getWritableDatabase();
         ContentValues contentValues=new ContentValues();
         contentValues.put(RUN_ROUTE_NAME, routeName);//filename of .txt file containing coordinates
         contentValues.put(STATIC_MAP_URL, url);
-        long addedID = db.insert(MASTER_TABLE_RUN, null, contentValues);  //not sure why we need to keep track of the ID for now
+        long addedID = db.insert(MASTER_TABLE_RUN, null, contentValues);  //keeping track of the addedID so that we can call addRunAttempt for the correct RouteID
         db.close();
         return addedID;
     }
 
+    //adding an attempt to the attempt table
     public void addRunAttempt(int RouteID, int totalTimeMinutes, float totalDistanceKM, String filename) {
         SQLiteDatabase db=this.getWritableDatabase();
         ContentValues contentValues=new ContentValues();
@@ -115,6 +126,7 @@ public class DBHandler extends SQLiteOpenHelper {
         db.close();
     }
 
+    // this checks if the Master table is empty. I made this so that in the MainActivity, when the Running button is clicked, it calls SelectRouteRunning if it's not empty or directly Running activity if this table is empty.
     public boolean isMasterTableEmpty(){
 
         SQLiteDatabase db = this.getWritableDatabase();

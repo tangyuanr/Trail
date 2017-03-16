@@ -13,8 +13,8 @@ import java.util.ArrayList;
 
 public class SelectRouteRunning extends AppCompatActivity {
 
-    DBHandler dbhandler = new DBHandler(this);
-    ArrayList<Route> listOfRoutes = new ArrayList<Route>();
+    DBHandler dbhandler = new DBHandler(this);  //instantiate and initialize dbHandler
+    ArrayList<Route> listOfRoutes = new ArrayList<Route>();     //list of Route objects that will contain all the routes
     private int routeID = -1;
     ListView listview;
 
@@ -24,26 +24,30 @@ public class SelectRouteRunning extends AppCompatActivity {
         setContentView(R.layout.activity_usage_example_listview);
 
 
-        listOfRoutes = dbhandler.getAllRoutes();
+        listOfRoutes = dbhandler.getAllRoutes();    //get all the routes stored in the MASTER_TABLE_RUN database
         listview = (ListView) findViewById(R.id.usage_example_listview);
         listview.setAdapter(new RouteAdapter(SelectRouteRunning.this, listOfRoutes));
 
+
+        //this is called when an item in the listview has been clicked (when the user chooses a route)
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(SelectRouteRunning.this, runActivity.class);
+                //building the intent to pass the int. the 1st row (1st route) returns an int = 0. 2nd route returns an int of 1, etc. we need to send this to the RunActivity.
                 intent.putExtra("ROUTEID", (int)id);
                 startActivity(intent);
             }
         });
 
+        //this inflates the "New Route" button at the end of the list
         Button newRouteButton = new Button(this);
         newRouteButton.setText("New Route");
         listview.addFooterView(newRouteButton);
         newRouteButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Intent intent = new Intent(SelectRouteRunning.this, runActivity.class);
-                intent.putExtra("ROUTEID", (int)-1);     //-1 for new route
+                intent.putExtra("ROUTEID", routeID);     //routeID has been initialized to -1, and this value of ROUTEID will be understood by Running Activity to be "New Route".
                 startActivity(intent);
             }
         });
