@@ -4,7 +4,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Created by admin on 3/15/2017.
+ * Created by Ezekiel.
+ * Route object that holds its name, its URL to google map static, and the image name if eventually  we choose to download it instead of keeping track of URLs.
  */
 
 public class Route implements Parcelable {
@@ -41,6 +42,15 @@ public class Route implements Parcelable {
         this.imageName = imageName;
     }
 
+    //implementing toString so that a listview adapter can call it on a Route object. We can build the string here and return it to the listview.
+    //For example, we can implement some DBHandler function to figure out what the best time is for a specific route, and concatenate it to the string being returned there.
+    @Override
+    public String toString() {
+        return routeName + "\n Best time:"; //we can build up the returned string there.
+    }
+
+
+    //some methods that need to be implemented to use this in a Fragment.
     @Override
     public int describeContents() {
         return 0;
@@ -68,8 +78,4 @@ public class Route implements Parcelable {
     }
 
 
-    @Override
-    public String toString() {
-        return routeName + "\n Best time:";
-    }
 }

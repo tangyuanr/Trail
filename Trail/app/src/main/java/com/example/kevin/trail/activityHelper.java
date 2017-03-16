@@ -44,6 +44,7 @@ public class activityHelper {
     private ServiceGPS serviceGPS;
     private boolean mBounded;
     private Intent intent;
+    private int sample;
     //private Intent intent_message;
     double totalDistance = 0;
     double pace = 0;
@@ -60,79 +61,53 @@ public class activityHelper {
         dbHandler = new DBHandler(context);
     }
 
+    //I thought we may need this but I seems like not, so for the moment this is never called.
     public activityHelper(Context context, int routeID, int activityType) { //constructor called if route already exists
         mActivityType = activityType;
         this.context = context;
         this.routeID = routeID;
     }
 
+    //Adding new route to the MASTER_TABLE_RUN table. I am storing the entire URL in the database. This will have to be improved as URLs have a character limit.
+    //We can try converting the URL to a shorturl with a shortURL service. Read this for example: https://www.learn2crack.com/2014/01/android-using-goo-gl-url-shortener-api.html
+    //Otherwise we can download the map image on the spot and save it on disk and keep track of the image name in the table, instead of the URL itself.
+    //I have not had time to look more into this for now.
+    //String name is the name of the Route that the user has inputed.
+    //This method is called by the Running(or other) activity, when the user inputs a name in the dialog.
     public long addNewRoute(String name) {
         String url = getStaticAPIURL();
-        new DownloadImage().execute(url);
         return dbHandler.addMasterRoute(name, url);
     }
 
-
-
-
-    private void saveImage(Bitmap b, String imageName) {
-        FileOutputStream foStream;
-        try {
-            foStream = context.openFileOutput(imageName, Context.MODE_PRIVATE);
-            b.compress(Bitmap.CompressFormat.PNG, 100, foStream);
-            foStream.close();
-        } catch (Exception e) {
-            Log.d("saveImage", "Exception 2, Something went wrong!");
-            e.printStackTrace();
-        }
-    }
-
-    private class DownloadImage extends AsyncTask<String, Void, Bitmap> {
-        private String TAG = "DownloadImage";
-        private Bitmap downloadImageBitmap(String sUrl) {
-            Bitmap bitmap = null;
-            try {
-                InputStream inputStream = new URL(sUrl).openStream();   // Download Image from URL
-                bitmap = BitmapFactory.decodeStream(inputStream);       // Decode Bitmap
-                inputStream.close();
-            } catch (Exception e) {
-                Log.d(TAG, "Exception 1, Something went wrong!");
-                e.printStackTrace();
-            }
-            return bitmap;
-        }
-
-        @Override
-        protected Bitmap doInBackground(String... params) {
-            return downloadImageBitmap(params[0]);
-        }
-
-        protected void onPostExecute(Bitmap result) {
-            saveImage(result, routeName);
-        }
-    }
-
-
+    //if the user wants to, he can save the attempt in the attempt table. the int routeID parameter is used to know to which route the attempt is associated.
+    //I have not implemented anything about this yet but It should take no more than 30 minutes.
     private void addRunAttempt(int routeID) {
         dbHandler.addRunAttempt(routeID, 500, 500, "gay.txt"); //not implemented yet
     }
 
+    //this builds up the URL to the static map screenshot, from the ArrayList of location objects returned by serviceGPS.
     private String getStaticAPIURL() {
+        //I have used these to figure out what the resolution of the requested image should be.
         DisplayMetrics displayMetrics = new DisplayMetrics();
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         wm.getDefaultDisplay().getMetrics(displayMetrics);
         int screenWidth = displayMetrics.widthPixels;
         float density  = displayMetrics.density;
+
+        //250*density and 150*density are used to calculate the image dimensions in pixels that need to be request.
+        //250 and 150 are values I have estimated from my phone's listview dimensions in dp. there is probably another way to do it, I don't know how this kind of thing is usually done.
         ArrayList<Location> locationArrayList = serviceGPS.getArrayCoordinates();
         String url = "http://maps.googleapis.com/maps/api/staticmap?size="+(int)(250*density)+"x"+(int)(150*density)+"&path=";
-        for (int i  = 0; i < locationArrayList.size(); i++) {
+        for (int i  = 0; i < locationArrayList.size(); i += 2) { //every other element
             double latitude = locationArrayList.get(i).getLatitude();
             double longitude = locationArrayList.get(i).getLongitude();
-            url += locationArrayList.get(i).getLatitude() + "," + longitude + "|";
+            url += latitude + "," + longitude + "|";
         }
         url = url.substring(0,url.length()-1);
         url += "&sensor=false";
         return url;
+        // this URL can get quite large so we need to look into ways to reduce it. For the moment I am taking every other element to half the number of points.
+        // downloading the image and storing its filename in the SQLite database is probably better.
     }
 
 
@@ -180,6 +155,7 @@ public class activityHelper {
     }
 
     public long getTimeLastsample() {return tLastSample;}
+    public int getCurrentNumberOfSamples() {return sample;}
 
 
     ServiceConnection mConnection = new ServiceConnection() {
@@ -207,6 +183,7 @@ public class activityHelper {
         totalDistance = intent.getDoubleExtra("distance", 1);
         pace = intent.getDoubleExtra("pace", 0);
         tLastSample = intent.getLongExtra("time_of_last_sample",0);
+        sample = intent.getIntExtra("number of samples", 0);
         Log.d(TAG, String.valueOf(totalDistance)+" data received "+tLastSample);
     }
 

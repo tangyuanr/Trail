@@ -17,6 +17,7 @@ import java.util.ArrayList;
 
 /**
  * Created by Ezekiel on 3/15/2017.
+ * Adapter that connects the Route objects to the listview
  */
 
 public class RouteAdapter extends ArrayAdapter<Route> {

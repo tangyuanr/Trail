@@ -21,6 +21,8 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
 import java.io.OutputStreamWriter;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -62,7 +64,6 @@ public class ServiceGPS extends Service implements LocationListener, GoogleApiCl
 
 
 
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -78,6 +79,8 @@ public class ServiceGPS extends Service implements LocationListener, GoogleApiCl
         Log.d(TAG, "getting current date and time: "+currentDateandTime);
         filename = String.valueOf(EFFECTIVESAMPLINGPERIOD / 1000) + currentDateandTime +".TXT";
         Log.d(TAG,"forming output filename: "+filename);
+
+
     }
 
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -109,28 +112,33 @@ public class ServiceGPS extends Service implements LocationListener, GoogleApiCl
         //Log.d(TAG, "onLocationChanged googleAPI");
         currentLocation = location;
 
+        //if we have enough subsamples to get an average sample
         if (counter > numberOfSamplePerAverage - 1) {
+            //TO DO: we need to round up and truncate the coordinates to the 5th decimal to save space for building the google static map API since URL has a char limit.
+            // The fifth decimal place is worth up to 1.1 meters so, we don't need more and we could probably do for 4.
             averageLongitude = totalLongitude / (numberOfSamplePerAverage);
             averageLatitude = totalLatitude / (numberOfSamplePerAverage);
             averageLocation = new Location("");
             averageLocation.setLatitude(averageLatitude);
             averageLocation.setLongitude(averageLongitude);
 
+            //if this is not fhte 1st sample
             if (!(sample == 0)) {
                 previousDistance = totalDistance;
                 double latestDistance = (previousLocation.distanceTo(averageLocation))/1000; //in km
                 Log.d(TAG, "latest distance "+latestDistance);
-                if(latestDistance > 0.0025) {totalDistance += latestDistance;} //if not, user is probably standing still
+                if(latestDistance > 0.0025) {totalDistance += latestDistance;} //if not, user is probably standing still. doing this to prevent accumulation of small errors.
                 pace = calculatePace(previousDistance, totalDistance, EFFECTIVESAMPLINGPERIOD / 1000);
                 Log.d(TAG, "totalDistance "+totalDistance);
                 Log.d(TAG, "pace "+pace);
             }
 
             tSample = System.currentTimeMillis() - tStart;  //time of last sample
+            //I am outputing totalDistance and tSample in the file for debug purposes but they are probably not needed.
             String string = String.valueOf(averageLocation.getLatitude()) + "," + String.valueOf(averageLocation.getLongitude()) + "," + totalDistance + "," + tSample;
             //String string = String.valueOf(averageLocation.getLatitude()) + "," + String.valueOf(averageLocation.getLongitude()) + "," + totalDistance + "," + String.valueOf(pace) + "," + tSample;
             saveText(string);
-            coordinatesArray.add(averageLocation);
+            coordinatesArray.add(averageLocation);  //building a dynamic arraylist of Location objects so that we can send it out if anything needs it.
             Log.d(TAG, "saved sample"+string);
             counter = 0;
             sample++;
@@ -139,7 +147,6 @@ public class ServiceGPS extends Service implements LocationListener, GoogleApiCl
             previousLocation = averageLocation;
         } else {
 
-            //Log.d(TAG, "Entered B");
             totalLongitude += currentLocation.getLongitude();
             totalLatitude += currentLocation.getLatitude();
             counter++;
@@ -173,6 +180,7 @@ public class ServiceGPS extends Service implements LocationListener, GoogleApiCl
         intent_sender.putExtra("distance", totalDistance);
         intent_sender.putExtra("pace", pace);
         intent_sender.putExtra("time_of_last_sample", tSample);
+        intent_sender.putExtra("number of samples", sample);
         sendBroadcast(intent_sender);
         Log.d(TAG, "entered PackageUpdates");
     }
