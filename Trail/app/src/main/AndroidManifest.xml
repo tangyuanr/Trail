@@ -7,6 +7,8 @@
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 
     <application
         android:name=".Trail"
@@ -23,22 +25,29 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
-        <activity android:name=".hikeActivity"
-                  android:screenOrientation="portrait"/>
-        <activity android:name=".bikeActivity"
-                  android:screenOrientation="portrait"/>
-        <activity android:name=".timerActivity"
-                  android:screenOrientation="portrait"/>
+        <activity
+            android:name=".hikeActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".bikeActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".timerActivity"
+            android:screenOrientation="portrait" />
 
-        <service android:name=".ServiceGPS"
-                 android:screenOrientation="portrait"/>
+        <service
+            android:name=".ServiceGPS"
+            android:screenOrientation="portrait" />
 
         <activity android:name=".historyActivity" />
-        <activity android:name=".runActivity"
-                  android:screenOrientation="portrait">
-        </activity>
+        <activity
+            android:name=".runActivity"
+            android:screenOrientation="portrait"></activity>
+        <activity
+            android:name=".HRActivity"
+            android:label="HxM Sensor"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>
