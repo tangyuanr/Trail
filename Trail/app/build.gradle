@@ -19,6 +19,7 @@ android {
     }
 }
 
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
@@ -36,4 +37,6 @@ dependencies {
     compile 'com.intentfilter:android-permissions:0.1.2'
     compile 'com.android.support:mediarouter-v7:25.2.0'
     compile 'com.android.support:multidex:1.0.1'
+    compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'com.intentfilter:android-permissions:0.1.2'
 }

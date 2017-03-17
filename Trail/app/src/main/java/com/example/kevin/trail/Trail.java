@@ -2,6 +2,7 @@ package com.example.kevin.trail;
 
 import android.app.Application;
 
+
 /**
  * Created by Ezekiel
  * Application class to hold global variables
@@ -21,4 +22,7 @@ public class Trail extends Application {
         isGPSEnabled = bool;
     }
 
+
 }
+
+
