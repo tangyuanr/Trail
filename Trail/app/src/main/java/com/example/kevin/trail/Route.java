@@ -14,6 +14,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -105,7 +107,6 @@ public class Route implements Serializable { //needed to be able to pass it betw
 
     private ArrayList<Location> buildLocationArray() {
         ArrayList<Location> arrayLocation = new ArrayList<>();
-        Location location = new Location("");
         FileInputStream is;
         BufferedReader reader;
         String path = Trail.getAppContext().getFilesDir() + "/" + filename_coordinates;
@@ -116,6 +117,7 @@ public class Route implements Serializable { //needed to be able to pass it betw
                 reader = new BufferedReader(new InputStreamReader(is));
                 String line = reader.readLine();
                 while (line != null) {
+                    Location location = new Location("");
                     List<String> coordinatesList = Arrays.asList(line.split(","));
                     location.setLatitude(Double.parseDouble(coordinatesList.get(0)));
                     location.setLongitude(Double.parseDouble(coordinatesList.get(1)));
@@ -145,16 +147,26 @@ public class Route implements Serializable { //needed to be able to pass it betw
         //widthDP*density and heightDP*density are used to calculate the image dimensions in pixels that need to be requested
         ArrayList<Location> locationArrayList = buildLocationArray();
         String url = "http://maps.googleapis.com/maps/api/staticmap?size=" + (int) (widthDP * density) + "x" + (int) (heightDP * density) + "&path=";
-        for (int i = 0; i < locationArrayList.size(); i += 2) { //every other element
-            double latitude = locationArrayList.get(i).getLatitude();
-            double longitude = locationArrayList.get(i).getLongitude();
+        for (int i = 0; i < locationArrayList.size(); i++) {
+            double latitude = round(locationArrayList.get(i).getLatitude(),5);
+            double longitude = round(locationArrayList.get(i).getLongitude(),5);
             url += latitude + "," + longitude + "|";
         }
         url = url.substring(0, url.length() - 1);
         url += "&sensor=false";
+        Log.d("getStaticAPIURL:",url);
         return url;
         // this URL can get quite large so we need to look into ways to reduce it. For the moment I am taking every other element to half the number of points.
         // downloading the image and storing its filename in the SQLite database is probably better.
+    }
+
+    //http://stackoverflow.com/questions/2808535/round-a-double-to-2-decimal-places
+    private static double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = new BigDecimal(value);
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
     }
 
 }
