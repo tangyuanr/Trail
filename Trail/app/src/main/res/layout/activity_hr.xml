@@ -52,13 +52,24 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
     <TextView
-        android:id="@+id/textView5"
+        android:id="@+id/hrView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textView4"
+        android:layout_alignStart="@+id/textView4"
+        android:layout_below="@+id/textView4"
         android:layout_marginTop="17dp"
         android:text="Heart rate will appear here"
-        android:textAppearance="@style/TextAppearance.AppCompat.Button"
-        android:layout_below="@+id/textView4"
-        android:layout_alignLeft="@+id/textView4"
-        android:layout_alignStart="@+id/textView4" />
+        android:textAppearance="@style/TextAppearance.AppCompat.Button" />
+
+    <TextView
+        android:id="@+id/connectStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="67dp"
+        android:text="Status Message"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+        android:layout_below="@+id/hrView"
+        android:layout_alignRight="@+id/textView"
+        android:layout_alignEnd="@+id/textView" />
 </RelativeLayout>
