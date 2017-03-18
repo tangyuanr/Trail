@@ -1,32 +1,20 @@
 package com.example.kevin.trail;
 
-import android.app.Dialog;
-import android.content.BroadcastReceiver;
+
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.ColorDrawable;
-import android.icu.text.DecimalFormat;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class runActivity extends AppCompatActivity {
     private boolean logging = false;
@@ -34,32 +22,25 @@ public class runActivity extends AppCompatActivity {
     TextView totalDistance;
     TextView latestPace;
     private static final String TAG = "runActivity";
-    ArrayList<Route> listOfRoutes = new ArrayList<Route>();
     private String inputRouteName = "";
-    private boolean isNewRoute = true;
-    private int routeID = -1; //initialize this to -1. (don't remove it)
+    Route route = null;
+    Attempt attempt = null;
+    private String activityType = "Running";
 
-    /*
-    * modified by JY on 3/11/2017
-    * add info (coordinate data filename, total time, tital distance) into database
-    */
     DBHandler dbHandler = new DBHandler(this);
     ServiceGPS servicegps = new ServiceGPS();
 
-
-    /**
-     * Created by Ezekiel on 3/9/2017.
-     * Example activity that calls the ServiceGPS service.
-     */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_run);
 
-        //get the intent sent from SelectRouteRunning activity. we need to know what the user has selected.
-        //the first item in the list has position 0, the second has position 1, etc. the "-1" in blue is the default value (needed by this method)
-        routeID = getIntent().getIntExtra("ROUTEID",-1);
+        Intent receivedIntent = getIntent();    //retrieve the intent that was sent to check if it has a Route object
+        if(receivedIntent.hasExtra("route")) {  //if the intent has a route object
+            route = (Route) receivedIntent.getSerializableExtra("route");
+            Log.d(TAG, "Route object received by runActivity");
+        }
 
         Button startStopButton = (Button) findViewById(R.id.StartStop);
         totalDistance = (TextView) findViewById(R.id.totalDistance);
@@ -68,39 +49,60 @@ public class runActivity extends AppCompatActivity {
         RunningHelper = new activityHelper(runActivity.this, 0); //instantiate a running helper object, the int parameter is the type of activity. 0 for running.
 
 
-
-
         startStopButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (!logging) {
                     //TODO implement timer with start/stop button
-
-                    RunningHelper.startActivity(); //when the user clicks start, running activity (activity in the traditional sense, not android sense) starts and data starts being collected.
+                    RunningHelper.startActivity(route); //when the user clicks start, running activity (activity in the traditional sense, not android sense) starts and data starts being collected.
+                    Log.d(TAG, "RunningHelper.startActivity(route) called");
                     logging = true; //boolean so that the same button acts as an on/off toggle
                     Toast.makeText(runActivity.this, "You've started running", Toast.LENGTH_SHORT).show();
                     startUpdateStatsThread(); //start the thread that receives updates from the service
                 } else {
-
-                    long timelastSample = RunningHelper.getTimeLastsample();    //get final stats for display
-                    double FinalDistance = RunningHelper.getTotalDistance();    //get final stats for display
-                    RunningHelper.stopActivity();
-                    showDialog(timelastSample, FinalDistance);  //show stats dialog
-
-                    //here we determine if we need to ask the user if he wants to save the route
-                    //if the user has selected "New Route" and there have been more than 5 samples collected, ask the user if he wants to save
-                    if ((routeID == -1) && (RunningHelper.getCurrentNumberOfSamples() > 2)) {
-                        NewRouteDialog();
+                    if (RunningHelper.getCurrentNumberOfSamples() < 1) {
+                        logging = false;
+                        RunningHelper.stopActivity();
+                    } else {
+                        if (!(route == null)) {  //if Route is not null, it means a route was sent was sent by SelectRouteRunning
+                            attempt = RunningHelper.getAttempt();   //build up the attempt from the stats held by the activityHelper. the runningHelper already has an instance of Route, so it can build the attempt and return it.
+                            Log.d(TAG, "Route is not null. Attempt object built.");
+                            SaveAttemptDialog();    //prompt the user if he wants to save the attempt
+                        } else {  //else, Route is null and the user selected New Route, so we need to ask the user to give the new route a name
+                            NewRouteDialog();
+                        }
+                        long timelastSample = RunningHelper.getTimeLastsample();    //get final stats for display
+                        float FinalDistance = RunningHelper.getTotalDistance();    //get final stats for display
+                        RunningHelper.stopActivity();
+                        showStatsDialog(timelastSample, FinalDistance);  //show stats dialog
+                        logging = false;
                     }
-                    logging = false;
-                    //Toast.makeText(runActivity.this, "You've stopped running",Toast.LENGTH_SHORT).show();
-                    //append stuff to the database
-                    //dbHandler.addRecord(servicegps.getFilename(), String.valueOf(RunningHelper.getTotalDistance()), "some total time");
                 }
 
             }
         });
     }
 
+
+    private void SaveAttemptDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Save attempt?");
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dbHandler.addAttempt(attempt); //save the attempt to the database
+                Log.d(TAG, "Attempt added to the database");
+            }
+        });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
+
+    }
     //dialog that asks the user if he wants to save the route
     private void NewRouteDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -110,8 +112,21 @@ public class runActivity extends AppCompatActivity {
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                //the user wants to save the route. it obviously means he wants to save the attempt with it as well. so we need to build both objects.
+                int totaltime = (int)RunningHelper.getTimeLastsample()/1000;
                 inputRouteName = input.getText().toString();
-                RunningHelper.addNewRoute(inputRouteName);  //activityHelper method that adds the New Route
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+                String currentDateandTime = sdf.format(new Date());
+                //instantiating a new route object with the constructor for the case in which we have no rowID yet
+                route = new Route(inputRouteName, activityType, RunningHelper.getTotalDistance(), totaltime, currentDateandTime, RunningHelper.getCoordinatesFileName() );
+                Log.d(TAG, "Route object created with constructor without rowID");
+                long addedID = dbHandler.addRoute(route);  //add the New Route to the database and get the rowID of the route that was added
+                Log.d(TAG, "Route object added to ROUTE_TABLE and rowID returned by the databasehandler");
+                //now that the route has been saved, we can save the attempt. we now need to set the rowID of the added route so that we can track to which route the attempt belongs to.
+                route.setRowID(addedID);
+                attempt = new Attempt(route, totaltime, currentDateandTime);
+                dbHandler.addAttempt(attempt); //adding the attempt
+                Log.d(TAG, "Attempt object built and added to database");
 
             }
         });
@@ -160,7 +175,7 @@ public class runActivity extends AppCompatActivity {
     }
 
     //dialog that displays final stats
-    private void showDialog(long timeLastSample, double FinalDistance) {
+    private void showStatsDialog(long timeLastSample, double FinalDistance) {
 
         long time = timeLastSample / (60000); //in minutes
         AlertDialog alertDialog = new AlertDialog.Builder(this).create();

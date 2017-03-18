@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
 
         runButtonlink.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                if (dbhandler.isMasterTableEmpty()) {goToRunningActivity();}
+                if (dbhandler.isRouteTableEmpty()) {goToRunningActivity();}
                 else {goToSelectRouteActivity();}
             }
         });
@@ -117,20 +117,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //methods that checks and asks for permissions and set the global variable trail.GPSStatus
-
-
-    public static boolean hasPermissions(Context context, String... permissions) {
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && permissions != null) {
-            for (String permission : permissions) {
-                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-
     void checkAndAskPermissions(final Trail trail) {
 
         PermissionManager permissionManager = PermissionManager.getInstance(this);

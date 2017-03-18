@@ -44,11 +44,7 @@ public class RouteAdapter extends ArrayAdapter<Route> {
 
         ImageView imageView = (ImageView) convertView.findViewById(R.id.imageViewtest);
 
-        Picasso
-                .with(context)
-                .load(routes.get(position).getImgURL())
-                .fit()
-                .into(imageView);
+        Picasso.with(context).load(routes.get(position).getStaticAPIURL(context, 250, 150)).fit().into(imageView);
 
         TextView routeName = (TextView) convertView.findViewById(R.id.textViewtest);
         routeName.setText(routes.get(position).toString());
