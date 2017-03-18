@@ -99,10 +99,16 @@ public class Route implements Serializable { //needed to be able to pass it betw
     }
 
     //implementing toString so that a listview adapter can call it on a Route object. We can build the string here and return it to the listview.
-    //For example, we can implement some DBHandler function to figure out what the best time is for a specific route, and concatenate it to the string being returned there.
     @Override
     public String toString() {
-        return routeName + "\n Best time:"; //we can build up the returned string there.
+
+        //converting seconds to hours,minutes string. copied-pasted from http://stackoverflow.com/questions/6118922/convert-seconds-value-to-hours-minutes-seconds
+        int hours = bestTime / 3600;
+        int minutes = (bestTime % 3600) / 60;
+        String bestTimeString = String.format("%02dh %02dm", hours, minutes);
+
+        Log.d("Best time string: ", bestTimeString);
+        return routeName + "\n Best time:\n" + bestTimeString +"\n on " + dateBestTime; //we can build up the returned string there.
     }
 
     private ArrayList<Location> buildLocationArray() {
@@ -148,8 +154,8 @@ public class Route implements Serializable { //needed to be able to pass it betw
         ArrayList<Location> locationArrayList = buildLocationArray();
         String url = "http://maps.googleapis.com/maps/api/staticmap?size=" + (int) (widthDP * density) + "x" + (int) (heightDP * density) + "&path=";
         for (int i = 0; i < locationArrayList.size(); i++) {
-            double latitude = round(locationArrayList.get(i).getLatitude(),5);
-            double longitude = round(locationArrayList.get(i).getLongitude(),5);
+            double latitude = locationArrayList.get(i).getLatitude();
+            double longitude = locationArrayList.get(i).getLongitude();
             url += latitude + "," + longitude + "|";
         }
         url = url.substring(0, url.length() - 1);
@@ -158,15 +164,6 @@ public class Route implements Serializable { //needed to be able to pass it betw
         return url;
         // this URL can get quite large so we need to look into ways to reduce it. For the moment I am taking every other element to half the number of points.
         // downloading the image and storing its filename in the SQLite database is probably better.
-    }
-
-    //http://stackoverflow.com/questions/2808535/round-a-double-to-2-decimal-places
-    private static double round(double value, int places) {
-        if (places < 0) throw new IllegalArgumentException();
-
-        BigDecimal bd = new BigDecimal(value);
-        bd = bd.setScale(places, RoundingMode.HALF_UP);
-        return bd.doubleValue();
     }
 
 }

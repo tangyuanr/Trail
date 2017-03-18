@@ -21,6 +21,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
 import java.io.OutputStreamWriter;
+import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -114,8 +115,6 @@ public class ServiceGPS extends Service implements LocationListener, GoogleApiCl
 
         //if we have enough subsamples to get an average sample
         if (counter > numberOfSamplePerAverage - 1) {
-            //TO DO: we need to round up and truncate the coordinates to the 5th decimal to save space for building the google static map API since URL has a char limit.
-            // The fifth decimal place is worth up to 1.1 meters so, we don't need more and we could probably do with 4.
             averageLongitude = totalLongitude / (numberOfSamplePerAverage);
             averageLatitude = totalLatitude / (numberOfSamplePerAverage);
             averageLocation = new Location("");
@@ -134,7 +133,7 @@ public class ServiceGPS extends Service implements LocationListener, GoogleApiCl
             }
 
             tSample = System.currentTimeMillis() - tStart;  //time of last sample
-            String string = String.valueOf(averageLocation.getLatitude()) + "," + String.valueOf(averageLocation.getLongitude());
+            String string = String.valueOf(round(averageLocation.getLatitude(),5)) + "," + String.valueOf(round(averageLocation.getLongitude(),5));
             //String string = String.valueOf(averageLocation.getLatitude()) + "," + String.valueOf(averageLocation.getLongitude()) + "," + totalDistance + "," + String.valueOf(pace) + "," + tSample;
             saveText(string);
             coordinatesArray.add(averageLocation);  //building a dynamic arraylist of Location objects so that we can send it out if anything needs it.
@@ -223,6 +222,15 @@ public class ServiceGPS extends Service implements LocationListener, GoogleApiCl
 
     private double calculatePace(float previousDist, float totalDist, int samplingPeriod) {
         return 1/(((totalDist-previousDist)/samplingPeriod)*60); //minutes per km
+    }
+
+    //copied-pasted from http://stackoverflow.com/questions/2808535/round-a-double-to-2-decimal-places
+    private static double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = new BigDecimal(value);
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
     }
 
 
