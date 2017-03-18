@@ -8,7 +8,6 @@ import android.util.Log;
 import zephyr.android.HxMBT.BTClient;
 import zephyr.android.HxMBT.ConnectListenerImpl;
 import zephyr.android.HxMBT.ConnectedEvent;
-import zephyr.android.HxMBT.ZephyrPacket;
 import zephyr.android.HxMBT.ZephyrPacketArgs;
 import zephyr.android.HxMBT.ZephyrPacketEvent;
 import zephyr.android.HxMBT.ZephyrPacketListener;
@@ -16,15 +15,15 @@ import zephyr.android.HxMBT.ZephyrProtocol;
 
 /**
  * Created by JY on 2017-03-17.
- * used sample code from HxM Example Android Project
+ * using sample code from HxM Example Android Project
  */
 
 public class HRSensorConnector extends ConnectListenerImpl{
 
     private Handler oldHandler;
     private Handler newHandler;
-    private int HEART_RATE=0;
-    private int HR_DIST_SPEED_PACKET=0;
+    private int HEART_RATE=0x100;
+    private int HR_DIST_SPEED_PACKET=0x26;
     private HRSpeedDistPacketInfo SENSOR_PACKET=new HRSpeedDistPacketInfo();
     String TAG="HRSensorConnector";
 
@@ -47,6 +46,13 @@ public class HRSensorConnector extends ConnectListenerImpl{
                     //get heart rate here
                     HEART_RATE=SENSOR_PACKET.GetHeartRate(DataArray);
                     Log.d(TAG, "Receiving Heart Rate data");
+
+                    Message msg =newHandler.obtainMessage(HEART_RATE);
+                    Bundle bundle=new Bundle();
+                    bundle.putString("Heart Rate", String.valueOf(HEART_RATE));
+                    msg.setData(bundle);
+                    newHandler.sendMessage(msg);
+                    Log.d(TAG, "Heart Rate is "+HEART_RATE);
                 }
             }
         });

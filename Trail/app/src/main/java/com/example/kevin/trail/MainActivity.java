@@ -18,6 +18,7 @@ public class MainActivity extends AppCompatActivity {
     protected Button bikeButtonlink =null;
     protected Button historyButtonlink=null;
     protected Button runButtonlink =null;
+    protected Button sensorButtonlink=null;
 
 
     @Override
@@ -33,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
         bikeButtonlink = (Button) findViewById(R.id.bikeButton);
         historyButtonlink=(Button) findViewById(R.id.historyButton);
         runButtonlink = (Button) findViewById(R.id.runButton);
+        sensorButtonlink=(Button)findViewById(R.id.sensorButton);
 
 
 
@@ -65,6 +67,12 @@ public class MainActivity extends AppCompatActivity {
                 goToRunningActivity();
             }
         });
+
+        sensorButtonlink.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view){
+                goToSensorActivity();
+            }
+        });
     }
 
     void goToTimerActivity(){
@@ -88,6 +96,11 @@ public class MainActivity extends AppCompatActivity {
 
     void goToRunningActivity(){
         Intent intent = new Intent(MainActivity.this, runActivity.class);
+        startActivity(intent);
+    }
+
+    void goToSensorActivity(){
+        Intent intent = new Intent(MainActivity.this, HRActivity.class);
         startActivity(intent);
     }
 
