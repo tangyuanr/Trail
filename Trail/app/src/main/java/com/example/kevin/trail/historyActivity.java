@@ -23,7 +23,7 @@ public class historyActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history);
 
-        expandableListView=(ExpandableListView)findViewById(R.id.historyListView);
+        /*expandableListView=(ExpandableListView)findViewById(R.id.historyListView);
         detail=dbHandler.getContent();
         titles=new ArrayList<String>(detail.keySet());
         expandableListAdapter=new ExpandableListAdapter(this, titles, detail);
@@ -65,7 +65,7 @@ public class historyActivity extends AppCompatActivity {
                 return false;
             }
         });
-
+*/
 
     }
 
