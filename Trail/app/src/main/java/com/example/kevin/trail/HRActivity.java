@@ -28,6 +28,8 @@ public class HRActivity extends AppCompatActivity {
     HRSensorConnector connector;
     private final int HEART_RATE=0x100;
 
+    String TAG="HRActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -148,6 +150,7 @@ public class HRActivity extends AppCompatActivity {
                 //read heart rate here
                 case HEART_RATE:
                     String hrInfo=msg.getData().getString("HeartRate");
+                    Log.d(TAG, "heart rate is "+hrInfo);
                     tv=(TextView)findViewById(R.id.hrView);
                     if (tv!=null) tv.setText(hrInfo);
                     break;
