@@ -146,8 +146,28 @@ public class DBHandler extends SQLiteOpenHelper {
         contentValues.put(MAP_SCREENSHOT,attempt.getFileNameStaticMapScreenshot());
         long addedID = db.insert(TABLE_ATTEMPTS, null, contentValues);
         db.close();
-        //TO DO: write a method that compares attempt.TotalTimeTaken() to the BEST_TIME column of rowID = attempt.getRoute().getRowID in the ROUTES table, update it if the time is better, add a call to that method here.
+        compareBestTime(attempt);
         return addedID;
+    }
+
+    //compares the current record best time for the given route and if the one of the current attempt is better, update the best time of the route table
+    private void compareBestTime(Attempt attempt) {
+        int totalTime = attempt.getTotalTimeTaken(); //in seconds
+        long rowID = attempt.getRoute().getRowID(); //id of the row
+        String query = "SELECT * FROM " + TABLE_ROUTES + " WHERE  rowid = " + rowID;
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(query, null);
+        if (cursor != null) {
+            cursor.moveToFirst();
+            if (cursor.getInt(4) >= totalTime) {
+                query = "UPDATE " + TABLE_ROUTES + " SET " + BEST_TIME + "=" + totalTime + " WHERE rowid = " + rowID;
+                db.execSQL(query);
+                query = "UPDATE " + TABLE_ROUTES + " SET " + DATE_OF_BEST_TIME + "='" + attempt.getDateOfAttempt() + "' WHERE rowid = " + rowID;
+                Log.d(TAG, "Best time updated");
+            }
+        }
+        cursor.close();
+        db.close();
     }
 
     // this checks if the Route table is empty. I
