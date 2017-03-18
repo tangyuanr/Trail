@@ -30,54 +30,64 @@ public class DBHandler extends SQLiteOpenHelper {
     }
 
     // runner table content
-    private static final String MASTER_TABLE_RUN="MasterRunning";
-    private static final String TABLE_RUN_ATTEMPTS="RunAttempts";
+    private static final String TABLE_ROUTES="ROUTES";
+    private static final String TABLE_ATTEMPTS="Attempts";
     private static final String ROUTE_ID="RouteID";
-    private static final String RUN_ATTEMPT_ID="RunAttemptID";
-    private static final String RUN_ROUTE_NAME="RouteName";
-    private static final String STATIC_MAP_URL="StaticMapURL";
-    private static final String RUN_DATA="CoordinateDataFile"; //may be useless
-    private static final String RUN_DISTANCE="TotalDistance";
-    private static final String RUN_TIME="TotalRunTime";
+    private static final String ATTEMPT_ID="AttemptID";
+    private static final String ACTIVITY_TYPE="ActivityType";
+    private static final String ROUTE_DISTANCE="RouteDistance"; //in km
+    private static final String ROUTE_NAME="RouteName";
+    private static final String BEST_TIME="BestTime"; //in seconds
+    private static final String DATE_OF_BEST_TIME = "DateOfBestTime"; //YYYYMMDD
+    private static final String FILENAME_COORDINATES = "FileNameCoordinates";
+    private static final String TOTAL_TIME = "TotalTime"; //in seconds
+    private static final String DATE_OF_ATTEMPT = "DateOfAttempt"; //in seconds
+    private static final String MAP_SCREENSHOT = "LinkToMapScreenshot";
 
     @Override
     public void onCreate(SQLiteDatabase db){
 
-        //MASTER_RUN_TABLE holds the routeID (autoincrement row id), the route name and the URL to google static map API. downloading the image and storing the filename of the image is better.
-        String CREATE_MASTER_RUN_TABLE="CREATE TABLE "+MASTER_TABLE_RUN+" ("+ROUTE_ID+" INTEGER PRIMARY KEY AUTOINCREMENT, "+RUN_ROUTE_NAME+" TEXT, "+STATIC_MAP_URL + " TEXT)";
-        Log.e(TAG, CREATE_MASTER_RUN_TABLE);
-        db.execSQL(CREATE_MASTER_RUN_TABLE);
-        //TABLE_RUN_ATTEMPTS holds a record of every attempt.
-        //1st column is the ID of the attempt (autoincrement), the 2nd column is the ID of the route it is associated with (should write some code to enforce sqlite foreign key)
-        //3rd column is the total time of the attempt, 4th time is the distance, 5th time is the filename of the data
-        //the Distance should probably be stored in the MASTER_TABLE_RUN instead. what do you think?
-        //keeping the data coordinates for every attempt is not needed, so we should probably remove this column.
-        //instead we could keep one file for a specific route and hold its name in the MASTER_RUN_TABLE
-        String CREATE_RUNS_TABLE="CREATE TABLE "+TABLE_RUN_ATTEMPTS+" ("+RUN_ATTEMPT_ID+" INTEGER PRIMARY KEY AUTOINCREMENT, "+ROUTE_ID+" INT, "+RUN_TIME + " REAL, "
-                + RUN_DISTANCE + " REAL, " + RUN_DATA + " TEXT)";
-        Log.e(TAG, CREATE_RUNS_TABLE);
-        db.execSQL(CREATE_RUNS_TABLE);
+        String CREATE_ROUTE_TABLE="CREATE TABLE "+TABLE_ROUTES + " ("+ROUTE_ID+" INTEGER PRIMARY KEY AUTOINCREMENT, "+ROUTE_NAME+" TEXT, "
+                + ACTIVITY_TYPE + " TEXT, " + ROUTE_DISTANCE + " REAL, " + BEST_TIME + " INT, " + DATE_OF_BEST_TIME + " TEXT, " + FILENAME_COORDINATES + " TEXT)";
+        Log.e(TAG, CREATE_ROUTE_TABLE);
+        db.execSQL(CREATE_ROUTE_TABLE);
+        String CREATE_ATTEMPTS_TABLE="CREATE TABLE "+TABLE_ATTEMPTS+" ("+ATTEMPT_ID+" INTEGER PRIMARY KEY AUTOINCREMENT, "+ROUTE_ID+" INT, "+TOTAL_TIME + " INT, "
+                + DATE_OF_ATTEMPT + " TEXT, " + MAP_SCREENSHOT + " TEXT)";
+        Log.e(TAG, CREATE_ATTEMPTS_TABLE);
+        db.execSQL(CREATE_ATTEMPTS_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion){
-        db.execSQL("DROP TABLE IF EXISTS "+MASTER_TABLE_RUN);
-        db.execSQL("DROP TABLE IF EXISTS "+TABLE_RUN_ATTEMPTS);
+        db.execSQL("DROP TABLE IF EXISTS "+TABLE_ROUTES);
+        db.execSQL("DROP TABLE IF EXISTS "+TABLE_ATTEMPTS);
         onCreate(db);
     }
 
 
     //builds an arraylist of Route objects and returns it
-    public ArrayList<Route> getAllRoutes() {
+    public ArrayList<Route> getRoutes(String activity) { //
         ArrayList<Route> routesList = new ArrayList<>();
-        String query = "SELECT * FROM " + MASTER_TABLE_RUN;
+        String query;
+        if(activity == "") {    //getRoutes("") will select all the routes
+            query = "SELECT * FROM " + TABLE_ROUTES;
+            Log.d(TAG, query);
+        }
+        else {  //ex: when we call getRoutes("Running") to only display a specific type;
+            query = "SELECT * FROM " + TABLE_ROUTES + " WHERE " + ACTIVITY_TYPE + " IN ('" + activity + "')";
+            Log.d(TAG, query);
+        }
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor routesCursor = db.rawQuery(query, null);
         try {
             while (routesCursor.moveToNext()) {
                 String nameOfRoute = routesCursor.getString(1);
-                String staticMapURL = routesCursor.getString(2);
-                Route route = new Route(nameOfRoute, staticMapURL);
+                String activityType = routesCursor.getString(2);
+                float totalDistance = routesCursor.getFloat(3);
+                int bestTime = routesCursor.getInt(4);
+                String dateBestTime = routesCursor.getString(5);
+                String filename_coordinates = routesCursor.getString(6);
+                Route route = new Route(nameOfRoute, activityType, totalDistance, bestTime, dateBestTime, filename_coordinates);
                 routesList.add(route);
             }
         } finally {
@@ -87,166 +97,72 @@ public class DBHandler extends SQLiteOpenHelper {
         return routesList;
     }
 
-    //setter
-    //add running record
-//    public void addRecord(String filename, String distance, String time){
-//        SQLiteDatabase db=this.getWritableDatabase();
-//        //link data to corresponding column
-//        ContentValues contentValues=new ContentValues();
-//        contentValues.put(RUN_DATA,filename);//filename of .txt file containing coordinates
-//        contentValues.put(RUN_DISTANCE,distance);
-//        contentValues.put(RUN_TIME,time);
-//        //insert row into table
-//        id=db.insert(TABLE_RUN,null,contentValues);
-//        Log.d(TAG, "RUNNING record added into database");
-//
-//        db.close();
-//    }
-
-    //add new Route to Master table
-    public long addMasterRoute(String routeName, String url) {
+    //add new Route to Route table
+    public long addRoute(Route route) {
         SQLiteDatabase db=this.getWritableDatabase();
         ContentValues contentValues=new ContentValues();
-        contentValues.put(RUN_ROUTE_NAME, routeName);//filename of .txt file containing coordinates
-        contentValues.put(STATIC_MAP_URL, url);
-        long addedID = db.insert(MASTER_TABLE_RUN, null, contentValues);  //keeping track of the addedID so that we can call addRunAttempt for the correct RouteID
+        contentValues.put(ROUTE_NAME, route.getRouteName());//filename of .txt file containing coordinates
+        contentValues.put(ACTIVITY_TYPE, route.getActivityType());
+        contentValues.put(ROUTE_DISTANCE, route.getTotalDistance());
+        contentValues.put(BEST_TIME, route.getBestTime());
+        contentValues.put(DATE_OF_BEST_TIME, route.getDateBestTime());
+        contentValues.put(FILENAME_COORDINATES, route.getFilename_coordinates());
+        long addedID = db.insert(TABLE_ROUTES, null, contentValues);  //keeping track of the addedID so that we can call addAttempt for the correct RouteID
         db.close();
         return addedID;
     }
 
-    //adding an attempt to the attempt table
-    public void addRunAttempt(int RouteID, int totalTimeMinutes, float totalDistanceKM, String filename) {
-        SQLiteDatabase db=this.getWritableDatabase();
-        ContentValues contentValues=new ContentValues();
-        contentValues.put(ROUTE_ID, RouteID);
-        contentValues.put(RUN_TIME, totalTimeMinutes);
-        contentValues.put(RUN_DISTANCE, totalDistanceKM);
-        contentValues.put(RUN_DATA,filename);
-        long addedID = db.insert(TABLE_RUN_ATTEMPTS, null, contentValues);
+    //fetch one route
+    public Route getRoute(long rowid) {
+        Route route = null;
+        String query = "SELECT * FROM " + TABLE_ROUTES +" WHERE  rowid = " + rowid;
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor routeCursor = db.rawQuery(query, null);
+        try {
+            while (routeCursor.moveToNext()) {
+                String nameOfRoute = routeCursor.getString(1);
+                String activityType = routeCursor.getString(2);
+                float totalDistance = routeCursor.getFloat(3);
+                int bestTime = routeCursor.getInt(4);
+                String dateBestTime = routeCursor.getString(5);
+                String filename_coordinates = routeCursor.getString(6);
+                route = new Route(rowid, nameOfRoute, activityType, totalDistance, bestTime, dateBestTime, filename_coordinates);
+            }
+        } finally {
+            routeCursor.close();
+        }
         db.close();
+        return route;
+
     }
 
-    // this checks if the Master table is empty. I made this so that in the MainActivity, when the Running button is clicked, it calls SelectRouteRunning if it's not empty or directly Running activity if this table is empty.
-    public boolean isMasterTableEmpty(){
+    //adding an attempt to the attempt table
+    public long addAttempt(Attempt attempt) {
+        SQLiteDatabase db=this.getWritableDatabase();
+        ContentValues contentValues=new ContentValues();
+        contentValues.put(ROUTE_ID, attempt.getRoute().getRowID());
+        contentValues.put(TOTAL_TIME, attempt.getTotalTimeTaken());
+        contentValues.put(DATE_OF_ATTEMPT, attempt.getDateOfAttempt());
+        contentValues.put(MAP_SCREENSHOT,attempt.getFileNameStaticMapScreenshot());
+        long addedID = db.insert(TABLE_ATTEMPTS, null, contentValues);
+        db.close();
+        //TO DO: write a method that compares attempt.TotalTimeTaken() to the BEST_TIME column of rowID = attempt.getRoute().getRowID in the ROUTES table, update it if the time is better, add a call to that method here.
+        return addedID;
+    }
 
+    // this checks if the Route table is empty. I
+    public boolean isRouteTableEmpty(){
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " +MASTER_TABLE_RUN, null);
-
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " +TABLE_ROUTES, null);
         if(cursor != null){
-
             cursor.moveToFirst();
-
             int count = cursor.getInt(0);
-
             if(count > 0){
                 return false;
             }
-
             cursor.close();
         }
-
         return true;
     }
 
-    // content generator for listview display
-    /*public HashMap<String, List<String>> getContent(){
-        HashMap<String, List<String>> expandList=new HashMap<String, List<String>>();
-        String placeholder;
-
-        SQLiteDatabase db=this.getReadableDatabase();
-        String selectQuery="SELECT * FROM "+TABLE_RUN;
-        Log.e(TAG, selectQuery);
-
-        Cursor cursorRead=db.rawQuery(selectQuery,null);
-        if (cursorRead!=null)
-            cursorRead.moveToFirst();
-        //loop through all rows
-        if (cursorRead.moveToFirst()) {
-//            do {
-//                //for each row, put each column data into list item
-//                List<String> dataHolder = new ArrayList<String>();
-//                dataHolder.add(cursor.getString(cursor.getColumnIndex(RUN_DATA)));//get coordinates filename
-//                dataHolder.add(cursor.getString(cursor.getColumnIndex(RUN_DISTANCE)));// get total run distance
-//                dataHolder.add(cursor.getString(cursor.getColumnIndex(RUN_TIME)));// get total run time
-//                //when adding row data is finished, name list with run ID
-//                expandList.put(cursor.getString(cursor.getColumnIndex(RUN_ID)), dataHolder);
-//            } while (cursor.moveToNext());
-            while (false==cursorRead.isAfterLast()){
-                List<String> dataHolder = new ArrayList<String>();
-                placeholder=cursorRead.getString(cursorRead.getColumnIndex(RUN_DATA));//get coordinates filename
-                Log.d(TAG, "read RUN DATA from RUN TABLE: "+placeholder);
-                dataHolder.add(placeholder);
-                placeholder=cursorRead.getString(cursorRead.getColumnIndex(RUN_DISTANCE));// get total run distance
-                Log.d(TAG, "read RUN DISTANCE from RUN TABLE: "+placeholder);
-                dataHolder.add(placeholder);
-                placeholder=cursorRead.getString(cursorRead.getColumnIndex(RUN_TIME));// get total run time
-                Log.d(TAG, "read RUN TIME from RUN TABLE: "+placeholder);
-                dataHolder.add(placeholder);
-                //when adding row data is finished, name key with ID
-                placeholder=cursorRead.getString(cursorRead.getColumnIndex(RUN_ID));
-                Log.d(TAG, "RUN ID: "+placeholder);
-                expandList.put(placeholder, dataHolder);
-
-                //next row
-                cursorRead.moveToNext();
-            }
-        }
-        cursorRead.close();
-        db.close();
-
-        return expandList;
-    }*/
-
-    //row number getter
-  /*  public int getRowNumber(){
-        SQLiteDatabase db=this.getReadableDatabase();
-        int numRows=(int) DatabaseUtils.longForQuery(db, "SELECT COUNT(*) FROM "+TABLE_RUN, null);
-        return numRows;
-    }*/
-
-    // getters for...future...use??? honestly the data can also be extracted from the content generator above, which
-    // probably consumes less memory since it won't need to establish connection with database
-    /*public String getRunData(String ID){
-        SQLiteDatabase db=this.getReadableDatabase();
-        //setup query sentence to retrieve row based on ID
-        String selectQuery="SELECT * FROM "+TABLE_RUN+" WHERE "+RUN_ID+"="+ID;
-        Cursor cursor=db.rawQuery(selectQuery,null);
-        cursor.moveToFirst();
-        //placeholder string
-        String runData;
-        //get filename from column RUN_DATA
-        runData=cursor.getString(cursor.getColumnIndex(RUN_DATA));
-        Log.d(TAG, "retrieved coordinate data filename: "+runData);
-        return runData;
-    }
-
-    public String getRunDistance(String ID){
-        SQLiteDatabase db=this.getReadableDatabase();
-        //setup query sentence to retrieve row based on ID
-        String selectQuery="SELECT * FROM "+TABLE_RUN+" WHERE "+RUN_ID+"="+ID;
-        Cursor cursor=db.rawQuery(selectQuery,null);
-        cursor.moveToFirst();
-        //placeholder string
-        String runDistance;
-        //get filename from column RUN_DISTANCE
-        runDistance=cursor.getString(cursor.getColumnIndex(RUN_DISTANCE));
-        Log.d(TAG, "retrieved total RUN distance: "+runDistance);
-
-        return runDistance;
-    }
-
-    public String getRunTime(String ID){
-        SQLiteDatabase db=this.getReadableDatabase();
-        //setup query sentence to retrieve row based on ID
-        String selectQuery="SELECT * FROM "+TABLE_RUN+" WHERE "+RUN_ID+"="+ID;
-        Cursor cursor=db.rawQuery(selectQuery,null);
-        cursor.moveToFirst();
-        //placeholder string
-        String runTime;
-        //get filename from column RUN_TIME
-        runTime=cursor.getString(cursor.getColumnIndex(RUN_TIME));
-        Log.d(TAG, "retrieved total RUN time: "+runTime);
-
-        return runTime;
-    }*/
 }

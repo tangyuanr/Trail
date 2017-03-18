@@ -48,7 +48,7 @@ public class ServiceGPS extends Service implements LocationListener, GoogleApiCl
     public static final String BROADCAST_ACTION = "STATS";
     private final Handler handler = new Handler();
     int counter = 0;
-    private double totalDistance = 0;
+    private float totalDistance = 0;
     private int sample = 0;
     private double averageLatitude = 0;
     private double averageLongitude = 0;
@@ -56,7 +56,7 @@ public class ServiceGPS extends Service implements LocationListener, GoogleApiCl
     double totalLatitude = 0;
     private Location averageLocation;
     private Location previousLocation;
-    private double previousDistance = 0;
+    private float previousDistance = 0;
     private long tStart = 0;
     private long tSample = 0;
     private double pace = 0;
@@ -115,7 +115,7 @@ public class ServiceGPS extends Service implements LocationListener, GoogleApiCl
         //if we have enough subsamples to get an average sample
         if (counter > numberOfSamplePerAverage - 1) {
             //TO DO: we need to round up and truncate the coordinates to the 5th decimal to save space for building the google static map API since URL has a char limit.
-            // The fifth decimal place is worth up to 1.1 meters so, we don't need more and we could probably do for 4.
+            // The fifth decimal place is worth up to 1.1 meters so, we don't need more and we could probably do with 4.
             averageLongitude = totalLongitude / (numberOfSamplePerAverage);
             averageLatitude = totalLatitude / (numberOfSamplePerAverage);
             averageLocation = new Location("");
@@ -125,7 +125,7 @@ public class ServiceGPS extends Service implements LocationListener, GoogleApiCl
             //if this is not fhte 1st sample
             if (!(sample == 0)) {
                 previousDistance = totalDistance;
-                double latestDistance = (previousLocation.distanceTo(averageLocation))/1000; //in km
+                float latestDistance = (previousLocation.distanceTo(averageLocation))/1000; //in km
                 Log.d(TAG, "latest distance "+latestDistance);
                 if(latestDistance > 0.0025) {totalDistance += latestDistance;} //if not, user is probably standing still. doing this to prevent accumulation of small errors.
                 pace = calculatePace(previousDistance, totalDistance, EFFECTIVESAMPLINGPERIOD / 1000);
@@ -134,8 +134,7 @@ public class ServiceGPS extends Service implements LocationListener, GoogleApiCl
             }
 
             tSample = System.currentTimeMillis() - tStart;  //time of last sample
-            //I am outputing totalDistance and tSample in the file for debug purposes but they are probably not needed.
-            String string = String.valueOf(averageLocation.getLatitude()) + "," + String.valueOf(averageLocation.getLongitude()) + "," + totalDistance + "," + tSample;
+            String string = String.valueOf(averageLocation.getLatitude()) + "," + String.valueOf(averageLocation.getLongitude());
             //String string = String.valueOf(averageLocation.getLatitude()) + "," + String.valueOf(averageLocation.getLongitude()) + "," + totalDistance + "," + String.valueOf(pace) + "," + tSample;
             saveText(string);
             coordinatesArray.add(averageLocation);  //building a dynamic arraylist of Location objects so that we can send it out if anything needs it.
@@ -154,7 +153,7 @@ public class ServiceGPS extends Service implements LocationListener, GoogleApiCl
 
     }
 
-    public ArrayList<Location> getArrayCoordinates() {
+    private ArrayList<Location> getArrayCoordinates() {
         return coordinatesArray;
     }
 
@@ -222,7 +221,7 @@ public class ServiceGPS extends Service implements LocationListener, GoogleApiCl
         super.onDestroy();
     }
 
-    private double calculatePace(double previousDist, double totalDist, int samplingPeriod) {
+    private double calculatePace(float previousDist, float totalDist, int samplingPeriod) {
         return 1/(((totalDist-previousDist)/samplingPeriod)*60); //minutes per km
     }
 
