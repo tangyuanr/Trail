@@ -22,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
     protected Button bikeButtonlink = null;
     protected Button historyButtonlink = null;
     protected Button runButtonlink = null;
+    protected Button mapButtonlink = null;
     DBHandler dbhandler;
 
 
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
         bikeButtonlink = (Button) findViewById(R.id.bikeButton);
         historyButtonlink = (Button) findViewById(R.id.historyButton);
         runButtonlink = (Button) findViewById(R.id.runButton);
+        mapButtonlink = (Button) findViewById(R.id.mapButton);
         dbhandler = new DBHandler(this);
 
 
@@ -62,6 +64,11 @@ public class MainActivity extends AppCompatActivity {
         historyButtonlink.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 goToHistoryActivity();
+            }
+        });
+        mapButtonlink.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                goToMapActivity();
             }
         });
 
@@ -100,6 +107,10 @@ public class MainActivity extends AppCompatActivity {
 
     void goToRunningActivity() {
         Intent intent = new Intent(MainActivity.this, runActivity.class);
+        startActivity(intent);
+    }
+    void goToMapActivity() {
+        Intent intent = new Intent(MainActivity.this, MapsActivity.class);
         startActivity(intent);
     }
 
