@@ -22,7 +22,6 @@ public class MainActivity extends AppCompatActivity {
     protected Button bikeButtonlink = null;
     protected Button historyButtonlink = null;
     protected Button runButtonlink = null;
-    protected Button mapButtonlink = null;
     DBHandler dbhandler;
 
 
@@ -39,7 +38,6 @@ public class MainActivity extends AppCompatActivity {
         bikeButtonlink = (Button) findViewById(R.id.bikeButton);
         historyButtonlink = (Button) findViewById(R.id.historyButton);
         runButtonlink = (Button) findViewById(R.id.runButton);
-        mapButtonlink = (Button) findViewById(R.id.mapButton);
         dbhandler = new DBHandler(this);
 
 
@@ -51,7 +49,14 @@ public class MainActivity extends AppCompatActivity {
 
         hikeButtonlink.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                goToHikeActivity();
+                if (dbhandler.isRouteTableEmpty("Hiking")) {
+                    Intent intent = new Intent(MainActivity.this, hikeActivity.class);
+                    startActivity(intent);
+                } else {
+                    Intent intent = new Intent(MainActivity.this, SelectRouteRunning.class);
+                    intent.putExtra("activityType", "Hiking");
+                    startActivity(intent);
+                }
             }
         });
 
@@ -66,27 +71,24 @@ public class MainActivity extends AppCompatActivity {
                 goToHistoryActivity();
             }
         });
-        mapButtonlink.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                goToMapActivity();
-            }
-        });
 
         runButtonlink.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                if (dbhandler.isRouteTableEmpty()) {goToRunningActivity();}
-                else {goToSelectRouteActivity();}
+                if (dbhandler.isRouteTableEmpty("Running")) {
+                    Intent intent = new Intent(MainActivity.this, runActivity.class);
+                    startActivity(intent);
+                }
+                else {
+                    Intent intent = new Intent(MainActivity.this, SelectRouteRunning.class);
+                    intent.putExtra("activityType", "Running");
+                    startActivity(intent);;
+                }
             }
         });
     }
 
     void goToTimerActivity() {
         Intent intent = new Intent(MainActivity.this, timerActivity.class);
-        startActivity(intent);
-    }
-
-    void goToHikeActivity() {
-        Intent intent = new Intent(MainActivity.this, hikeActivity.class);
         startActivity(intent);
     }
 
@@ -100,19 +102,6 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    void goToSelectRouteActivity() {
-        Intent intent = new Intent(MainActivity.this, SelectRouteRunning.class);
-        startActivity(intent);
-    }
-
-    void goToRunningActivity() {
-        Intent intent = new Intent(MainActivity.this, runActivity.class);
-        startActivity(intent);
-    }
-    void goToMapActivity() {
-        Intent intent = new Intent(MainActivity.this, MapsActivity.class);
-        startActivity(intent);
-    }
 
     //methods that checks and asks for permissions and set the global variable trail.GPSStatus
     void checkAndAskPermissions(final Trail trail) {
