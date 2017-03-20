@@ -115,7 +115,7 @@ public class runActivity extends AppCompatActivity {
                 //the user wants to save the route. it obviously means he wants to save the attempt with it as well. so we need to build both objects.
                 int totaltime = (int)RunningHelper.getTimeLastsample()/1000;
                 inputRouteName = input.getText().toString();
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
                 String currentDateandTime = sdf.format(new Date());
                 //instantiating a new route object with the constructor for the case in which we have no rowID yet
                 route = new Route(inputRouteName, activityType, RunningHelper.getTotalDistance(), totaltime, currentDateandTime, RunningHelper.getCoordinatesFileName() );
