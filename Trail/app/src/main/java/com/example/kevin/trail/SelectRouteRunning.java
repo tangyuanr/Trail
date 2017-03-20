@@ -25,12 +25,19 @@ public class SelectRouteRunning extends AppCompatActivity {
     ArrayList<Route> listOfRoutes = new ArrayList<Route>();     //list of Route objects that will contain all the routes
     ListView listview;
     private static final String TAG = "SelectRouteRunning";
+    private String activityType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_usage_example_listview);
         listview = (ListView) findViewById(R.id.usage_example_listview);
+
+        Intent receivedIntent = getIntent();
+        if(receivedIntent.hasExtra("activityType")) {
+            activityType = (String) receivedIntent.getSerializableExtra("activityType");
+        }
+
         //this inflates the "New Route" button at the end of the list
         Button newRouteButton = new Button(this);
         newRouteButton.setText("New Route");
@@ -38,7 +45,7 @@ public class SelectRouteRunning extends AppCompatActivity {
         newRouteButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Log.d(TAG, "User selects new route");
-                Intent intent = new Intent(SelectRouteRunning.this, runActivity.class);
+                Intent intent = new Intent(SelectRouteRunning.this, getClassIntent(activityType));
                 startActivity(intent);
             }
         });
@@ -50,7 +57,7 @@ public class SelectRouteRunning extends AppCompatActivity {
         super.onStart();
 
 
-        listOfRoutes = dbhandler.getRoutes("Running");    //get all the routes stored in the route table, activity type "Running". this is for the ActivityType column in the database.
+        listOfRoutes = dbhandler.getRoutes(activityType);    //get all the routes stored in the route table, activity type "Running". this is for the ActivityType column in the database.
         listview.setAdapter(new RouteAdapter(SelectRouteRunning.this, listOfRoutes)); // custom routeAdapter to bind the data to the listview
 
 
@@ -59,13 +66,20 @@ public class SelectRouteRunning extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Log.d(TAG, "User selects row #" + Long.toString(id));
-                Intent intent = new Intent(SelectRouteRunning.this, runActivity.class);
+                Intent intent = new Intent(SelectRouteRunning.this, getClassIntent(activityType));
                 Route selectedRoute = dbhandler.getRoute((int) id + 1); //fetch the Route object from the database, build the object so that we can send it to the runActivity
                 intent.putExtra("route", selectedRoute);    //serializable object that can be passed in intents
                 startActivity(intent);
             }
         });
 
+    }
+
+
+    private Class<?> getClassIntent(String activity) {
+        if(activity.equals("Running")) {return runActivity.class;}
+        else if(activity.equals("Hiking")) {return hikeActivity.class;}
+        else {return null;}
     }
 
 

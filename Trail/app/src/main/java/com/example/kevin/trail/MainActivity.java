@@ -49,7 +49,14 @@ public class MainActivity extends AppCompatActivity {
 
         hikeButtonlink.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                goToHikeActivity();
+                if (dbhandler.isRouteTableEmpty("Hiking")) {
+                    Intent intent = new Intent(MainActivity.this, hikeActivity.class);
+                    startActivity(intent);
+                } else {
+                    Intent intent = new Intent(MainActivity.this, SelectRouteRunning.class);
+                    intent.putExtra("activityType", "Hiking");
+                    startActivity(intent);
+                }
             }
         });
 
@@ -67,19 +74,21 @@ public class MainActivity extends AppCompatActivity {
 
         runButtonlink.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                if (dbhandler.isRouteTableEmpty()) {goToRunningActivity();}
-                else {goToSelectRouteActivity();}
+                if (dbhandler.isRouteTableEmpty("Running")) {
+                    Intent intent = new Intent(MainActivity.this, runActivity.class);
+                    startActivity(intent);
+                }
+                else {
+                    Intent intent = new Intent(MainActivity.this, SelectRouteRunning.class);
+                    intent.putExtra("activityType", "Running");
+                    startActivity(intent);;
+                }
             }
         });
     }
 
     void goToTimerActivity() {
         Intent intent = new Intent(MainActivity.this, timerActivity.class);
-        startActivity(intent);
-    }
-
-    void goToHikeActivity() {
-        Intent intent = new Intent(MainActivity.this, hikeActivity.class);
         startActivity(intent);
     }
 
@@ -93,15 +102,6 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    void goToSelectRouteActivity() {
-        Intent intent = new Intent(MainActivity.this, SelectRouteRunning.class);
-        startActivity(intent);
-    }
-
-    void goToRunningActivity() {
-        Intent intent = new Intent(MainActivity.this, runActivity.class);
-        startActivity(intent);
-    }
 
     //methods that checks and asks for permissions and set the global variable trail.GPSStatus
     void checkAndAskPermissions(final Trail trail) {

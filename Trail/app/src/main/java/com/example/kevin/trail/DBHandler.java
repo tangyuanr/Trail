@@ -171,9 +171,9 @@ public class DBHandler extends SQLiteOpenHelper {
     }
 
     // this checks if the Route table is empty. I
-    public boolean isRouteTableEmpty(){
+    public boolean isRouteTableEmpty(String activityType){
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " +TABLE_ROUTES, null);
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " +TABLE_ROUTES + " WHERE " + ACTIVITY_TYPE + " ='" + activityType + "'", null);
         if(cursor != null){
             cursor.moveToFirst();
             int count = cursor.getInt(0);
