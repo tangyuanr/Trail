@@ -220,8 +220,11 @@ public class DBHandler extends SQLiteOpenHelper {
                 Log.d(TAG, "read DATE OF ATTEMPT from TABLE ATTEMPTS");
                 expandList.put("DATE: "+placeholder, dataHolder);
 
-                if (cursor.isFirst())
+                if (cursor.isFirst()) {
+                    cursor.close();
+                    db.close();
                     break;
+                }
 
                 cursor.moveToPrevious();
             }
