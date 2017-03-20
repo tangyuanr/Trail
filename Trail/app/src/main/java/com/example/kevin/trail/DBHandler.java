@@ -69,7 +69,7 @@ public class DBHandler extends SQLiteOpenHelper {
     public ArrayList<Route> getRoutes(String activity) { //
         ArrayList<Route> routesList = new ArrayList<>();
         String query;
-        if(activity == "") {    //getRoutes("") will select all the routes
+        if(activity.equals("")) {    //getRoutes("") will select all the routes
             query = "SELECT * FROM " + TABLE_ROUTES;
             Log.d(TAG, query);
         }
