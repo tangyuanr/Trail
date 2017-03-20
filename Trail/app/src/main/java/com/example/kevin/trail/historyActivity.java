@@ -14,7 +14,7 @@ public class historyActivity extends AppCompatActivity {
     ExpandableListView expandableListView;
     ExpandableListAdapter expandableListAdapter;
     List<String> titles;
-    HashMap<String, List<String>> detail;
+    HashMap<String, List<String>> detail=new HashMap<String, List<String>>();
 
     DBHandler dbHandler=new DBHandler(this);
 
@@ -23,7 +23,8 @@ public class historyActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history);
 
-        /*expandableListView=(ExpandableListView)findViewById(R.id.historyListView);
+        expandableListView=(ExpandableListView)findViewById(R.id.historyListView);
+
         detail=dbHandler.getContent();
         titles=new ArrayList<String>(detail.keySet());
         expandableListAdapter=new ExpandableListAdapter(this, titles, detail);
@@ -65,7 +66,7 @@ public class historyActivity extends AppCompatActivity {
                 return false;
             }
         });
-*/
+
 
     }
 
