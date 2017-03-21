@@ -1,9 +1,11 @@
 package com.example.kevin.trail;
 
 import android.content.Intent;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -26,6 +28,8 @@ public class SelectRouteRunning extends AppCompatActivity {
     ListView listview;
     private static final String TAG = "SelectRouteRunning";
     private String activityType;
+    ActionBar actionBar;
+    private Menu menuActionBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +54,16 @@ public class SelectRouteRunning extends AppCompatActivity {
             }
         });
 
+        actionBar = getSupportActionBar();
+        actionBar.show();
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_selectroute, menu);
+        menuActionBar = menu;
+        return true;
     }
 
     @Override
@@ -70,6 +84,14 @@ public class SelectRouteRunning extends AppCompatActivity {
                 Route selectedRoute = dbhandler.getRoute((int) id + 1); //fetch the Route object from the database, build the object so that we can send it to the runActivity
                 intent.putExtra("route", selectedRoute);    //serializable object that can be passed in intents
                 startActivity(intent);
+            }
+        });
+
+        listview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int pos, long id) {
+
+                return true;
             }
         });
 
