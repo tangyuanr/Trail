@@ -112,21 +112,27 @@ public class DBHandler extends SQLiteOpenHelper {
         return addedID;
     }
 
+    public void deleteRoute(String routeName) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_ROUTES, ROUTE_NAME +  "='" + routeName + "'", null);
+    }
+
     //fetch one route
-    public Route getRoute(long rowid) {
+    public Route getRoute(String routeName) {
         Route route = null;
-        String query = "SELECT * FROM " + TABLE_ROUTES +" WHERE  rowid = " + rowid;
+        String query = "SELECT * FROM " + TABLE_ROUTES +" WHERE " + ROUTE_NAME + " ='" + routeName +"'";
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor routeCursor = db.rawQuery(query, null);
         try {
             while (routeCursor.moveToNext()) {
+                long rowID = routeCursor.getLong(0);
                 String nameOfRoute = routeCursor.getString(1);
                 String activityType = routeCursor.getString(2);
                 float totalDistance = routeCursor.getFloat(3);
                 int bestTime = routeCursor.getInt(4);
                 String dateBestTime = routeCursor.getString(5);
                 String filename_coordinates = routeCursor.getString(6);
-                route = new Route(rowid, nameOfRoute, activityType, totalDistance, bestTime, dateBestTime, filename_coordinates);
+                route = new Route(rowID, nameOfRoute, activityType, totalDistance, bestTime, dateBestTime, filename_coordinates);
             }
         } finally {
             routeCursor.close();

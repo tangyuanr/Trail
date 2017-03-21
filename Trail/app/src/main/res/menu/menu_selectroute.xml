@@ -5,6 +5,8 @@
         android:id="@+id/deleteButton"
         android:icon="@drawable/ic_deletebuttonwhite"
         app:showAsAction="ifRoom"
+        android:visible="false"
+        android:onClick="onDeleteAction"
         android:title="Delete">
     </item>
 </menu>
