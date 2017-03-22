@@ -111,7 +111,7 @@ public class Route implements Serializable { //needed to be able to pass it betw
         return routeName + "\n Best time:\n" + bestTimeString +"\n on " + dateBestTime; //we can build up the returned string there.
     }
 
-    private ArrayList<Location> buildLocationArray() {
+    public ArrayList<Location> buildLocationArray() {
         ArrayList<Location> arrayLocation = new ArrayList<>();
         FileInputStream is;
         BufferedReader reader;

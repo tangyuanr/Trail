@@ -185,4 +185,29 @@ public class DBHandler extends SQLiteOpenHelper {
         return true;
     }
 
+    public String getRouteCoordinates(long rowid) {
+        Route route = null;
+        String coordinates="";
+        String query = "SELECT * FROM " + TABLE_ROUTES +" WHERE  rowid = " + rowid;
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor routeCursor = db.rawQuery(query, null);
+        try {
+            while (routeCursor.moveToNext()) {
+
+                String filename_coordinates = routeCursor.getString(6);
+                coordinates = filename_coordinates;
+            }
+        } finally {
+            routeCursor.close();
+        }
+        db.close();
+        return coordinates;
+
+    }
+
+
+
+
+
+
 }
