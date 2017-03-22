@@ -19,6 +19,7 @@ import java.util.List;
 public class DBHandler extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION=6;
     private static final String DATABASE_NAME="healthData";
+    private boolean isEmpty=true;
 
 
 
@@ -52,7 +53,7 @@ public class DBHandler extends SQLiteOpenHelper {
         Log.e(TAG, CREATE_ROUTE_TABLE);
         db.execSQL(CREATE_ROUTE_TABLE);
         String CREATE_ATTEMPTS_TABLE="CREATE TABLE "+TABLE_ATTEMPTS+" ("+ATTEMPT_ID+" INTEGER PRIMARY KEY AUTOINCREMENT, "+ROUTE_ID+" INT, "+TOTAL_TIME + " INT, "
-                + DATE_OF_ATTEMPT + " TEXT, " + MAP_SCREENSHOT + " TEXT)";
+                + DATE_OF_ATTEMPT + " TEXT, " + ROUTE_NAME + " TEXT, " + MAP_SCREENSHOT + " TEXT)";
         Log.e(TAG, CREATE_ATTEMPTS_TABLE);
         db.execSQL(CREATE_ATTEMPTS_TABLE);
     }
@@ -150,6 +151,7 @@ public class DBHandler extends SQLiteOpenHelper {
         contentValues.put(TOTAL_TIME, attempt.getTotalTimeTaken());
         contentValues.put(DATE_OF_ATTEMPT, attempt.getDateOfAttempt());
         contentValues.put(MAP_SCREENSHOT,attempt.getFileNameStaticMapScreenshot());
+        contentValues.put(ROUTE_NAME, attempt.getRoute().getRouteName());
         long addedID = db.insert(TABLE_ATTEMPTS, null, contentValues);
         db.close();
         compareBestTime(attempt);
@@ -189,6 +191,53 @@ public class DBHandler extends SQLiteOpenHelper {
             cursor.close();
         }
         return true;
+    }
+
+    //get general info of all attempts from ATTEMPTS table
+    //data will be read in descending order, so that the display order goes from most recent to oldest
+    public HashMap<String, List<String>> getContent(){
+        HashMap<String, List<String>> expandList = new HashMap<String, List<String>>();
+        String placeholder;
+
+        SQLiteDatabase db=this.getReadableDatabase();
+        String selectQuery = "SELECT * FROM "+TABLE_ATTEMPTS;
+        Log.e(TAG, selectQuery);
+
+        Cursor cursor=db.rawQuery(selectQuery,null);
+
+        //read data in reverse order
+        if (cursor.moveToLast()) {
+            while (true) {
+                List<String> dataHolder = new ArrayList<String>();
+                placeholder = cursor.getString(cursor.getColumnIndex(ROUTE_NAME));
+                Log.d(TAG, "read ROUTE NAME from TABLE ATTEMPTS: " + placeholder);
+                dataHolder.add("ROUTE:      " + placeholder);
+
+                placeholder = cursor.getString(cursor.getColumnIndex(TOTAL_TIME));
+                Log.d(TAG, "read TOTAL TIME from TABLE ATTEMPTS: " + placeholder);
+                dataHolder.add("TOTAL TIME: " + placeholder);
+
+                placeholder = cursor.getString(cursor.getColumnIndex(MAP_SCREENSHOT));
+                Log.d(TAG, "read MAP SCREENSHOT from TABLE ATTEMPTS: " + placeholder);
+                dataHolder.add("MAP SCREENSHOT url (temporary) " + placeholder);
+
+                //when adding row data is finished, name hashmap key with date
+                placeholder = cursor.getString(cursor.getColumnIndex(DATE_OF_ATTEMPT));
+                Log.d(TAG, "read DATE OF ATTEMPT from TABLE ATTEMPTS");
+                expandList.put("DATE: "+placeholder, dataHolder);
+
+                if (cursor.isFirst()) {
+                    cursor.close();
+                    db.close();
+                    break;
+                }
+
+                cursor.moveToPrevious();
+            }
+        }
+
+
+        return expandList;
     }
 
 }

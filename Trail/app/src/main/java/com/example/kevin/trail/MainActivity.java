@@ -22,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
     protected Button bikeButtonlink = null;
     protected Button historyButtonlink = null;
     protected Button runButtonlink = null;
+    protected Button sensorButtonlink=null;
     DBHandler dbhandler;
 
 
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
         bikeButtonlink = (Button) findViewById(R.id.bikeButton);
         historyButtonlink = (Button) findViewById(R.id.historyButton);
         runButtonlink = (Button) findViewById(R.id.runButton);
+        sensorButtonlink=(Button)findViewById(R.id.sensorButton);
         dbhandler = new DBHandler(this);
 
 
@@ -85,6 +87,12 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        sensorButtonlink.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view){
+                goToSensorActivity();
+            }
+        });
     }
 
     void goToTimerActivity() {
@@ -102,6 +110,11 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+
+    void goToSensorActivity(){
+        Intent intent = new Intent(MainActivity.this, HRActivity.class);
+        startActivity(intent);
+    }
 
     //methods that checks and asks for permissions and set the global variable trail.GPSStatus
     void checkAndAskPermissions(final Trail trail) {

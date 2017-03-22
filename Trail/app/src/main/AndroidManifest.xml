@@ -7,6 +7,8 @@
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 
     <application
         android:name=".Trail"
@@ -58,6 +60,10 @@
             android:label="Select a Route"
             android:screenOrientation="portrait">
         </activity>
+        <activity
+            android:name=".HRActivity"
+            android:label="HxM Sensor"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>
