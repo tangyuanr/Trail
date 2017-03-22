@@ -1,7 +1,9 @@
 package com.example.kevin.trail;
 
+import android.Manifest;
 import android.app.Service;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Location;
 
 import com.google.android.gms.location.LocationListener;
@@ -10,6 +12,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -64,7 +67,6 @@ public class ServiceGPS extends Service implements LocationListener, GoogleApiCl
     ArrayList<Location> coordinatesArray = new ArrayList<>();
 
 
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -74,12 +76,12 @@ public class ServiceGPS extends Service implements LocationListener, GoogleApiCl
         googleApi = new GoogleApiClient.Builder(this).addApi(LocationServices.API).addConnectionCallbacks(this).addOnConnectionFailedListener(this).build();
         intent_sender = new Intent(BROADCAST_ACTION);
         //configure output filename
-        EFFECTIVESAMPLINGPERIOD = SUBSAMPLINGPERIOD*numberOfSamplePerAverage;
+        EFFECTIVESAMPLINGPERIOD = SUBSAMPLINGPERIOD * numberOfSamplePerAverage;
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
         String currentDateandTime = sdf.format(new Date());
-        Log.d(TAG, "getting current date and time: "+currentDateandTime);
-        filename = String.valueOf(EFFECTIVESAMPLINGPERIOD / 1000) + currentDateandTime +".TXT";
-        Log.d(TAG,"forming output filename: "+filename);
+        Log.d(TAG, "getting current date and time: " + currentDateandTime);
+        filename = String.valueOf(EFFECTIVESAMPLINGPERIOD / 1000) + currentDateandTime + ".TXT";
+        Log.d(TAG, "forming output filename: " + filename);
 
 
     }
@@ -95,6 +97,16 @@ public class ServiceGPS extends Service implements LocationListener, GoogleApiCl
 
     @Override
     public void onConnected(Bundle bundle) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
         PendingResult<Status> pendingResult = LocationServices.FusedLocationApi.requestLocationUpdates(googleApi, locationRequestQuery, this);
     }
 
