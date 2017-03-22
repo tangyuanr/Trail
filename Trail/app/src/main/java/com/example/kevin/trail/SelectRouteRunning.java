@@ -1,9 +1,12 @@
 package com.example.kevin.trail;
 
 import android.content.Intent;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -26,6 +29,10 @@ public class SelectRouteRunning extends AppCompatActivity {
     ListView listview;
     private static final String TAG = "SelectRouteRunning";
     private String activityType;
+    ActionBar actionBar;
+    private Menu menuActionBar;
+    MenuItem deleteButton;
+    String routeNameSelected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +57,27 @@ public class SelectRouteRunning extends AppCompatActivity {
             }
         });
 
+       // actionBar = getSupportActionBar();
+        //actionBar.show();
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_selectroute, menu);
+        menuActionBar = menu;
+        deleteButton = menuActionBar.findItem(R.id.deleteButton);
+        return true;
+
+    }
+
+    public void onDeleteAction(MenuItem mi) {
+        if(!(routeNameSelected==null)) {
+            dbhandler.deleteRoute(routeNameSelected);
+            routeNameSelected = null;
+            deleteButton.setVisible(false);
+            onStart();
+        }
     }
 
     @Override
@@ -65,11 +93,20 @@ public class SelectRouteRunning extends AppCompatActivity {
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.d(TAG, "User selects row #" + Long.toString(id));
+                Route selectedRoute = (Route) parent.getAdapter().getItem(position);
                 Intent intent = new Intent(SelectRouteRunning.this, getClassIntent(activityType));
-                Route selectedRoute = dbhandler.getRoute((int) id + 1); //fetch the Route object from the database, build the object so that we can send it to the runActivity
+                Log.d(TAG, selectedRoute.getRouteName());
                 intent.putExtra("route", selectedRoute);    //serializable object that can be passed in intents
                 startActivity(intent);
+            }
+        });
+
+        listview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                deleteButton.setVisible(true);
+                routeNameSelected = ((Route) parent.getAdapter().getItem(position)).getRouteName();
+                return true;
             }
         });
 
