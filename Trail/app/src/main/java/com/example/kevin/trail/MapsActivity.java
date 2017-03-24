@@ -93,11 +93,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         ArrayList<Location> latestRouteLocation =null;  /////contains array of coordinate of latest route
              ////fetching the latest route name
 
+                if(db.getRoutes("").size()!=0) {
 
-
-                 latestRouteLocation = db.getRoutes("").get(db.getRoutes("").size()-1).buildLocationArray();
-                 Toast.makeText(MapsActivity.this,"last route fetched", Toast.LENGTH_LONG).show();
-
+                    latestRouteLocation = db.getRoutes("").get(db.getRoutes("").size() - 1).buildLocationArray();
+                    Toast.makeText(MapsActivity.this, "last route fetched", Toast.LENGTH_LONG).show();
+                }
 
         ArrayList<LatLng> coordList = new ArrayList<LatLng>();
 
@@ -112,7 +112,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }                                                             ///creating a polyline
 
         }
-        if(coordList!=null) {
+        if(coordList.size()!=0) {
             mMap.addMarker(new MarkerOptions().position(coordList.get(0)).title("route starting point "));
             mMap.moveCamera(CameraUpdateFactory.newLatLng(coordList.get(0)));
         }
