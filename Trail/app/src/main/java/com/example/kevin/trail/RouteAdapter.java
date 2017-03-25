@@ -35,6 +35,7 @@ public class RouteAdapter extends ArrayAdapter<Route> {
         inflater = LayoutInflater.from(context);
     }
 
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (null == convertView) {
