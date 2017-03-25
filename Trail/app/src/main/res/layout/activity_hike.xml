@@ -21,11 +21,28 @@
         android:orientation="vertical"
         android:background="#CC000000">
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/startStopHiking"
-            android:text="Start logging route"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="visible">
+
+            <TextView
+                android:id="@+id/timerTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_toRightOf="@+id/startStopHiking"
+                android:hint="00:00"
+                android:textAlignment="center"
+                android:textColor="@color/common_google_signin_btn_text_dark_default"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/startStopHiking"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Start logging route" />
+        </RelativeLayout>
 
         <TextView
             android:layout_width="wrap_content"

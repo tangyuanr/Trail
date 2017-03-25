@@ -3,6 +3,7 @@ package com.example.kevin.trail;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -30,6 +31,26 @@ public class runActivity extends AppCompatActivity {
     DBHandler dbHandler = new DBHandler(this);
     ServiceGPS servicegps = new ServiceGPS();
 
+    TextView timerTextViewL;
+    TextView recordedTextViewL;
+    long startTime= 0;
+
+    Handler timerHandler = new Handler();
+    Runnable timerRunnable = new Runnable() {
+        @Override
+        public void run() {
+                long millis = System.currentTimeMillis() - startTime;
+                int seconds = (int) (millis / 1000);
+                int minutes = seconds / 60;
+                seconds = seconds % 60;
+
+                timerTextViewL.setText(String.format("%d:%02d", minutes, seconds));
+
+                timerHandler.postDelayed(this, 500);
+        }
+    };
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +69,9 @@ public class runActivity extends AppCompatActivity {
         final Intent intent = new Intent(this, ServiceGPS.class);
         RunningHelper = new activityHelper(runActivity.this, 0); //instantiate a running helper object, the int parameter is the type of activity. 0 for running.
 
+        timerTextViewL = (TextView) findViewById(R.id.timerTextView);
+        //final Button restButton= (Button) findViewById(R.id.restartB);
+        recordedTextViewL = (TextView) findViewById(R.id.recordedTextView);
 
         startStopButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -78,8 +102,19 @@ public class runActivity extends AppCompatActivity {
                     }
                 }
 
+                Button  startStopButton= (Button) v;
+                if (startStopButton.getText().equals("stop")){
+                    timerHandler.removeCallbacks(timerRunnable);
+                    recordedTextViewL.setText(timerTextViewL.getText());
+                    startStopButton.setText("Start");
+                }else if (startStopButton.getText().equals("Start")){
+                    startTime = System.currentTimeMillis();
+                    timerHandler.postDelayed(timerRunnable, 0);
+                    startStopButton.setText("stop");
+                }
             }
         });
+
     }
 
 
@@ -140,6 +175,14 @@ public class runActivity extends AppCompatActivity {
 
         builder.show();
 
+    }
+
+    public void onPause(){
+        super.onPause();
+    }
+
+    public void onResume(){
+        super.onResume();
     }
 
     @Override

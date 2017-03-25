@@ -11,14 +11,33 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.kevin.trail.runActivity">
 
+    <TextView
+        android:id="@+id/recordedTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/StartStop"
+        android:layout_alignRight="@+id/StartStop"
+        android:layout_below="@+id/latestpace"
+        android:layout_marginTop="19dp"
+        android:hint="Last recorded" />
+
+    <TextView
+        android:id="@+id/timerTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/StartStop"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="60dp"
+        android:hint="00:00" />
+
     <Button
-        android:text="Start/Stop"
+        android:id="@+id/StartStop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="137dp"
-        android:id="@+id/StartStop"/>
+        android:text="Start" />
 
     <TextView
         android:text="0"

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.icu.text.SimpleDateFormat;
 import android.location.Location;
+import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -47,12 +48,28 @@ public class hikeActivity extends AppCompatActivity implements OnMapReadyCallbac
     LocationRequest locrequest;
     GoogleApiClient googleAPIclient;
 
+    TextView timerTextViewL;
+    long startTime= 0;
+    Handler timerHandler = new Handler();
+    Runnable timerRunnable = new Runnable() {
+        @Override
+        public void run() {
+            long millis = System.currentTimeMillis() - startTime;
+            int seconds = (int) (millis / 1000);
+            int minutes = seconds / 60;
+            seconds = seconds % 60;
+            timerTextViewL.setText(String.format("%d:%02d", minutes, seconds));
+            timerHandler.postDelayed(this, 500);
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_hike);
+
         startStopButton = (Button) findViewById(R.id.startStopHiking);
         routeNameTextView = (TextView) findViewById(R.id.routeNameHiking);
         Intent receivedIntent = getIntent();    //retrieve the intent that was sent to check if it has a Route object
@@ -64,6 +81,7 @@ public class hikeActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapFrag = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFrag.getMapAsync(this);
 
+        timerTextViewL = (TextView) findViewById(R.id.timerTextView);
 
         startStopButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -71,13 +89,18 @@ public class hikeActivity extends AppCompatActivity implements OnMapReadyCallbac
                     logging = true;
                     HikingHelper = new activityHelper(hikeActivity.this, 1);
                     HikingHelper.startActivity(null);
+                    startTime = System.currentTimeMillis();
+                    timerHandler.postDelayed(timerRunnable, 0);
                     startStopButton.setText("Stop logging");
                 }
                 else {
                     NewRouteDialog();
                     logging = false;
+                    timerHandler.removeCallbacks(timerRunnable);
+                    startStopButton.setText("Start logging route");
 
                 }
+
             }
         });
     }
