@@ -26,6 +26,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
@@ -46,6 +47,10 @@ public class hikeActivity extends AppCompatActivity implements OnMapReadyCallbac
     SupportMapFragment mapFrag;
     LocationRequest locrequest;
     GoogleApiClient googleAPIclient;
+
+    Polyline routeLine=null;
+    boolean firstSample=true;
+    ArrayList<LatLng> locationArray=new ArrayList<LatLng>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -168,6 +173,12 @@ public class hikeActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onLocationChanged(Location location) {
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        locationArray.add(latLng);
+        if (!firstSample){
+            routeLine.remove();
+        }
+        routeLine=googleMAP.addPolyline(new PolylineOptions().addAll(locationArray).width(8).color(Color.RED));
+
         googleMAP.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
     }
 
