@@ -66,8 +66,9 @@ public class activityHelper {
     }
 
     private String getDate() {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
         String currentDateandTime = sdf.format(new Date());
+        Log.d(TAG, "getting current date and time: start of Attempt");
         return currentDateandTime;
     }
 

@@ -23,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
     protected Button historyButtonlink = null;
     protected Button runButtonlink = null;
     protected Button mapButtonlink = null;
+    protected Button sensorButtonlink=null;
     DBHandler dbhandler;
 
 
@@ -40,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
         historyButtonlink = (Button) findViewById(R.id.historyButton);
         runButtonlink = (Button) findViewById(R.id.runButton);
         mapButtonlink = (Button) findViewById(R.id.mapButton);
+        sensorButtonlink=(Button)findViewById(R.id.sensorButton);
         dbhandler = new DBHandler(this);
 
 
@@ -51,7 +53,14 @@ public class MainActivity extends AppCompatActivity {
 
         hikeButtonlink.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                goToHikeActivity();
+                if (dbhandler.isRouteTableEmpty("Hiking")) {
+                    Intent intent = new Intent(MainActivity.this, hikeActivity.class);
+                    startActivity(intent);
+                } else {
+                    Intent intent = new Intent(MainActivity.this, SelectRouteRunning.class);
+                    intent.putExtra("activityType", "Hiking");
+                    startActivity(intent);
+                }
             }
         });
 
@@ -74,19 +83,27 @@ public class MainActivity extends AppCompatActivity {
 
         runButtonlink.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                if (dbhandler.isRouteTableEmpty()) {goToRunningActivity();}
-                else {goToSelectRouteActivity();}
+                if (dbhandler.isRouteTableEmpty("Running")) {
+                    Intent intent = new Intent(MainActivity.this, runActivity.class);
+                    startActivity(intent);
+                }
+                else {
+                    Intent intent = new Intent(MainActivity.this, SelectRouteRunning.class);
+                    intent.putExtra("activityType", "Running");
+                    startActivity(intent);;
+                }
+            }
+        });
+
+        sensorButtonlink.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view){
+                goToSensorActivity();
             }
         });
     }
 
     void goToTimerActivity() {
         Intent intent = new Intent(MainActivity.this, timerActivity.class);
-        startActivity(intent);
-    }
-
-    void goToHikeActivity() {
-        Intent intent = new Intent(MainActivity.this, hikeActivity.class);
         startActivity(intent);
     }
 
@@ -100,13 +117,9 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    void goToSelectRouteActivity() {
-        Intent intent = new Intent(MainActivity.this, SelectRouteRunning.class);
-        startActivity(intent);
-    }
 
-    void goToRunningActivity() {
-        Intent intent = new Intent(MainActivity.this, runActivity.class);
+    void goToSensorActivity(){
+        Intent intent = new Intent(MainActivity.this, HRActivity.class);
         startActivity(intent);
     }
     void goToMapActivity() {
