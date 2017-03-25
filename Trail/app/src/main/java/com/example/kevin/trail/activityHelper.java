@@ -33,6 +33,9 @@ public class activityHelper {
     private int sample;
     float totalDistance = 0;
     double pace = 0;
+    private double currentLongitude = 0;
+    private double currentLatitude = 0;
+    Location currentLocation = null;
     private long tLastSample = 0;
     boolean mBounded;
     Route route;
@@ -53,6 +56,13 @@ public class activityHelper {
 
     }
 
+    public double getCurrentLongitude() {
+        return currentLongitude;
+    }
+
+    public double getCurrentLatitude() {
+        return currentLatitude;
+    }
 
     public void stopActivity() {
 
@@ -120,6 +130,8 @@ public class activityHelper {
     };
 
     private void updateData(Intent intent) {
+        currentLatitude = intent.getDoubleExtra("current_latitude", 0);
+        currentLongitude = intent.getDoubleExtra("current_longitude", 0);
         totalDistance = intent.getFloatExtra("distance", 1);
         pace = intent.getDoubleExtra("pace", 0);
         tLastSample = intent.getLongExtra("time_of_last_sample",0);

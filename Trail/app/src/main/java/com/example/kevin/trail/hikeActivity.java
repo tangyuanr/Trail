@@ -26,6 +26,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
@@ -37,6 +38,9 @@ public class hikeActivity extends AppCompatActivity implements OnMapReadyCallbac
     Route route = null;
     Attempt attempt = null;
     activityHelper HikingHelper;
+    private  double  currentLongitude = 0;
+    private double currentLatitude = 0;
+    ArrayList<LatLng> locationArray = new ArrayList<>();
     private Button startStopButton;
     private TextView routeNameTextView;
     private boolean logging = false;
@@ -46,6 +50,8 @@ public class hikeActivity extends AppCompatActivity implements OnMapReadyCallbac
     SupportMapFragment mapFrag;
     LocationRequest locrequest;
     GoogleApiClient googleAPIclient;
+    Polyline routeLine = null;
+    int countNumber = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +67,15 @@ public class hikeActivity extends AppCompatActivity implements OnMapReadyCallbac
             routeNameTextView.setText(route.getRouteName());
             Log.d(TAG, "Route object received by hikeActivity");
         }
+
+
+
+        final Intent intent = new Intent(this, ServiceGPS.class);
+        HikingHelper = new activityHelper(hikeActivity.this, 0);
+
+
+
+
         mapFrag = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFrag.getMapAsync(this);
 
@@ -135,7 +150,6 @@ public class hikeActivity extends AppCompatActivity implements OnMapReadyCallbac
         buildGoogleApiClient();
         googleMAP.setMyLocationEnabled(true);
         if(!(route==null)) {addPolyLine();}
-
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -157,6 +171,41 @@ public class hikeActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
+
+
+    //thread that receives current location updates from the service
+//    private void startUpdateStatsThread() {
+//        Thread th = new Thread(new Runnable() {
+//
+//            public void run() {
+//                while (logging == true) {
+//                    runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            currentLatitude = HikingHelper.getCurrentLatitude();
+//                            currentLongitude = HikingHelper.getCurrentLongitude();
+//                            locationArray.add(new LatLng(currentLatitude, currentLongitude));
+//
+//
+//                        }
+//                    });
+//                    try {
+//                        Thread.sleep(15000);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
+//        });
+//        th.start();
+//    }
+
+
+
+
+
+
+
     @Override
     public void onConnectionSuspended(int i) {
     }
@@ -168,7 +217,13 @@ public class hikeActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onLocationChanged(Location location) {
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        locationArray.add(latLng);
+        if(countNumber > 0) {
+            routeLine.remove();
+        }
+        routeLine = googleMAP.addPolyline(new PolylineOptions().addAll(locationArray).width(8).color(Color.BLUE));
         googleMAP.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
+        countNumber++;
     }
 
     @Override
@@ -177,5 +232,10 @@ public class hikeActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (logging)// if logging is still true
             HikingHelper.stopActivity();
     }
+
+
+
+
+
 
 }

@@ -43,6 +43,7 @@ public class ServiceGPS extends Service implements LocationListener, GoogleApiCl
     LocationRequest locationRequestQuery;
     GoogleApiClient googleApi;
     Location currentLocation;
+    Location location =null;
     private final IBinder mBinder = new LocalService();
     private int SUBSAMPLINGPERIOD = 1000; //in milliseconds
     private final int numberOfSamplePerAverage = 10;
@@ -183,14 +184,29 @@ public class ServiceGPS extends Service implements LocationListener, GoogleApiCl
             packageUpdates();
             handler.postDelayed(this, 10000); // 5 seconds
         }
-    };
+
+    //    private Hiking sendUpdates = new Hiking() {
+    //        public void hike() {
+    //            packageUpdates();
+    //            handler.postDelayed(this, 10000); // 10 seconds
+        //       }
+
+
+
+        };
 
     private void packageUpdates() {
 
+        location = coordinatesArray.get(coordinatesArray.size() - 1);
+        double currentLatitude = location.getLatitude();
+        double currentLongitude = location.getLongitude();
+        intent_sender.putExtra("current_latitude", currentLatitude);
+        intent_sender.putExtra("current_longitude", currentLongitude);
         intent_sender.putExtra("distance", totalDistance);
         intent_sender.putExtra("pace", pace);
         intent_sender.putExtra("time_of_last_sample", tSample);
         intent_sender.putExtra("number of samples", sample);
+
         sendBroadcast(intent_sender);
         Log.d(TAG, "entered PackageUpdates");
     }

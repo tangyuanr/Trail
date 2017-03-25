@@ -27,6 +27,12 @@
             android:id="@+id/startStopHiking"
             android:text="Start logging route"/>
 
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/stopPath"
+            android:text="Arrived to destination"/>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
