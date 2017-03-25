@@ -82,6 +82,7 @@ public class HRActivity extends AppCompatActivity implements IHeartRateReciever{
         }
         connectButton.setEnabled(true);
         disconnectButton.setEnabled(false);
+        connectionStatus.setText("Disconnected from HxM");
         hrText.setText("Heart rate will appear here");
     }
 
