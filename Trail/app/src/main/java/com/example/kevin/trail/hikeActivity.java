@@ -1,5 +1,7 @@
 package com.example.kevin.trail;
 
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -9,6 +11,7 @@ import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -50,6 +53,7 @@ public class hikeActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     TextView timerTextViewL;
     long startTime= 0;
+    int noti_id=1;
     Handler timerHandler = new Handler();
     Runnable timerRunnable = new Runnable() {
         @Override
@@ -59,6 +63,7 @@ public class hikeActivity extends AppCompatActivity implements OnMapReadyCallbac
             int minutes = seconds / 60;
             seconds = seconds % 60;
             timerTextViewL.setText(String.format("%d:%02d", minutes, seconds));
+            notificationOp(noti_id, String.format("%d:%02d", minutes, seconds), String.format("%.2f", HikingHelper.getTotalDistance()));
             timerHandler.postDelayed(this, 500);
         }
     };
@@ -103,6 +108,15 @@ public class hikeActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             }
         });
+    }
+
+    public void notificationOp(int id, String time, String distance){
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+        builder.setSmallIcon(R.mipmap.ic_launcher);
+        builder.setContentTitle("Trail : Hiking");
+        builder.setContentText("Time: " + timerTextViewL.getText()+ ", Distance : " + HikingHelper.getTotalDistance());
+        NotificationManager NM = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        NM.notify(id,builder.build());
     }
 
     private void NewRouteDialog() {

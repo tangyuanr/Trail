@@ -1,12 +1,15 @@
 package com.example.kevin.trail;
 
 
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -35,6 +38,8 @@ public class runActivity extends AppCompatActivity {
     TextView recordedTextViewL;
     long startTime= 0;
 
+    int noti_id = 1;
+
     Handler timerHandler = new Handler();
     Runnable timerRunnable = new Runnable() {
         @Override
@@ -45,7 +50,7 @@ public class runActivity extends AppCompatActivity {
                 seconds = seconds % 60;
 
                 timerTextViewL.setText(String.format("%d:%02d", minutes, seconds));
-
+            notificationOp(noti_id, String.format("%d:%02d", minutes, seconds), RunningHelper.getPaceFormatted(), String.format("%.2f", RunningHelper.getTotalDistance()));
                 timerHandler.postDelayed(this, 500);
         }
     };
@@ -117,7 +122,14 @@ public class runActivity extends AppCompatActivity {
 
     }
 
-
+    public void notificationOp(int id, String time, String pace, String distance){
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+        builder.setSmallIcon(R.mipmap.ic_launcher);
+        builder.setContentTitle("Trail : Running");
+        builder.setContentText("Time: " + timerTextViewL.getText()+ ", Pace: "+ latestPace.getText() + ", Distance : " + RunningHelper.getTotalDistance());
+        NotificationManager NM = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        NM.notify(id,builder.build());
+    }
     private void SaveAttemptDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Save attempt?");
