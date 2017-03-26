@@ -3,6 +3,8 @@ package com.example.kevin.trail;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -16,7 +18,7 @@ import android.widget.Toast;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class runActivity extends AppCompatActivity {
+public class runActivity extends AppCompatActivity implements IHeartRateReciever{
     private boolean logging = false;
     activityHelper RunningHelper;
     TextView totalDistance;
@@ -29,6 +31,10 @@ public class runActivity extends AppCompatActivity {
 
     DBHandler dbHandler = new DBHandler(this);
     ServiceGPS servicegps = new ServiceGPS();
+
+    protected TextView hrTextView=null;
+    int heartRate=0;
+    HRSensorHandler hrHandler;
 
 
     @Override
@@ -43,11 +49,12 @@ public class runActivity extends AppCompatActivity {
         }
 
         Button startStopButton = (Button) findViewById(R.id.StartStop);
+        hrTextView=(TextView)findViewById(R.id.hrText);
         totalDistance = (TextView) findViewById(R.id.totalDistance);
         latestPace = (TextView) findViewById(R.id.latestpace);
         final Intent intent = new Intent(this, ServiceGPS.class);
         RunningHelper = new activityHelper(runActivity.this, 0); //instantiate a running helper object, the int parameter is the type of activity. 0 for running.
-
+        hrHandler=new HRSensorHandler(this);
 
         startStopButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -58,6 +65,8 @@ public class runActivity extends AppCompatActivity {
                     logging = true; //boolean so that the same button acts as an on/off toggle
                     Toast.makeText(runActivity.this, "You've started running", Toast.LENGTH_SHORT).show();
                     startUpdateStatsThread(); //start the thread that receives updates from the service
+                    //activate heart rate sensor
+                    connectClicked();
                 } else {
                     if (RunningHelper.getCurrentNumberOfSamples() < 1) {
                         logging = false;
@@ -76,6 +85,7 @@ public class runActivity extends AppCompatActivity {
                         showStatsDialog(timelastSample, FinalDistance);  //show stats dialog
                         logging = false;
                     }
+                    disconnectClicked();
                 }
 
             }
@@ -190,4 +200,38 @@ public class runActivity extends AppCompatActivity {
                 });
         alertDialog.show();
     }
+
+
+    @Override
+    public void heartRateReceived(int heartRate){
+        Message msg=new Message();
+        msg.getData().putInt("HeartRate", heartRate);
+        newHandler.sendMessage(msg);
+    }
+    //connect with HxM HR Sensor
+    private void connectClicked(){
+        try{
+            hrHandler.Connect();
+            hrHandler.setReciver(runActivity.this);
+        }catch (RuntimeException e) {
+            hrTextView.setText("error connecting to HxM");
+        }
+    }
+
+    //disconnect with HxM HR Sensor
+    private void disconnectClicked(){
+        try{
+            hrHandler.setReciver(null);
+            hrHandler.Disconnect();
+        }catch (RuntimeException e){
+            hrTextView.setText("error disconnecting from HxM");
+        }
+    }
+
+    final Handler newHandler=new Handler(){
+        public void handleMessage(Message msg){
+            heartRate=msg.getData().getInt("HeartRate");
+            hrTextView.setText(Integer.toString(heartRate));
+        }
+    };
 }
