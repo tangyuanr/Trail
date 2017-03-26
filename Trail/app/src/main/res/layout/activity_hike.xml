@@ -39,6 +39,18 @@
             android:layout_height="wrap_content"
             android:text="Distance traveled: (not implemented yet)"
             android:textColor="#FFF"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Heart rate (BPM):"
+            android:textColor="#FFF"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:id="@+id/heartRateText"
+            android:textColor="#FFF"/>
         <ImageView
             android:id="@+id/imageViewFavorites"
             android:layout_width="wrap_content"

@@ -33,8 +33,9 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
     ServiceGPS servicegps = new ServiceGPS();
 
     protected TextView hrTextView=null;
-    int heartRate=0;
+    private int heartRate=0;
     HRSensorHandler hrHandler;
+    private int totalBPM=0;
 
 
     @Override
@@ -63,10 +64,10 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                     RunningHelper.startActivity(route); //when the user clicks start, running activity (activity in the traditional sense, not android sense) starts and data starts being collected.
                     Log.d(TAG, "RunningHelper.startActivity(route) called");
                     logging = true; //boolean so that the same button acts as an on/off toggle
-                    Toast.makeText(runActivity.this, "You've started running", Toast.LENGTH_SHORT).show();
-                    startUpdateStatsThread(); //start the thread that receives updates from the service
                     //activate heart rate sensor
                     connectClicked();
+                    Toast.makeText(runActivity.this, "You've started running", Toast.LENGTH_SHORT).show();
+                    startUpdateStatsThread(); //start the thread that receives updates from the service
                 } else {
                     if (RunningHelper.getCurrentNumberOfSamples() < 1) {
                         logging = false;
@@ -156,7 +157,11 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
     protected void onDestroy() {
         super.onDestroy();
         if (logging)// if logging is still true
+        {
             RunningHelper.stopActivity();
+            //disconnect the HxM
+            disconnectClicked();
+        }
     }
 
 
@@ -171,6 +176,10 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                         public void run() {
                             totalDistance.setText(String.format("%.2f", RunningHelper.getTotalDistance()));
                             latestPace.setText(RunningHelper.getPaceFormatted());
+
+                            //TODO: @Kevin, here you can compile the heart rate at period=thread.sleep time, and finally use that totalBPM to calculate the average heart rate
+                            totalBPM+=heartRate;//so now it's incrementing at every 5 seconds
+                            Log.d(TAG,"compiling heart rate at time: "+RunningHelper.getTimeLastsample()+", total BPM is: "+totalBPM);
                         }
                     });
                     try {

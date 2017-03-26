@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.icu.text.SimpleDateFormat;
 import android.location.Location;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -33,7 +35,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 
-public class hikeActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+public class hikeActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, IHeartRateReciever {
     private static final String TAG = "hikeActivity";
     Route route = null;
     Attempt attempt = null;
@@ -52,6 +54,10 @@ public class hikeActivity extends AppCompatActivity implements OnMapReadyCallbac
     boolean firstSample=true;
     ArrayList<LatLng> locationArray=new ArrayList<LatLng>();
 
+    private int heartRate;
+    protected TextView hrTextView=null;
+    private HRSensorHandler hrHandler;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,6 +66,8 @@ public class hikeActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_hike);
         startStopButton = (Button) findViewById(R.id.startStopHiking);
         routeNameTextView = (TextView) findViewById(R.id.routeNameHiking);
+        hrTextView=(TextView)findViewById(R.id.heartRateText);
+        hrHandler=new HRSensorHandler(this);
         Intent receivedIntent = getIntent();    //retrieve the intent that was sent to check if it has a Route object
         if (receivedIntent.hasExtra("route")) {  //if the intent has a route object
             route = (Route) receivedIntent.getSerializableExtra("route");
@@ -76,9 +84,11 @@ public class hikeActivity extends AppCompatActivity implements OnMapReadyCallbac
                     logging = true;
                     HikingHelper = new activityHelper(hikeActivity.this, 1);
                     HikingHelper.startActivity(null);
+                    connectClicked();
                     startStopButton.setText("Stop logging");
                 }
                 else {
+                    disconnectClicked();
                     NewRouteDialog();
                     logging = false;
 
@@ -186,7 +196,42 @@ public class hikeActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onDestroy() {
         super.onDestroy();
         if (logging)// if logging is still true
+        {
             HikingHelper.stopActivity();
+            disconnectClicked();//disconnect from HxM
+        }
     }
+
+    @Override
+    public void heartRateReceived(int heartRate){
+        Message msg=new Message();
+        msg.getData().putInt("HeartRate", heartRate);
+        newHandler.sendMessage(msg);
+    }
+    //connect with HxM HR Sensor
+    private void connectClicked(){
+        try{
+            hrHandler.Connect();
+            hrHandler.setReciver(hikeActivity.this);
+        }catch (RuntimeException e) {
+            hrTextView.setText("error connecting to HxM");
+        }
+    }
+
+    //disconnect with HxM HR Sensor
+    private void disconnectClicked(){
+        try{
+            hrHandler.setReciver(null);
+            hrHandler.Disconnect();
+        }catch (RuntimeException e){
+            hrTextView.setText("error disconnecting from HxM");
+        }
+    }
+    final Handler newHandler=new Handler(){
+        public void handleMessage(Message msg){
+            heartRate=msg.getData().getInt("HeartRate");
+            hrTextView.setText(Integer.toString(heartRate));
+        }
+    };
 
 }
