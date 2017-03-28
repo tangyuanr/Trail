@@ -38,7 +38,8 @@
         android:layout_below="@+id/textView3"
         android:layout_marginTop="14dp"
         android:onClick="startActivity"
-        android:text="TIMER" />
+        android:text="TIMER"
+        android:visibility="invisible" />
 
     <Button
         android:text="Hiking"
@@ -62,19 +63,21 @@
         android:id="@+id/historyButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/bikeButton"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="15dp"
-        android:text="RUN HISTORY" />
+        android:layout_marginTop="25dp"
+        android:text="RUN HISTORY"
+        android:layout_below="@+id/runButton"
+        android:layout_alignLeft="@+id/textView2"
+        android:layout_alignStart="@+id/textView2" />
 
     <Button
         android:id="@+id/runButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/historyButton"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="15dp"
-        android:text="Running" />
+        android:layout_marginTop="25dp"
+        android:text="Running"
+        android:layout_below="@+id/bikeButton"
+        android:layout_alignLeft="@+id/bikeButton"
+        android:layout_alignStart="@+id/bikeButton" />
 
     <Button
         android:id="@+id/mapButton"
@@ -89,13 +92,14 @@
         style="@android:style/Widget.DeviceDefault.Light.Button.Inset"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_above="@+id/textView3"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="16dp"
         android:elevation="0dp"
         android:text="Connect with HxM Sensor"
         android:textAppearance="@style/TextAppearance.AppCompat"
-        android:layout_above="@+id/textView3"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginBottom="16dp" />
+        android:visibility="visible" />
 
     <Button
         android:id="@+id/infoB"

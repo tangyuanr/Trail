@@ -182,7 +182,7 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                 Log.d(TAG, "Route object added to ROUTE_TABLE and rowID returned by the databasehandler");
                 //now that the route has been saved, we can save the attempt. we now need to set the rowID of the added route so that we can track to which route the attempt belongs to.
                 route.setRowID(addedID);
-                attempt = new Attempt(route, totaltime, currentDateandTime);
+                attempt = new Attempt(route, totaltime, currentDateandTime, route.getSnapshotURL());
                 dbHandler.addAttempt(attempt); //adding the attempt
                 Log.d(TAG, "Attempt object built and added to database");
 
