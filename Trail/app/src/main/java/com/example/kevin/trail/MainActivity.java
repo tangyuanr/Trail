@@ -17,6 +17,7 @@ import static java.util.Collections.singleton;
 
 public class MainActivity extends AppCompatActivity {
 
+    private sharedPreferenceHelper sharedPreferenceHelper;
     protected Button timerButtonlink = null;
     protected Button hikeButtonlink = null;
     protected Button bikeButtonlink = null;
@@ -24,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
     protected Button runButtonlink = null;
     protected Button mapButtonlink = null;
     protected Button sensorButtonlink=null;
+    protected Button infoButtonlink = null;
     DBHandler dbhandler;
 
 
@@ -35,71 +37,94 @@ public class MainActivity extends AppCompatActivity {
 
         Trail trail = ((Trail) getApplicationContext());     //used to access global variable to check if permissions are right
         checkAndAskPermissions(trail);
-        timerButtonlink = (Button) findViewById(R.id.timerButton);
-        hikeButtonlink = (Button) findViewById(R.id.hikeButton);
-        bikeButtonlink = (Button) findViewById(R.id.bikeButton);
-        historyButtonlink = (Button) findViewById(R.id.historyButton);
-        runButtonlink = (Button) findViewById(R.id.runButton);
-        mapButtonlink = (Button) findViewById(R.id.mapButton);
-        sensorButtonlink=(Button)findViewById(R.id.sensorButton);
-        dbhandler = new DBHandler(this);
+        sharedPreferenceHelper = new sharedPreferenceHelper(MainActivity.this);
 
+        infoButtonlink = (Button) findViewById(R.id.infoB);
+            timerButtonlink = (Button) findViewById(R.id.timerButton);
+            hikeButtonlink = (Button) findViewById(R.id.hikeButton);
+            bikeButtonlink = (Button) findViewById(R.id.bikeButton);
+            historyButtonlink = (Button) findViewById(R.id.historyButton);
+            runButtonlink = (Button) findViewById(R.id.runButton);
+            mapButtonlink = (Button) findViewById(R.id.mapButton);
+            sensorButtonlink = (Button) findViewById(R.id.sensorButton);
+            dbhandler = new DBHandler(this);
 
-        timerButtonlink.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                goToTimerActivity();
-            }
-        });
+            infoButtonlink.setOnClickListener(new View.OnClickListener() {
 
-        hikeButtonlink.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                if (dbhandler.isRouteTableEmpty("Hiking")) {
-                    Intent intent = new Intent(MainActivity.this, hikeActivity.class);
-                    startActivity(intent);
-                } else {
-                    Intent intent = new Intent(MainActivity.this, SelectRouteRunning.class);
-                    intent.putExtra("activityType", "Hiking");
-                    startActivity(intent);
+                public void onClick(View view) {
+                    goToinfoActivity();
                 }
-            }
-        });
+            });
 
-        bikeButtonlink.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                goToBikeActivity();
-            }
-        });
-
-        historyButtonlink.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                goToHistoryActivity();
-            }
-        });
-        mapButtonlink.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                goToMapActivity();
-            }
-        });
-
-        runButtonlink.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                if (dbhandler.isRouteTableEmpty("Running")) {
-                    Intent intent = new Intent(MainActivity.this, runActivity.class);
-                    startActivity(intent);
+            timerButtonlink.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View view) {
+                    goToTimerActivity();
                 }
-                else {
-                    Intent intent = new Intent(MainActivity.this, SelectRouteRunning.class);
-                    intent.putExtra("activityType", "Running");
-                    startActivity(intent);;
-                }
-            }
-        });
+            });
 
-        sensorButtonlink.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view){
-                goToSensorActivity();
+            hikeButtonlink.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View view) {
+                    if (dbhandler.isRouteTableEmpty("Hiking")) {
+                        Intent intent = new Intent(MainActivity.this, hikeActivity.class);
+                        startActivity(intent);
+                    } else {
+                        Intent intent = new Intent(MainActivity.this, SelectRouteRunning.class);
+                        intent.putExtra("activityType", "Hiking");
+                        startActivity(intent);
+                    }
+                }
+            });
+
+            bikeButtonlink.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View view) {
+                    goToBikeActivity();
+                }
+            });
+
+            historyButtonlink.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View view) {
+                    goToHistoryActivity();
+                }
+            });
+            mapButtonlink.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View view) {
+                    goToMapActivity();
+                }
+            });
+
+            runButtonlink.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View view) {
+                    if (dbhandler.isRouteTableEmpty("Running")) {
+                        Intent intent = new Intent(MainActivity.this, runActivity.class);
+                        startActivity(intent);
+                    } else {
+                        Intent intent = new Intent(MainActivity.this, SelectRouteRunning.class);
+                        intent.putExtra("activityType", "Running");
+                        startActivity(intent);
+                        ;
+                    }
+                }
+            });
+
+            sensorButtonlink.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View view) {
+                    goToSensorActivity();
+                }
+            });
+        }
+
+        protected void onStart() {
+            super.onStart();
+            String gender = sharedPreferenceHelper.getProfileGender();
+            String weight = sharedPreferenceHelper.getProfileWeight();
+            if (gender == "" || weight == "") {
+                goToinfoActivity();
             }
-        });
+        }
+
+    void goToinfoActivity(){
+        Intent intent = new Intent(MainActivity.this, infoActivity.class);
+        startActivity(intent);
     }
 
     void goToTimerActivity() {

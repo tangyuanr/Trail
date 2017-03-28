@@ -1,6 +1,8 @@
 package com.example.kevin.trail;
 
 
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Handler;
@@ -8,6 +10,7 @@ import android.os.Message;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -37,6 +40,28 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
     HRSensorHandler hrHandler;
     private int totalBPM=0;
 
+    TextView timerTextViewL;
+    TextView recordedTextViewL;
+    long startTime= 0;
+
+    int noti_id = 1;
+
+    Handler timerHandler = new Handler();
+    Runnable timerRunnable = new Runnable() {
+        @Override
+        public void run() {
+                long millis = System.currentTimeMillis() - startTime;
+                int seconds = (int) (millis / 1000);
+                int minutes = seconds / 60;
+                seconds = seconds % 60;
+
+                timerTextViewL.setText(String.format("%d:%02d", minutes, seconds));
+            notificationOp(noti_id, String.format("%d:%02d", minutes, seconds), RunningHelper.getPaceFormatted(), String.format("%.2f", RunningHelper.getTotalDistance()));
+                timerHandler.postDelayed(this, 500);
+        }
+    };
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +81,10 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
         final Intent intent = new Intent(this, ServiceGPS.class);
         RunningHelper = new activityHelper(runActivity.this, 0); //instantiate a running helper object, the int parameter is the type of activity. 0 for running.
         hrHandler=new HRSensorHandler(this);
+
+        timerTextViewL = (TextView) findViewById(R.id.timerTextView);
+        //final Button restButton= (Button) findViewById(R.id.restartB);
+        recordedTextViewL = (TextView) findViewById(R.id.recordedTextView);
 
         startStopButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -89,11 +118,29 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                     disconnectClicked();
                 }
 
+                Button  startStopButton= (Button) v;
+                if (startStopButton.getText().equals("stop")){
+                    timerHandler.removeCallbacks(timerRunnable);
+                    recordedTextViewL.setText(timerTextViewL.getText());
+                    startStopButton.setText("Start");
+                }else if (startStopButton.getText().equals("Start")){
+                    startTime = System.currentTimeMillis();
+                    timerHandler.postDelayed(timerRunnable, 0);
+                    startStopButton.setText("stop");
+                }
             }
         });
+
     }
 
-
+    public void notificationOp(int id, String time, String pace, String distance){
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+        builder.setSmallIcon(R.mipmap.ic_launcher);
+        builder.setContentTitle("Trail : Running");
+        builder.setContentText("Time: " + timerTextViewL.getText()+ ", Pace: "+ latestPace.getText() + ", Distance : " + RunningHelper.getTotalDistance());
+        NotificationManager NM = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        NM.notify(id,builder.build());
+    }
     private void SaveAttemptDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Save attempt?");
@@ -151,6 +198,14 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
 
         builder.show();
 
+    }
+
+    public void onPause(){
+        super.onPause();
+    }
+
+    public void onResume(){
+        super.onResume();
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.example.kevin.trail;
 
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -10,6 +12,7 @@ import android.os.Message;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -58,12 +61,30 @@ public class hikeActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected TextView hrTextView=null;
     private HRSensorHandler hrHandler;
 
+    TextView timerTextViewL;
+    long startTime= 0;
+    int noti_id=1;
+    Handler timerHandler = new Handler();
+    Runnable timerRunnable = new Runnable() {
+        @Override
+        public void run() {
+            long millis = System.currentTimeMillis() - startTime;
+            int seconds = (int) (millis / 1000);
+            int minutes = seconds / 60;
+            seconds = seconds % 60;
+            timerTextViewL.setText(String.format("%d:%02d", minutes, seconds));
+            notificationOp(noti_id, String.format("%d:%02d", minutes, seconds), String.format("%.2f", HikingHelper.getTotalDistance()));
+            timerHandler.postDelayed(this, 500);
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_hike);
+
         startStopButton = (Button) findViewById(R.id.startStopHiking);
         routeNameTextView = (TextView) findViewById(R.id.routeNameHiking);
         hrTextView=(TextView)findViewById(R.id.heartRateText);
@@ -77,6 +98,7 @@ public class hikeActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapFrag = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFrag.getMapAsync(this);
 
+        timerTextViewL = (TextView) findViewById(R.id.timerTextView);
 
         startStopButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -85,16 +107,30 @@ public class hikeActivity extends AppCompatActivity implements OnMapReadyCallbac
                     HikingHelper = new activityHelper(hikeActivity.this, 1);
                     HikingHelper.startActivity(null);
                     connectClicked();
+                    startTime = System.currentTimeMillis();
+                    timerHandler.postDelayed(timerRunnable, 0);
                     startStopButton.setText("Stop logging");
                 }
                 else {
                     disconnectClicked();
                     NewRouteDialog();
                     logging = false;
+                    timerHandler.removeCallbacks(timerRunnable);
+                    startStopButton.setText("Start logging route");
 
                 }
+
             }
         });
+    }
+
+    public void notificationOp(int id, String time, String distance){
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+        builder.setSmallIcon(R.mipmap.ic_launcher);
+        builder.setContentTitle("Trail : Hiking");
+        builder.setContentText("Time: " + timerTextViewL.getText()+ ", Distance : " + HikingHelper.getTotalDistance());
+        NotificationManager NM = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        NM.notify(id,builder.build());
     }
 
     private void NewRouteDialog() {
