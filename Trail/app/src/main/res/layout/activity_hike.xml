@@ -17,6 +17,7 @@
               tools:context=".hikeActivity"/>
 
     <RelativeLayout
+        android:id="@+id/relativeLayout2"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:background="#CC000000">
@@ -51,10 +52,10 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:layout_below="@id/routeNameHiking"
-            android:hint="00:00"
+            android:hint="Time elapsed: 00:00"
             android:textAlignment="center"
-            android:textColor="@color/common_google_signin_btn_text_dark_default"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:textColor="#FFF"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -96,7 +97,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/imageViewFavorites"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="20dp"
             android:textOn="Yes"
             android:checked="true"
             android:visibility="gone"
@@ -109,7 +110,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/showSelectedRoute"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="20dp"
             android:textOn="Yes"
             android:checked="true"
             android:textOff="No"
@@ -120,6 +121,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/resetTrail"
+            android:layout_marginTop="20dp"
             android:layout_toRightOf="@id/showPreviousRoute"
             android:layout_below="@id/showSelectedRoute"
             android:text="Reset trail"/>
@@ -133,7 +135,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/linearLayout2"
+        android:layout_below="@+id/relativeLayout2"
         android:text="Reconnect to HxM"
         android:visibility="invisible" />
 

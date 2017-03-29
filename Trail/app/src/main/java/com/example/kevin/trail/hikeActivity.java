@@ -52,7 +52,7 @@ public class hikeActivity extends AppCompatActivity implements
         GoogleMap.OnCameraMoveListener,
         GoogleMap.OnCameraMoveCanceledListener,
         GoogleMap.OnCameraIdleListener,
-        GoogleMap.OnMyLocationButtonClickListener
+        GoogleMap.OnMyLocationButtonClickListener,
         IHeartRateReciever{
 
     private static final String TAG = "hikeActivity";
@@ -97,7 +97,7 @@ public class hikeActivity extends AppCompatActivity implements
             int seconds = (int) (millis / 1000);
             int minutes = seconds / 60;
             seconds = seconds % 60;
-            timerTextViewL.setText(String.format("%d:%02d", minutes, seconds));
+            timerTextViewL.setText("Time elapsed: " + String.format("%d:%02d", minutes, seconds));
             notificationOp(noti_id, String.format("%d:%02d", minutes, seconds), String.format("%.2f", HikingHelper.getTotalDistance()));
             timerHandler.postDelayed(this, 500);
         }
@@ -259,7 +259,7 @@ public class hikeActivity extends AppCompatActivity implements
                             route = new Route(inputRouteName, activityType, HikingHelper.getTotalDistance(), totaltime, currentDateandTime, HikingHelper.getCoordinatesFileName());
                             dbHandler.addRoute(route);
                             Log.d(TAG, "Route object added to ROUTE_TABLE");
-                            attempt = new Attempt(route, totaltime, currentDateandTime);
+                            attempt=new Attempt(route, totaltime, currentDateandTime, route.getSnapshotURL());
                             dbHandler.addAttempt(attempt); //adding the attempt
                             Log.d(TAG, "Attempt object built and added to database");
                             dialog.dismiss();
