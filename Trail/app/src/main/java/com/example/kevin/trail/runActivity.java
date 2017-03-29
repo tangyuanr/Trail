@@ -128,7 +128,8 @@ public class runActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View view) {
                         inputRouteName = input.getText().toString();
-                        if(!dbHandler.doesRouteNameExist(inputRouteName)) {
+                        boolean routeNameExists = dbHandler.doesRouteNameExist(inputRouteName);
+                        if(!(routeNameExists || inputRouteName.isEmpty())) {
                             //the user wants to save the route. it obviously means he wants to save the attempt with it as well. so we need to build both objects.
                             int totaltime = (int) RunningHelper.getTimeLastsample() / 1000;
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
@@ -141,8 +142,11 @@ public class runActivity extends AppCompatActivity {
                             dbHandler.addAttempt(attempt); //adding the attempt
                             Log.d(TAG, "Attempt object built and added to database");
                             dialog.dismiss();
-                        } else {
+                        } else if(routeNameExists) {
                             Toast.makeText(runActivity.this, "Route name already exists", Toast.LENGTH_SHORT).show();
+                        }
+                        else if(inputRouteName.isEmpty()) {
+                            Toast.makeText(runActivity.this, "Route name cannot be empty", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
