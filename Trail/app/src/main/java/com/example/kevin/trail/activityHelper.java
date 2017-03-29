@@ -64,7 +64,7 @@ public class activityHelper {
     }
 
     public Attempt getAttempt() {
-        return new Attempt(route, (int) tLastSample/1000, getDate()); //tLastSample is in milliseconds so we divide by 1000
+        return new Attempt(route, (int) tLastSample/1000, getDate(), route.getSnapshotURL()); //tLastSample is in milliseconds so we divide by 1000
     }
 
     private String getDate() {

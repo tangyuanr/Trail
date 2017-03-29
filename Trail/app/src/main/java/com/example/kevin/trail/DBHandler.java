@@ -52,7 +52,7 @@ public class DBHandler extends SQLiteOpenHelper {
                 + ACTIVITY_TYPE + " TEXT, " + ROUTE_DISTANCE + " REAL, " + BEST_TIME + " INT, " + DATE_OF_BEST_TIME + " TEXT, " + FILENAME_COORDINATES + " TEXT)";
         Log.e(TAG, CREATE_ROUTE_TABLE);
         db.execSQL(CREATE_ROUTE_TABLE);
-        String CREATE_ATTEMPTS_TABLE="CREATE TABLE "+TABLE_ATTEMPTS+" ("+ATTEMPT_ID+" INTEGER PRIMARY KEY AUTOINCREMENT, "+TOTAL_TIME + " INT, "
+        String CREATE_ATTEMPTS_TABLE="CREATE TABLE "+TABLE_ATTEMPTS+" ("+ATTEMPT_ID+" INTEGER PRIMARY KEY AUTOINCREMENT, "+ACTIVITY_TYPE+" TEXT, "+TOTAL_TIME + " INT, "
                 + DATE_OF_ATTEMPT + " TEXT, " + ROUTE_NAME + " TEXT, " + MAP_SCREENSHOT + " TEXT)";
         Log.e(TAG, CREATE_ATTEMPTS_TABLE);
         db.execSQL(CREATE_ATTEMPTS_TABLE);
@@ -145,6 +145,7 @@ public class DBHandler extends SQLiteOpenHelper {
     public void addAttempt(Attempt attempt) {
         SQLiteDatabase db=this.getWritableDatabase();
         ContentValues contentValues=new ContentValues();
+        contentValues.put(ACTIVITY_TYPE, attempt.getRoute().getActivityType());
         contentValues.put(TOTAL_TIME, attempt.getTotalTimeTaken());
         contentValues.put(DATE_OF_ATTEMPT, attempt.getDateOfAttempt());
         contentValues.put(MAP_SCREENSHOT,attempt.getFileNameStaticMapScreenshot());
@@ -216,6 +217,11 @@ public class DBHandler extends SQLiteOpenHelper {
         if (cursor.moveToLast()) {
             while (true) {
                 List<String> dataHolder = new ArrayList<String>();
+
+                placeholder = cursor.getString(cursor.getColumnIndex(ACTIVITY_TYPE));
+                Log.d(TAG, "read ACTIVITY TYPE from TABLE ATTEMPTS: " + placeholder);
+                dataHolder.add("ACTIVITY: " + placeholder);
+
                 placeholder = cursor.getString(cursor.getColumnIndex(ROUTE_NAME));
                 Log.d(TAG, "read ROUTE NAME from TABLE ATTEMPTS: " + placeholder);
                 dataHolder.add("ROUTE:      " + placeholder);

@@ -21,10 +21,11 @@ public class Attempt {
     private String fileNameStaticMapScreenshot;
 
     //a route must be provided to the constructor (i.e. no attempt without an associated route)
-    public Attempt(Route route, int totalTimeTaken, String dateOfAttempt) {
+    public Attempt(Route route, int totalTimeTaken, String dateOfAttempt, String URL) {
         this.route = route;
         this.totalTimeTaken = totalTimeTaken;
         this.dateOfAttempt = dateOfAttempt;
+        this.fileNameStaticMapScreenshot=URL;
     }
 
     public String getFileNameStaticMapScreenshot() {

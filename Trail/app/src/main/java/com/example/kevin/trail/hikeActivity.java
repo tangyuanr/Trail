@@ -1,13 +1,19 @@
 package com.example.kevin.trail;
 
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.icu.text.SimpleDateFormat;
 import android.location.Location;
+import android.os.Handler;
+import android.os.Message;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -46,7 +52,8 @@ public class hikeActivity extends AppCompatActivity implements
         GoogleMap.OnCameraMoveListener,
         GoogleMap.OnCameraMoveCanceledListener,
         GoogleMap.OnCameraIdleListener,
-        GoogleMap.OnMyLocationButtonClickListener {
+        GoogleMap.OnMyLocationButtonClickListener
+        IHeartRateReciever{
 
     private static final String TAG = "hikeActivity";
     Route route = null;
@@ -73,12 +80,40 @@ public class hikeActivity extends AppCompatActivity implements
     Location lastLocation;
     ArrayList<Location> locationArray = new ArrayList<Location>();
 
+    private int heartRate;
+    protected TextView hrTextView=null;
+    private HRSensorHandler hrHandler;
+    protected Button sensorReconnect=null;
+    protected FloatingActionButton sensorHelp=null;
+
+    TextView timerTextViewL;
+    long startTime= 0;
+    int noti_id=1;
+    Handler timerHandler = new Handler();
+    Runnable timerRunnable = new Runnable() {
+        @Override
+        public void run() {
+            long millis = System.currentTimeMillis() - startTime;
+            int seconds = (int) (millis / 1000);
+            int minutes = seconds / 60;
+            seconds = seconds % 60;
+            timerTextViewL.setText(String.format("%d:%02d", minutes, seconds));
+            notificationOp(noti_id, String.format("%d:%02d", minutes, seconds), String.format("%.2f", HikingHelper.getTotalDistance()));
+            timerHandler.postDelayed(this, 500);
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_hike);
+        hrTextView=(TextView)findViewById(R.id.heartRateText);
+        hrHandler=new HRSensorHandler(this);
+        sensorReconnect=(Button)findViewById(R.id.hrReconnectHike);
+        sensorHelp=(FloatingActionButton)findViewById(R.id.hrReconectHelp);
+
         startStopButton = (Button) findViewById(R.id.startStopHiking);
         resetTrailButton = (Button) findViewById(R.id.resetTrail);
         resetTrailButton.setOnClickListener(new View.OnClickListener() {
@@ -124,18 +159,37 @@ public class hikeActivity extends AppCompatActivity implements
         mapFrag = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFrag.getMapAsync(this);
 
+        timerTextViewL = (TextView) findViewById(R.id.timerTextView);
+
         startStopButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (!logging) {
                     logging = true;
                     HikingHelper = new activityHelper(hikeActivity.this, 1);
                     HikingHelper.startActivity(null); //start logging samples
+                    connectClicked();
+                    startTime = System.currentTimeMillis();
+                    timerHandler.postDelayed(timerRunnable, 0);
                     startStopButton.setText("Stop logging");
                     loggingText.setVisibility(View.VISIBLE);
                     startUpdateStatsThread();
                 } else {
                     confirmDialog();
                 }
+            }
+        });
+
+        //handles reconnection to heart rate sensor
+        sensorReconnect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                connectClicked();
+            }
+        });
+        sensorHelp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sensorHelpDialog();
             }
         });
     }
@@ -150,6 +204,8 @@ public class hikeActivity extends AppCompatActivity implements
                     public void onClick(DialogInterface dialog, int which) {
                         HikingHelper.stopActivity();
                         logging = false;
+                        disconnectClicked();
+                        timerHandler.removeCallbacks(timerRunnable);
                         startStopButton.setText("Start logging");
                         loggingText.setVisibility(View.INVISIBLE);
                         NewRouteDialog();
@@ -161,6 +217,16 @@ public class hikeActivity extends AppCompatActivity implements
                 .setNegativeButton("No", null)
                 .show();
     }
+
+    public void notificationOp(int id, String time, String distance){
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+        builder.setSmallIcon(R.mipmap.ic_launcher);
+        builder.setContentTitle("Trail : Hiking");
+        builder.setContentText("Time: " + timerTextViewL.getText()+ ", Distance : " + HikingHelper.getTotalDistance());
+        NotificationManager NM = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        NM.notify(id,builder.build());
+    }
+
 
 
     private void NewRouteDialog() {
@@ -349,9 +415,68 @@ public class hikeActivity extends AppCompatActivity implements
     protected void onDestroy() {
         super.onDestroy();
         if (logging)// if logging is still true
+        {
             HikingHelper.stopActivity();
+            disconnectClicked();//disconnect from HxM
+        }
     }
 
+    @Override
+    public void heartRateReceived(int heartRate){
+        Message msg=new Message();
+        msg.getData().putInt("HeartRate", heartRate);
+        newHandler.sendMessage(msg);
+    }
+    //connect with HxM HR Sensor
+    private void connectClicked(){
+        try{
+            hrHandler.Connect();
+            hrHandler.setReciver(hikeActivity.this);
+            //make sensor reconnection buttons disappear if connection is established
+            sensorReconnect.setVisibility(View.INVISIBLE);
+            sensorHelp.setVisibility(View.INVISIBLE);
+        }catch (RuntimeException e) {
+            hrTextView.setText("error connecting to HxM");
+            sensorReconnect.setVisibility(View.VISIBLE);
+            sensorHelp.setVisibility(View.VISIBLE);
+        }
+    }
+
+    //disconnect with HxM HR Sensor
+    private void disconnectClicked(){
+        try{
+            hrHandler.setReciver(null);
+            hrHandler.Disconnect();
+            sensorReconnect.setVisibility(View.INVISIBLE);
+            sensorHelp.setVisibility(View.INVISIBLE);
+        }catch (RuntimeException e){
+            hrTextView.setText("error disconnecting from HxM"+e.getMessage());//never encountered so far, put exception message here to debug
+        }
+    }
+    final Handler newHandler=new Handler(){
+        public void handleMessage(Message msg){
+            heartRate=msg.getData().getInt("HeartRate");
+            hrTextView.setText(Integer.toString(heartRate));
+        }
+    };
+
+    //dialog that pops out when user clicks on the floating help button
+    private void sensorHelpDialog() {
+        AlertDialog helpDialog = new AlertDialog.Builder(this).create();
+        helpDialog.setTitle("Trouble using HxM?");
+        helpDialog.setMessage("Check if your Zephyr HxM is paired with your phone via bluetooth\n"+
+                "Make sure your HxM is charged\n"+
+                "Make sure the probes on the strap are placed onto your chest\n"+
+                "Moisten the strap probes with a bit of water"
+        );
+        helpDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        helpDialog.show();
+    }
     //thread that receives distance updates from the service
     private void startUpdateStatsThread() {
         Thread th = new Thread(new Runnable() {
