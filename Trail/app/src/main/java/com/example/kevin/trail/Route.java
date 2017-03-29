@@ -16,8 +16,12 @@ import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -43,7 +47,6 @@ public class Route implements Serializable { //needed to be able to pass it betw
     private int bestTime; //in seconds
     private String dateBestTime; //YYMMDD
     private String filename_coordinates;
-    private long rowID = 0;
 
     //constructor called when row ID is not known yet. typically before adding it to the database.
     public Route(String routeName, String activityType, float totalDistance, int bestTime, String dateBestTime, String filename_coordinates) {
@@ -56,23 +59,16 @@ public class Route implements Serializable { //needed to be able to pass it betw
     }
 
     //constructor called when rowID is known. typically when it already exists in the database and user has selected it.
-    public Route(long rowID, String routeName, String activityType, float totalDistance, int bestTime, String dateBestTime, String filename_coordinates) {
-        this.routeName = routeName;
-        this.activityType = activityType;
-        this.totalDistance = totalDistance;
-        this.bestTime = bestTime;
-        this.dateBestTime = dateBestTime;
-        this.filename_coordinates = filename_coordinates;
-        this.rowID = rowID;
-    }
+//    public Route(long rowID, String routeName, String activityType, float totalDistance, int bestTime, String dateBestTime, String filename_coordinates) {
+//        this.routeName = routeName;
+//        this.activityType = activityType;
+//        this.totalDistance = totalDistance;
+//        this.bestTime = bestTime;
+//        this.dateBestTime = dateBestTime;
+//        this.filename_coordinates = filename_coordinates;
+//        this.rowID = rowID;
+//    }
 
-    public long getRowID() {
-        return this.rowID;
-    }
-
-    public void setRowID(long rowID) {
-        this.rowID = rowID;
-    }
 
     public String getRouteName() {
         return routeName;
@@ -108,12 +104,23 @@ public class Route implements Serializable { //needed to be able to pass it betw
             String bestTimeString = String.format("%02dh %02dm", hours, minutes);
 
             Log.d("Best time string: ", bestTimeString);
-            return routeName + "\n Best time:\n" + bestTimeString + "\n on " + dateBestTime; //we can build up the returned string there.
+            return routeName + "\n Best time:\n" + bestTimeString + "\n on " + formatDate(dateBestTime); //we can build up the returned string there.
         }
         else if(activityType.equals("Hiking")) {
             return routeName + "\n Distance: " + totalDistance + " km";
         }
         else {return null;}
+    }
+
+    private static String formatDate(String YYYYMMDD) {
+        DateFormat inputformat = new SimpleDateFormat("yyyyMMdd");
+        Date inputdate = null;
+        try {
+            inputdate = inputformat.parse(YYYYMMDD);
+        } catch(ParseException e) {}
+        DateFormat outputformat = new SimpleDateFormat("yyyy/MM/dd");
+        String output = outputformat.format(inputdate);
+        return output;
     }
 
     public ArrayList<Location> buildLocationArray() {
