@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_sampling_test"
     android:layout_width="match_parent"
@@ -96,5 +97,30 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="29dp"
         android:text="0" />
+
+    <Button
+        android:id="@+id/HRreconnect"
+        style="@android:style/Widget.Button.Small"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:text="Reconnect to HxM"
+        android:textAppearance="@style/TextAppearance.AppCompat.Button"
+        android:visibility="invisible" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/floatingHelp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/HRreconnect"
+        android:layout_marginLeft="13dp"
+        android:layout_marginStart="13dp"
+        android:layout_toEndOf="@+id/WHAT_TOTALDISTANCE"
+        android:layout_toRightOf="@+id/WHAT_TOTALDISTANCE"
+        android:clickable="true"
+        android:visibility="invisible"
+        app:fabSize="mini"
+        app:srcCompat="@android:drawable/ic_menu_help" />
 
 </RelativeLayout>

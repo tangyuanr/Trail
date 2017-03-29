@@ -9,6 +9,7 @@ import android.icu.text.SimpleDateFormat;
 import android.location.Location;
 import android.os.Handler;
 import android.os.Message;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -60,6 +61,8 @@ public class hikeActivity extends AppCompatActivity implements OnMapReadyCallbac
     private int heartRate;
     protected TextView hrTextView=null;
     private HRSensorHandler hrHandler;
+    protected Button sensorReconnect=null;
+    protected FloatingActionButton sensorHelp=null;
 
     TextView timerTextViewL;
     long startTime= 0;
@@ -89,6 +92,9 @@ public class hikeActivity extends AppCompatActivity implements OnMapReadyCallbac
         routeNameTextView = (TextView) findViewById(R.id.routeNameHiking);
         hrTextView=(TextView)findViewById(R.id.heartRateText);
         hrHandler=new HRSensorHandler(this);
+        sensorReconnect=(Button)findViewById(R.id.hrReconnectHike);
+        sensorHelp=(FloatingActionButton)findViewById(R.id.hrReconectHelp);
+
         Intent receivedIntent = getIntent();    //retrieve the intent that was sent to check if it has a Route object
         if (receivedIntent.hasExtra("route")) {  //if the intent has a route object
             route = (Route) receivedIntent.getSerializableExtra("route");
@@ -120,6 +126,20 @@ public class hikeActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 }
 
+            }
+        });
+
+        //handles reconnection to heart rate sensor
+        sensorReconnect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                connectClicked();
+            }
+        });
+        sensorHelp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sensorHelpDialog();
             }
         });
     }
@@ -251,8 +271,13 @@ public class hikeActivity extends AppCompatActivity implements OnMapReadyCallbac
         try{
             hrHandler.Connect();
             hrHandler.setReciver(hikeActivity.this);
+            //make sensor reconnection buttons disappear if connection is established
+            sensorReconnect.setVisibility(View.INVISIBLE);
+            sensorHelp.setVisibility(View.INVISIBLE);
         }catch (RuntimeException e) {
             hrTextView.setText("error connecting to HxM");
+            sensorReconnect.setVisibility(View.VISIBLE);
+            sensorHelp.setVisibility(View.VISIBLE);
         }
     }
 
@@ -261,8 +286,10 @@ public class hikeActivity extends AppCompatActivity implements OnMapReadyCallbac
         try{
             hrHandler.setReciver(null);
             hrHandler.Disconnect();
+            sensorReconnect.setVisibility(View.INVISIBLE);
+            sensorHelp.setVisibility(View.INVISIBLE);
         }catch (RuntimeException e){
-            hrTextView.setText("error disconnecting from HxM");
+            hrTextView.setText("error disconnecting from HxM"+e.getMessage());//never encountered so far, put exception message here to debug
         }
     }
     final Handler newHandler=new Handler(){
@@ -272,4 +299,21 @@ public class hikeActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     };
 
+    //dialog that pops out when user clicks on the floating help button
+    private void sensorHelpDialog() {
+        AlertDialog helpDialog = new AlertDialog.Builder(this).create();
+        helpDialog.setTitle("Trouble using HxM?");
+        helpDialog.setMessage("Check if your Zephyr HxM is paired with your phone via bluetooth\n"+
+                "Make sure your HxM is charged\n"+
+                "Make sure the probes on the strap are placed onto your chest\n"+
+                "Moisten the strap probes with a bit of water"
+        );
+        helpDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        helpDialog.show();
+    }
 }

@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -39,6 +40,8 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
     private int heartRate=0;
     HRSensorHandler hrHandler;
     private int totalBPM=0;
+    protected Button sensorReconnect=null;
+    protected FloatingActionButton sensorHelp=null;
 
     TextView timerTextViewL;
     TextView recordedTextViewL;
@@ -81,6 +84,8 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
         final Intent intent = new Intent(this, ServiceGPS.class);
         RunningHelper = new activityHelper(runActivity.this, 0); //instantiate a running helper object, the int parameter is the type of activity. 0 for running.
         hrHandler=new HRSensorHandler(this);
+        sensorReconnect=(Button)findViewById(R.id.HRreconnect);
+        sensorHelp=(FloatingActionButton)findViewById(R.id.floatingHelp);
 
         timerTextViewL = (TextView) findViewById(R.id.timerTextView);
         //final Button restButton= (Button) findViewById(R.id.restartB);
@@ -89,7 +94,6 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
         startStopButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (!logging) {
-                    //TODO implement timer with start/stop button
                     RunningHelper.startActivity(route); //when the user clicks start, running activity (activity in the traditional sense, not android sense) starts and data starts being collected.
                     Log.d(TAG, "RunningHelper.startActivity(route) called");
                     logging = true; //boolean so that the same button acts as an on/off toggle
@@ -128,6 +132,19 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                     timerHandler.postDelayed(timerRunnable, 0);
                     startStopButton.setText("stop");
                 }
+            }
+        });
+
+        //handles sensor reconnection
+        sensorReconnect.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v){
+                connectClicked();//try to connect to sensor
+            }
+        });
+        sensorHelp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sensorHelpDialog();//display help to adjust sensor so that connection can be established
             }
         });
 
@@ -277,8 +294,12 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
         try{
             hrHandler.Connect();
             hrHandler.setReciver(runActivity.this);
+            sensorReconnect.setVisibility(View.INVISIBLE);
+            sensorHelp.setVisibility(View.INVISIBLE);
         }catch (RuntimeException e) {
-            hrTextView.setText("error connecting to HxM");
+            hrTextView.setText("Error connecting to HxM");
+            sensorReconnect.setVisibility(View.VISIBLE);
+            sensorHelp.setVisibility(View.VISIBLE);
         }
     }
 
@@ -287,8 +308,10 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
         try{
             hrHandler.setReciver(null);
             hrHandler.Disconnect();
+            sensorReconnect.setVisibility(View.INVISIBLE);
+            sensorHelp.setVisibility(View.INVISIBLE);
         }catch (RuntimeException e){
-            hrTextView.setText("error disconnecting from HxM");
+            hrTextView.setText("error disconnecting from HxM: "+e.getMessage());//never had problem disconnecting from it so far...but just in case there is, the exception message is for debugging
         }
     }
 
@@ -298,4 +321,22 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
             hrTextView.setText(Integer.toString(heartRate));
         }
     };
+
+    //dialog that pops out when user clicks on the floating help button
+    private void sensorHelpDialog() {
+        AlertDialog helpDialog = new AlertDialog.Builder(this).create();
+        helpDialog.setTitle("Trouble using HxM?");
+        helpDialog.setMessage("Check if your Zephyr HxM is paired with your phone via bluetooth\n"+
+                "Make sure your HxM is charged\n"+
+                "Make sure the probes on the strap are placed onto your chest\n"+
+                "Moisten the strap probes with a bit of water"
+        );
+        helpDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        helpDialog.show();
+    }
 }
