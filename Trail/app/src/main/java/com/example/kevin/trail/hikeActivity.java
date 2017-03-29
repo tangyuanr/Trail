@@ -101,7 +101,7 @@ public class hikeActivity extends AppCompatActivity implements OnMapReadyCallbac
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
                 String currentDateandTime = sdf.format(new Date());
                 route = new Route(inputRouteName, activityType, HikingHelper.getTotalDistance(), totaltime, currentDateandTime, HikingHelper.getCoordinatesFileName() );
-                long addedID = dbHandler.addRoute(route);
+                dbHandler.addRoute(route);
                 HikingHelper.stopActivity();
             }
         });

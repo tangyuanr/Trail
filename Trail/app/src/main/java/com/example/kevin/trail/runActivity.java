@@ -28,7 +28,6 @@ public class runActivity extends AppCompatActivity {
     private String activityType = "Running";
 
     DBHandler dbHandler = new DBHandler(this);
-    ServiceGPS servicegps = new ServiceGPS();
 
 
     @Override
@@ -44,8 +43,7 @@ public class runActivity extends AppCompatActivity {
 
         Button startStopButton = (Button) findViewById(R.id.StartStop);
         totalDistance = (TextView) findViewById(R.id.totalDistance);
-        latestPace = (TextView) findViewById(R.id.latestpace);
-        final Intent intent = new Intent(this, ServiceGPS.class);
+        latestPace = (TextView) findViewById(R.id.latestpace);;
         RunningHelper = new activityHelper(runActivity.this, 0); //instantiate a running helper object, the int parameter is the type of activity. 0 for running.
 
 
@@ -103,50 +101,54 @@ public class runActivity extends AppCompatActivity {
         builder.show();
 
     }
+
+
+
+
+
+
     //dialog that asks the user if he wants to save the route
     private void NewRouteDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Save Route?");
         final EditText input = new EditText(this);
-        builder.setView(input);
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                //the user wants to save the route. it obviously means he wants to save the attempt with it as well. so we need to build both objects.
-                int totaltime = (int)RunningHelper.getTimeLastsample()/1000;
-                inputRouteName = input.getText().toString();
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
-                String currentDateandTime = sdf.format(new Date());
-                //instantiating a new route object with the constructor for the case in which we have no rowID yet
-                route = new Route(inputRouteName, activityType, RunningHelper.getTotalDistance(), totaltime, currentDateandTime, RunningHelper.getCoordinatesFileName() );
-                Log.d(TAG, "Route object created with constructor without rowID");
-                long addedID = dbHandler.addRoute(route);  //add the New Route to the database and get the rowID of the route that was added
-                Log.d(TAG, "Route object added to ROUTE_TABLE and rowID returned by the databasehandler");
-                //now that the route has been saved, we can save the attempt. we now need to set the rowID of the added route so that we can track to which route the attempt belongs to.
-                route.setRowID(addedID);
-                attempt = new Attempt(route, totaltime, currentDateandTime);
-                dbHandler.addAttempt(attempt); //adding the attempt
-                Log.d(TAG, "Attempt object built and added to database");
+        final AlertDialog dialog = new AlertDialog.Builder(this)
+                .setView(input)
+                .setTitle("Enter route name:")
+                .setPositiveButton("Save", null)
+                .setNegativeButton("Cancel", null)
+                .create();
 
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+
+            @Override
+            public void onShow(final DialogInterface dialog) {
+
+                Button buttonSave = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE);
+                buttonSave.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View view) {
+                        inputRouteName = input.getText().toString();
+                        if(!dbHandler.doesRouteNameExist(inputRouteName)) {
+                            //the user wants to save the route. it obviously means he wants to save the attempt with it as well. so we need to build both objects.
+                            int totaltime = (int) RunningHelper.getTimeLastsample() / 1000;
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
+                            String currentDateandTime = sdf.format(new Date());
+                            //instantiating a new route object with the constructor for the case in which we have no rowID yet
+                            route = new Route(inputRouteName, activityType, RunningHelper.getTotalDistance(), totaltime, currentDateandTime, RunningHelper.getCoordinatesFileName());
+                            dbHandler.addRoute(route);  //add the New Route to the database and get the rowID of the route that was added
+                            Log.d(TAG, "Route object added to ROUTE_TABLE");
+                            attempt = new Attempt(route, totaltime, currentDateandTime);
+                            dbHandler.addAttempt(attempt); //adding the attempt
+                            Log.d(TAG, "Attempt object built and added to database");
+                            dialog.dismiss();
+                        } else {
+                            Toast.makeText(runActivity.this, "Route name already exists", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
             }
         });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                dialog.cancel();
-            }
-        });
-
-        builder.show();
-
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (logging)// if logging is still true
-            RunningHelper.stopActivity();
+        dialog.show();
     }
 
 
