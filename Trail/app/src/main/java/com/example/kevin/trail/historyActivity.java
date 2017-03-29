@@ -1,7 +1,11 @@
 package com.example.kevin.trail;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
@@ -68,7 +72,34 @@ public class historyActivity extends AppCompatActivity {
         });
 
 
+
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuinflater =  getMenuInflater();
+        menuinflater.inflate(R.menu.history,menu);
+        return super.onCreateOptionsMenu(menu);
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+
+        switch (item.getItemId()){
+
+            case R.id.comparison_id:
+                goToComparisonActivity();
+                return true;
+
+                default:
+                    return super.onOptionsItemSelected(item);
+
+        }
+    }
+
+    private void goToComparisonActivity() {
+        Intent intent = new Intent(historyActivity.this, comparison.class);
+        startActivity(intent);
+    }
 }
