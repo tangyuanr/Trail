@@ -39,6 +39,7 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
     private int heartRate=0;
     HRSensorHandler hrHandler;
     private int totalBPM=0;
+    private int counter=0;
     protected Button sensorReconnect=null;
     protected FloatingActionButton sensorHelp=null;
 
@@ -95,8 +96,8 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                     RunningHelper.startActivity(route); //when the user clicks start, running activity (activity in the traditional sense, not android sense) starts and data starts being collected.
                     Log.d(TAG, "RunningHelper.startActivity(route) called");
                     logging = true; //boolean so that the same button acts as an on/off toggle
-                    //activate heart rate sensor
-                    connectClicked();
+
+                    connectClicked();//activate heart rate sensor
                     Toast.makeText(runActivity.this, "You've started running", Toast.LENGTH_SHORT).show();
                     startUpdateStatsThread(); //start the thread that receives updates from the service
                 } else {
@@ -117,7 +118,9 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                         showStatsDialog(timelastSample, FinalDistance);  //show stats dialog
                         logging = false;
                     }
-                    disconnectClicked();
+                    disconnectClicked();//disconnect from HxM sensor
+                    sensorReconnect.setVisibility(View.INVISIBLE);
+                    sensorHelp.setVisibility(View.INVISIBLE);
                 }
 
                 Button  startStopButton= (Button) v;
@@ -148,11 +151,22 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
 
     }
 
+    //to stop both sensors activity when user quits prematurely
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        //if still logging
+        if (logging) {
+            RunningHelper.stopActivity();//stop GPS
+            disconnectClicked();//stop heart rate monitor
+        }
+    }
+
     public void notificationOp(int id, String time, String pace, String distance){
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         builder.setSmallIcon(R.mipmap.ic_launcher);
         builder.setContentTitle("Trail : Running");
-        builder.setContentText("Time: " + timerTextViewL.getText()+ ", Pace: "+ latestPace.getText() + ", Distance : " + RunningHelper.getTotalDistance());
+        builder.setContentText("Time: " + time+ ", Pace: "+ pace + ", Distance : " + distance);
         NotificationManager NM = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         NM.notify(id,builder.build());
     }
@@ -213,7 +227,7 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                             route = new Route(inputRouteName, activityType, RunningHelper.getTotalDistance(), totaltime, currentDateandTime, RunningHelper.getCoordinatesFileName());
                             dbHandler.addRoute(route);  //add the New Route to the database and get the rowID of the route that was added
                             Log.d(TAG, "Route object added to ROUTE_TABLE");
-                            attempt = new Attempt(route, totaltime, currentDateandTime);
+                            attempt = new Attempt(route, totaltime, currentDateandTime, route.getSnapshotURL());
                             dbHandler.addAttempt(attempt); //adding the attempt
                             Log.d(TAG, "Attempt object built and added to database");
                             dialog.dismiss();
@@ -243,13 +257,13 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                             totalDistance.setText(String.format("%.2f", RunningHelper.getTotalDistance()));
                             latestPace.setText(RunningHelper.getPaceFormatted());
 
-                            //TODO: @Kevin, here you can compile the heart rate at period=thread.sleep time, and finally use that totalBPM to calculate the average heart rate
-                            totalBPM+=heartRate;//so now it's incrementing at every 5 seconds
-                            Log.d(TAG,"compiling heart rate at time: "+RunningHelper.getTimeLastsample()+", total BPM is: "+totalBPM);
                         }
                     });
                     try {
                         Thread.sleep(5000);
+                        //TODO compile average heart rate
+                        totalBPM+=heartRate;//so now it's incrementing at every 5 seconds
+                        counter++;
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -266,7 +280,8 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
         AlertDialog alertDialog = new AlertDialog.Builder(this).create();
         alertDialog.setTitle("Run ended");
         alertDialog.setMessage("You have runned " + String.format("%.2f", FinalDistance) + " km in " + (time) + " minutes.\n"
-                + "Average pace: " + RunningHelper.getFinalAveragePaceFormatted() + " min/km.");
+                + "Average pace: " + RunningHelper.getFinalAveragePaceFormatted() + " min/km.\n"+
+                "Average heart rage: "+totalBPM/counter+" BPM");
         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
@@ -286,6 +301,7 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
     //connect with HxM HR Sensor
     private void connectClicked(){
         try{
+
             hrHandler.Connect();
             hrHandler.setReciver(runActivity.this);
             sensorReconnect.setVisibility(View.INVISIBLE);
