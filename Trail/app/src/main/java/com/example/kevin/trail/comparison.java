@@ -56,19 +56,19 @@ public class comparison extends AppCompatActivity {
             }
             if (myroute != null) {
                 if (myroute.size() >= 2) {
-                    recentdistance.setText("" + myroute.get(myroute.size() - 1).getTotalDistance());
-                    previousdistance.setText("" + myroute.get(myroute.size() - 2).getTotalDistance());
+                    recentdistance.setText("" + myroute.get(myroute.size() - 1).getTotalDistance()+"km");
+                    previousdistance.setText("" + myroute.get(myroute.size() - 2).getTotalDistance()+"km");
                    // distancechange.setText("" + ((myroute.get(myroute.size() - 1).getTotalDistance()) - (myroute.get(myroute.size() - 2).getTotalDistance())));
-                    recenttime.setText("" + myroute.get(myroute.size() - 1).getBestTime());
-                    previoustime.setText("" + myroute.get(myroute.size() - 2).getBestTime());
+                    recenttime.setText("" + myroute.get(myroute.size() - 1).getBestTime() +"s");
+                    previoustime.setText("" + myroute.get(myroute.size() - 2).getBestTime()+"s");
                    // timechange.setText("" + ((myroute.get(myroute.size() - 1).getBestTime()) - (myroute.get(myroute.size() - 2).getTotalDistance())));
-                    recentdistance.setText("" + myroute.get(myroute.size() - 1).getBestTime());
-                    recentspeed.setText("" + (myroute.get(myroute.size() - 1).getTotalDistance()) / ((myroute.get(myroute.size() - 1).getBestTime())));
-                    previousspeed.setText("" + (myroute.get(myroute.size() - 1).getTotalDistance()) / ((myroute.get(myroute.size() - 2).getBestTime())));
-                    speedchange.setText("" + ((((myroute.get(myroute.size() - 1).getTotalDistance()) / ((myroute.get(myroute.size() - 1).getBestTime())))) - ((myroute.get(myroute.size() - 1).getTotalDistance()) / ((myroute.get(myroute.size() - 2).getBestTime())))));
-                    previouspace.setText("" + (myroute.get(myroute.size() - 2).getBestTime()) / ((60000) * myroute.get(myroute.size() - 2).getTotalDistance()));//min per km
-                    recentpace.setText("" + (myroute.get(myroute.size() - 1).getBestTime()) / ((60000) * myroute.get(myroute.size() - 1).getTotalDistance()));//min per km
-                    pacechanges.setText("" + ((myroute.get(myroute.size() - 1).getBestTime()) / ((60000) * myroute.get(myroute.size() - 1).getTotalDistance()) - ((myroute.get(myroute.size() - 2).getBestTime()) / ((60000) * myroute.get(myroute.size() - 2).getTotalDistance()))));
+
+                    recentspeed.setText("" + ((myroute.get(myroute.size() - 1).getTotalDistance())*(1000)) / ((myroute.get(myroute.size() - 1).getBestTime()))+"m/s");
+                    previousspeed.setText("" + ((myroute.get(myroute.size() - 2).getTotalDistance())*(1000)) / ((myroute.get(myroute.size() - 2).getBestTime()))+"m/s");
+                    speedchange.setText("" + (((((myroute.get(myroute.size() - 1).getTotalDistance())*(1000)) / ((myroute.get(myroute.size() - 1).getBestTime())))) - (((myroute.get(myroute.size() - 2).getTotalDistance())*(1000)) / ((myroute.get(myroute.size() - 2).getBestTime()))))+"m/s");
+                    previouspace.setText("" + (myroute.get(myroute.size() - 2).getBestTime()) / ((60000) * myroute.get(myroute.size() - 2).getTotalDistance())+"min/km");//min per km
+                    recentpace.setText("" + (myroute.get(myroute.size() - 1).getBestTime()) / ((60000) * myroute.get(myroute.size() - 1).getTotalDistance())+"min/km");//min per km
+                    pacechanges.setText("" + ((myroute.get(myroute.size() - 1).getBestTime()) / ((60000) * myroute.get(myroute.size() - 1).getTotalDistance()) - ((myroute.get(myroute.size() - 2).getBestTime()) / ((60000) * myroute.get(myroute.size() - 2).getTotalDistance())))+"min/km");
                 }
 
 
