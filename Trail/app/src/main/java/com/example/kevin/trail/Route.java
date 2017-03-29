@@ -47,6 +47,7 @@ public class Route implements Serializable { //needed to be able to pass it betw
     private int bestTime; //in seconds
     private String dateBestTime; //YYMMDD
     private String filename_coordinates;
+    private String snapshotURL;
 
     //constructor called when row ID is not known yet. typically before adding it to the database.
     public Route(String routeName, String activityType, float totalDistance, int bestTime, String dateBestTime, String filename_coordinates) {
@@ -93,6 +94,8 @@ public class Route implements Serializable { //needed to be able to pass it betw
     public String getFilename_coordinates() {
         return filename_coordinates;
     }
+
+    public String getSnapshotURL(){return snapshotURL;}
 
     //implementing toString so that a listview adapter can call it on a Route object. We can build the string here and return it to the listview.
     @Override
@@ -173,6 +176,7 @@ public class Route implements Serializable { //needed to be able to pass it betw
         url = url.substring(0, url.length() - 1);
         url += "&sensor=false";
         Log.d("getStaticAPIURL:",url);
+        this.snapshotURL=url;
         return url;
         // this URL can get quite large so we need to look into ways to reduce it. For the moment I am taking every other element to half the number of points.
         // downloading the image and storing its filename in the SQLite database is probably better.

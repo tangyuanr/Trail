@@ -24,7 +24,7 @@
         android:text="Welcome to Trail,"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="53dp"
         android:id="@+id/textView2"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
@@ -33,11 +33,13 @@
         android:id="@+id/timerButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/hikeButton"
+        android:layout_alignStart="@+id/hikeButton"
         android:layout_below="@+id/textView3"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="25dp"
+        android:layout_marginTop="14dp"
         android:onClick="startActivity"
-        android:text="TIMER" />
+        android:text="TIMER"
+        android:visibility="invisible" />
 
     <Button
         android:text="Hiking"
@@ -61,19 +63,21 @@
         android:id="@+id/historyButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/bikeButton"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="15dp"
-        android:text="RUN HISTORY" />
+        android:layout_marginTop="25dp"
+        android:text="RUN HISTORY"
+        android:layout_below="@+id/runButton"
+        android:layout_alignLeft="@+id/textView2"
+        android:layout_alignStart="@+id/textView2" />
 
     <Button
         android:id="@+id/runButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/historyButton"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="15dp"
-        android:text="Running" />
+        android:layout_marginTop="25dp"
+        android:text="Running"
+        android:layout_below="@+id/bikeButton"
+        android:layout_alignLeft="@+id/bikeButton"
+        android:layout_alignStart="@+id/bikeButton" />
 
     <Button
         android:id="@+id/mapButton"
@@ -93,5 +97,15 @@
         android:layout_alignParentTop="true"
         android:elevation="0dp"
         android:text="Connect with HxM Sensor"
-        android:textAppearance="@style/TextAppearance.AppCompat" />
+        android:textAppearance="@style/TextAppearance.AppCompat"
+        android:visibility="invisible" />
+
+    <Button
+        android:id="@+id/infoB"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:text="Info" />
 </RelativeLayout>
