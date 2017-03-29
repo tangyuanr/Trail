@@ -189,6 +189,8 @@ public class ServiceGPS extends Service implements LocationListener, GoogleApiCl
 
         intent_sender.putExtra("distance", totalDistance);
         intent_sender.putExtra("pace", pace);
+        intent_sender.putExtra("currentLatitude", averageLatitude);
+        intent_sender.putExtra("currentLongitude", averageLongitude);
         intent_sender.putExtra("time_of_last_sample", tSample);
         intent_sender.putExtra("number of samples", sample);
         sendBroadcast(intent_sender);
