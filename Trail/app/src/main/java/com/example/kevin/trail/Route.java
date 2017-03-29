@@ -97,17 +97,16 @@ public class Route implements Serializable { //needed to be able to pass it betw
     //implementing toString so that a listview adapter can call it on a Route object. We can build the string here and return it to the listview.
     @Override
     public String toString() {
+        //converting seconds to hours,minutes string. copied-pasted from http://stackoverflow.com/questions/6118922/convert-seconds-value-to-hours-minutes-seconds
+        int hours = bestTime / 3600;
+        int minutes = (bestTime % 3600) / 60;
+        String bestTimeString = String.format("%02dh %02dm", hours, minutes);
+        Log.d("Best time string: ", bestTimeString);
         if(activityType.equals("Running")) {
-            //converting seconds to hours,minutes string. copied-pasted from http://stackoverflow.com/questions/6118922/convert-seconds-value-to-hours-minutes-seconds
-            int hours = bestTime / 3600;
-            int minutes = (bestTime % 3600) / 60;
-            String bestTimeString = String.format("%02dh %02dm", hours, minutes);
-
-            Log.d("Best time string: ", bestTimeString);
             return routeName + "\n Best time:\n" + bestTimeString + "\n on " + formatDate(dateBestTime); //we can build up the returned string there.
         }
         else if(activityType.equals("Hiking")) {
-            return routeName + "\n Distance: " + totalDistance + " km";
+            return routeName + "\n Best time:\n" + bestTimeString + "\n on " + formatDate(dateBestTime);
         }
         else {return null;}
     }

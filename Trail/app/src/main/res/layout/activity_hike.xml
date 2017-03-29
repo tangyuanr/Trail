@@ -15,37 +15,85 @@
               android:layout_height="match_parent"
               tools:context=".hikeActivity"/>
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <RelativeLayout
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:background="#CC000000">
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/startStopHiking"
-            android:text="Start logging route"/>
+            android:text="Start logging"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:text="Your performance is being logged."
+            android:textSize="25sp"
+            android:id="@+id/loggingText"
+            android:layout_toRightOf="@id/startStopHiking"
+            android:visibility="invisible"
+            android:textColor="#32CD32"
+            android:layout_height="wrap_content"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="No route selected"
+            android:layout_below="@id/startStopHiking"
             android:id="@+id/routeNameHiking"
             android:textColor="#FFF"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Distance traveled: (not implemented yet)"
+            android:text="Distance traveled: 0.00 km"
+            android:layout_below="@id/routeNameHiking"
+            android:id="@+id/distanceTravelled"
             android:textColor="#FFF"/>
+
         <ImageView
             android:id="@+id/imageViewFavorites"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@id/distanceTravelled"
+            android:visibility="gone"
             android:src="@mipmap/icon_favorite" />
 
 
-    </LinearLayout>
+        <Switch
+            android:id="@+id/showSelectedRoute"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/imageViewFavorites"
+            android:layout_marginTop="10dp"
+            android:textOn="Yes"
+            android:checked="true"
+            android:visibility="gone"
+            android:textOff="No"
+            android:textColor="#FFF"
+            android:text="Show selected route" />
+
+        <Switch
+            android:id="@+id/showPreviousRoute"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/showSelectedRoute"
+            android:layout_marginTop="10dp"
+            android:textOn="Yes"
+            android:checked="true"
+            android:textOff="No"
+            android:textColor="#FFF"
+            android:text="Show trail" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/resetTrail"
+            android:layout_toRightOf="@id/showPreviousRoute"
+            android:layout_below="@id/showSelectedRoute"
+            android:text="Reset trail"/>
+
+    </RelativeLayout>
 
 </RelativeLayout>

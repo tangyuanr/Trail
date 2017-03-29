@@ -30,6 +30,8 @@ public class activityHelper {
     private Context context;
     private ServiceGPS serviceGPS;
     private Intent intent;
+    private double averageLatitude;
+    private double averageLongitude;
     private int sample;
     float totalDistance = 0;
     double pace = 0;
@@ -124,6 +126,8 @@ public class activityHelper {
         pace = intent.getDoubleExtra("pace", 0);
         tLastSample = intent.getLongExtra("time_of_last_sample",0);
         sample = intent.getIntExtra("number of samples", 0);
+        averageLatitude = intent.getDoubleExtra("currentLatitude", 0);
+        averageLongitude = intent.getDoubleExtra("currentLongitude", 0);
         Log.d(TAG, String.valueOf(totalDistance)+" data received "+tLastSample);
     }
 
