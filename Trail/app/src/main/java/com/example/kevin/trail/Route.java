@@ -16,8 +16,12 @@ import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -43,7 +47,7 @@ public class Route implements Serializable { //needed to be able to pass it betw
     private int bestTime; //in seconds
     private String dateBestTime; //YYMMDD
     private String filename_coordinates;
-    private long rowID = 0;
+    private String snapshotURL;
 
     //constructor called when row ID is not known yet. typically before adding it to the database.
     public Route(String routeName, String activityType, float totalDistance, int bestTime, String dateBestTime, String filename_coordinates) {
@@ -56,23 +60,16 @@ public class Route implements Serializable { //needed to be able to pass it betw
     }
 
     //constructor called when rowID is known. typically when it already exists in the database and user has selected it.
-    public Route(long rowID, String routeName, String activityType, float totalDistance, int bestTime, String dateBestTime, String filename_coordinates) {
-        this.routeName = routeName;
-        this.activityType = activityType;
-        this.totalDistance = totalDistance;
-        this.bestTime = bestTime;
-        this.dateBestTime = dateBestTime;
-        this.filename_coordinates = filename_coordinates;
-        this.rowID = rowID;
-    }
+//    public Route(long rowID, String routeName, String activityType, float totalDistance, int bestTime, String dateBestTime, String filename_coordinates) {
+//        this.routeName = routeName;
+//        this.activityType = activityType;
+//        this.totalDistance = totalDistance;
+//        this.bestTime = bestTime;
+//        this.dateBestTime = dateBestTime;
+//        this.filename_coordinates = filename_coordinates;
+//        this.rowID = rowID;
+//    }
 
-    public long getRowID() {
-        return this.rowID;
-    }
-
-    public void setRowID(long rowID) {
-        this.rowID = rowID;
-    }
 
     public String getRouteName() {
         return routeName;
@@ -98,22 +95,34 @@ public class Route implements Serializable { //needed to be able to pass it betw
         return filename_coordinates;
     }
 
+    public String getSnapshotURL(){return snapshotURL;}
+
     //implementing toString so that a listview adapter can call it on a Route object. We can build the string here and return it to the listview.
     @Override
     public String toString() {
+        //converting seconds to hours,minutes string. copied-pasted from http://stackoverflow.com/questions/6118922/convert-seconds-value-to-hours-minutes-seconds
+        int hours = bestTime / 3600;
+        int minutes = (bestTime % 3600) / 60;
+        String bestTimeString = String.format("%02dh %02dm", hours, minutes);
+        Log.d("Best time string: ", bestTimeString);
         if(activityType.equals("Running")) {
-            //converting seconds to hours,minutes string. copied-pasted from http://stackoverflow.com/questions/6118922/convert-seconds-value-to-hours-minutes-seconds
-            int hours = bestTime / 3600;
-            int minutes = (bestTime % 3600) / 60;
-            String bestTimeString = String.format("%02dh %02dm", hours, minutes);
-
-            Log.d("Best time string: ", bestTimeString);
-            return routeName + "\n Best time:\n" + bestTimeString + "\n on " + dateBestTime; //we can build up the returned string there.
+            return routeName + "\n Best time:\n" + bestTimeString + "\n on " + formatDate(dateBestTime); //we can build up the returned string there.
         }
         else if(activityType.equals("Hiking")) {
-            return routeName + "\n Distance: " + totalDistance + " km";
+            return routeName + "\n Best time:\n" + bestTimeString + "\n on " + formatDate(dateBestTime) +"\n Distance: " + String.format("%.2f", totalDistance) + " km";
         }
         else {return null;}
+    }
+
+    private static String formatDate(String YYYYMMDD) {
+        DateFormat inputformat = new SimpleDateFormat("yyyyMMdd");
+        Date inputdate = null;
+        try {
+            inputdate = inputformat.parse(YYYYMMDD);
+        } catch(ParseException e) {}
+        DateFormat outputformat = new SimpleDateFormat("yyyy/MM/dd");
+        String output = outputformat.format(inputdate);
+        return output;
     }
 
     public ArrayList<Location> buildLocationArray() {
@@ -166,6 +175,7 @@ public class Route implements Serializable { //needed to be able to pass it betw
         url = url.substring(0, url.length() - 1);
         url += "&sensor=false";
         Log.d("getStaticAPIURL:",url);
+        this.snapshotURL=url;
         return url;
         // this URL can get quite large so we need to look into ways to reduce it. For the moment I am taking every other element to half the number of points.
         // downloading the image and storing its filename in the SQLite database is probably better.

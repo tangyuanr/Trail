@@ -22,6 +22,7 @@ android {
 
 
 
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile files('libs/HxMBT.jar')
@@ -37,14 +38,14 @@ dependencies {
 
 
 
-    
 
 
-    
+
+
 
 
     compile'com.intentfilter:android-permissions:0.1.2'
-
+    compile 'com.intentfilter:android-permissions:0.1.2'
     compile'com.intentfilter:android-permissions:0.1.2'
     compile'com.android.support:appcompat-v7:25.2.0'
     compile 'pl.charmas.android:android-reactive-location:0.10@aar'
@@ -52,9 +53,11 @@ dependencies {
     compile 'com.google.android.gms:play-services-places:10.2.0'
     compile 'com.google.android.gms:play-services-gcm:10.2.0'
     compile 'io.reactivex:rxjava:1.2.0'
-    compile'com.android.support:mediarouter-v7:25.2.0'
-    compile'com.android.support:multidex:1.0.1'
-    compile'com.squareup.picasso:picasso:2.5.2'
-    compile'com.android.support.constraint:constraint-layout:1.0.2'
-    compile'com.google.android.gms:play-services-maps:10.2.0'
-    testCompile'junit:junit:4.12'}
+    compile 'com.android.support:mediarouter-v7:25.2.0'
+    compile 'com.android.support:multidex:1.0.1'
+    compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    compile 'com.google.android.gms:play-services-maps:10.2.0'
+    testCompile 'junit:junit:4.12'
+    compile 'com.android.support:design:25.3.0'
+}

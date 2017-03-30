@@ -78,6 +78,7 @@
             android:name=".HRActivity"
             android:label="HxM Sensor"
             android:screenOrientation="portrait" />
+        <activity android:name=".infoActivity"></activity>
         <activity android:name=".comparison"></activity>
     </application>
 
