@@ -30,12 +30,11 @@ public class activityHelper {
     private Context context;
     private ServiceGPS serviceGPS;
     private Intent intent;
+    private double averageLatitude;
+    private double averageLongitude;
     private int sample;
     float totalDistance = 0;
     double pace = 0;
-    private double currentLongitude = 0;
-    private double currentLatitude = 0;
-    Location currentLocation = null;
     private long tLastSample = 0;
     boolean mBounded;
     Route route;
@@ -56,13 +55,6 @@ public class activityHelper {
 
     }
 
-    public double getCurrentLongitude() {
-        return currentLongitude;
-    }
-
-    public double getCurrentLatitude() {
-        return currentLatitude;
-    }
 
     public void stopActivity() {
 
@@ -72,7 +64,7 @@ public class activityHelper {
     }
 
     public Attempt getAttempt() {
-        return new Attempt(route, (int) tLastSample/1000, getDate()); //tLastSample is in milliseconds so we divide by 1000
+        return new Attempt(route, (int) tLastSample/1000, getDate(), route.getSnapshotURL()); //tLastSample is in milliseconds so we divide by 1000
     }
 
     private String getDate() {
@@ -130,12 +122,12 @@ public class activityHelper {
     };
 
     private void updateData(Intent intent) {
-        currentLatitude = intent.getDoubleExtra("current_latitude", 0);
-        currentLongitude = intent.getDoubleExtra("current_longitude", 0);
         totalDistance = intent.getFloatExtra("distance", 1);
         pace = intent.getDoubleExtra("pace", 0);
         tLastSample = intent.getLongExtra("time_of_last_sample",0);
         sample = intent.getIntExtra("number of samples", 0);
+        averageLatitude = intent.getDoubleExtra("currentLatitude", 0);
+        averageLongitude = intent.getDoubleExtra("currentLongitude", 0);
         Log.d(TAG, String.valueOf(totalDistance)+" data received "+tLastSample);
     }
 

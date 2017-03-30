@@ -1,11 +1,17 @@
 package com.example.kevin.trail;
 
 
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Message;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -16,7 +22,7 @@ import android.widget.Toast;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class runActivity extends AppCompatActivity {
+public class runActivity extends AppCompatActivity implements IHeartRateReciever{
     private boolean logging = false;
     activityHelper RunningHelper;
     TextView totalDistance;
@@ -28,7 +34,36 @@ public class runActivity extends AppCompatActivity {
     private String activityType = "Running";
 
     DBHandler dbHandler = new DBHandler(this);
-    ServiceGPS servicegps = new ServiceGPS();
+
+    protected TextView hrTextView=null;
+    private int heartRate=0;
+    HRSensorHandler hrHandler;
+    private int totalBPM=0;
+    private int counter=0;
+    protected Button sensorReconnect=null;
+    protected FloatingActionButton sensorHelp=null;
+
+    TextView timerTextViewL;
+    TextView recordedTextViewL;
+    long startTime= 0;
+
+    int noti_id = 1;
+
+    Handler timerHandler = new Handler();
+    Runnable timerRunnable = new Runnable() {
+        @Override
+        public void run() {
+                long millis = System.currentTimeMillis() - startTime;
+                int seconds = (int) (millis / 1000);
+                int minutes = seconds / 60;
+                seconds = seconds % 60;
+
+                timerTextViewL.setText(String.format("%d:%02d", minutes, seconds));
+            notificationOp(noti_id, String.format("%d:%02d", minutes, seconds), RunningHelper.getPaceFormatted(), String.format("%.2f", RunningHelper.getTotalDistance()));
+                timerHandler.postDelayed(this, 500);
+        }
+    };
+
 
 
     @Override
@@ -43,19 +78,26 @@ public class runActivity extends AppCompatActivity {
         }
 
         Button startStopButton = (Button) findViewById(R.id.StartStop);
+        hrTextView=(TextView)findViewById(R.id.hrText);
         totalDistance = (TextView) findViewById(R.id.totalDistance);
-        latestPace = (TextView) findViewById(R.id.latestpace);
-        final Intent intent = new Intent(this, ServiceGPS.class);
+        latestPace = (TextView) findViewById(R.id.latestpace);;
         RunningHelper = new activityHelper(runActivity.this, 0); //instantiate a running helper object, the int parameter is the type of activity. 0 for running.
+        hrHandler=new HRSensorHandler(this);
+        sensorReconnect=(Button)findViewById(R.id.HRreconnect);
+        sensorHelp=(FloatingActionButton)findViewById(R.id.floatingHelp);
 
+        timerTextViewL = (TextView) findViewById(R.id.timerTextView);
+        //final Button restButton= (Button) findViewById(R.id.restartB);
+        recordedTextViewL = (TextView) findViewById(R.id.recordedTextView);
 
         startStopButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (!logging) {
-                    //TODO implement timer with start/stop button
                     RunningHelper.startActivity(route); //when the user clicks start, running activity (activity in the traditional sense, not android sense) starts and data starts being collected.
                     Log.d(TAG, "RunningHelper.startActivity(route) called");
                     logging = true; //boolean so that the same button acts as an on/off toggle
+
+                    connectClicked();//activate heart rate sensor
                     Toast.makeText(runActivity.this, "You've started running", Toast.LENGTH_SHORT).show();
                     startUpdateStatsThread(); //start the thread that receives updates from the service
                 } else {
@@ -76,13 +118,58 @@ public class runActivity extends AppCompatActivity {
                         showStatsDialog(timelastSample, FinalDistance);  //show stats dialog
                         logging = false;
                     }
+                    disconnectClicked();//disconnect from HxM sensor
+                    sensorReconnect.setVisibility(View.INVISIBLE);
+                    sensorHelp.setVisibility(View.INVISIBLE);
                 }
 
+                Button  startStopButton= (Button) v;
+                if (startStopButton.getText().equals("stop")){
+                    timerHandler.removeCallbacks(timerRunnable);
+                    recordedTextViewL.setText(timerTextViewL.getText());
+                    startStopButton.setText("Start");
+                }else if (startStopButton.getText().equals("Start")){
+                    startTime = System.currentTimeMillis();
+                    timerHandler.postDelayed(timerRunnable, 0);
+                    startStopButton.setText("stop");
+                }
             }
         });
+
+        //handles sensor reconnection
+        sensorReconnect.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v){
+                connectClicked();//try to connect to sensor
+            }
+        });
+        sensorHelp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sensorHelpDialog();//display help to adjust sensor so that connection can be established
+            }
+        });
+
     }
 
+    //to stop both sensors activity when user quits prematurely
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        //if still logging
+        if (logging) {
+            RunningHelper.stopActivity();//stop GPS
+            disconnectClicked();//stop heart rate monitor
+        }
+    }
 
+    public void notificationOp(int id, String time, String pace, String distance){
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+        builder.setSmallIcon(R.mipmap.ic_launcher);
+        builder.setContentTitle("Trail : Running");
+        builder.setContentText("Time: " + time+ ", Pace: "+ pace + ", Distance : " + distance);
+        NotificationManager NM = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        NM.notify(id,builder.build());
+    }
     private void SaveAttemptDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Save attempt?");
@@ -103,50 +190,58 @@ public class runActivity extends AppCompatActivity {
         builder.show();
 
     }
+
+
+
+
+
+
     //dialog that asks the user if he wants to save the route
     private void NewRouteDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Save Route?");
         final EditText input = new EditText(this);
-        builder.setView(input);
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                //the user wants to save the route. it obviously means he wants to save the attempt with it as well. so we need to build both objects.
-                int totaltime = (int)RunningHelper.getTimeLastsample()/1000;
-                inputRouteName = input.getText().toString();
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
-                String currentDateandTime = sdf.format(new Date());
-                //instantiating a new route object with the constructor for the case in which we have no rowID yet
-                route = new Route(inputRouteName, activityType, RunningHelper.getTotalDistance(), totaltime, currentDateandTime, RunningHelper.getCoordinatesFileName() );
-                Log.d(TAG, "Route object created with constructor without rowID");
-                long addedID = dbHandler.addRoute(route);  //add the New Route to the database and get the rowID of the route that was added
-                Log.d(TAG, "Route object added to ROUTE_TABLE and rowID returned by the databasehandler");
-                //now that the route has been saved, we can save the attempt. we now need to set the rowID of the added route so that we can track to which route the attempt belongs to.
-                route.setRowID(addedID);
-                attempt = new Attempt(route, totaltime, currentDateandTime);
-                dbHandler.addAttempt(attempt); //adding the attempt
-                Log.d(TAG, "Attempt object built and added to database");
+        final AlertDialog dialog = new AlertDialog.Builder(this)
+                .setView(input)
+                .setTitle("Enter route name:")
+                .setPositiveButton("Save", null)
+                .setNegativeButton("Cancel", null)
+                .create();
 
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+
+            @Override
+            public void onShow(final DialogInterface dialog) {
+
+                Button buttonSave = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE);
+                buttonSave.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View view) {
+                        inputRouteName = input.getText().toString();
+                        boolean routeNameExists = dbHandler.doesRouteNameExist(inputRouteName);
+                        if(!(routeNameExists || inputRouteName.isEmpty())) {
+                            //the user wants to save the route. it obviously means he wants to save the attempt with it as well. so we need to build both objects.
+                            int totaltime = (int) RunningHelper.getTimeLastsample() / 1000;
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
+                            String currentDateandTime = sdf.format(new Date());
+                            //instantiating a new route object with the constructor for the case in which we have no rowID yet
+                            route = new Route(inputRouteName, activityType, RunningHelper.getTotalDistance(), totaltime, currentDateandTime, RunningHelper.getCoordinatesFileName());
+                            dbHandler.addRoute(route);  //add the New Route to the database and get the rowID of the route that was added
+                            Log.d(TAG, "Route object added to ROUTE_TABLE");
+                            attempt = new Attempt(route, totaltime, currentDateandTime, route.getSnapshotURL());
+                            dbHandler.addAttempt(attempt); //adding the attempt
+                            Log.d(TAG, "Attempt object built and added to database");
+                            dialog.dismiss();
+                        } else if(routeNameExists) {
+                            Toast.makeText(runActivity.this, "Route name already exists", Toast.LENGTH_SHORT).show();
+                        }
+                        else if(inputRouteName.isEmpty()) {
+                            Toast.makeText(runActivity.this, "Route name cannot be empty", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
             }
         });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                dialog.cancel();
-            }
-        });
-
-        builder.show();
-
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (logging)// if logging is still true
-            RunningHelper.stopActivity();
+        dialog.show();
     }
 
 
@@ -161,10 +256,14 @@ public class runActivity extends AppCompatActivity {
                         public void run() {
                             totalDistance.setText(String.format("%.2f", RunningHelper.getTotalDistance()));
                             latestPace.setText(RunningHelper.getPaceFormatted());
+
                         }
                     });
                     try {
                         Thread.sleep(5000);
+                        //TODO compile average heart rate
+                        totalBPM+=heartRate;//so now it's incrementing at every 5 seconds
+                        counter++;
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -181,7 +280,8 @@ public class runActivity extends AppCompatActivity {
         AlertDialog alertDialog = new AlertDialog.Builder(this).create();
         alertDialog.setTitle("Run ended");
         alertDialog.setMessage("You have runned " + String.format("%.2f", FinalDistance) + " km in " + (time) + " minutes.\n"
-                + "Average pace: " + RunningHelper.getFinalAveragePaceFormatted() + " min/km.");
+                + "Average pace: " + RunningHelper.getFinalAveragePaceFormatted() + " min/km.\n"+
+                "Average heart rage: "+totalBPM/counter+" BPM");
         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
@@ -189,5 +289,64 @@ public class runActivity extends AppCompatActivity {
                     }
                 });
         alertDialog.show();
+    }
+
+
+    @Override
+    public void heartRateReceived(int heartRate){
+        Message msg=new Message();
+        msg.getData().putInt("HeartRate", heartRate);
+        newHandler.sendMessage(msg);
+    }
+    //connect with HxM HR Sensor
+    private void connectClicked(){
+        try{
+
+            hrHandler.Connect();
+            hrHandler.setReciver(runActivity.this);
+            sensorReconnect.setVisibility(View.INVISIBLE);
+            sensorHelp.setVisibility(View.INVISIBLE);
+        }catch (RuntimeException e) {
+            hrTextView.setText("Error connecting to HxM");
+            sensorReconnect.setVisibility(View.VISIBLE);
+            sensorHelp.setVisibility(View.VISIBLE);
+        }
+    }
+
+    //disconnect with HxM HR Sensor
+    private void disconnectClicked(){
+        try{
+            hrHandler.setReciver(null);
+            hrHandler.Disconnect();
+            sensorReconnect.setVisibility(View.INVISIBLE);
+            sensorHelp.setVisibility(View.INVISIBLE);
+        }catch (RuntimeException e){
+            hrTextView.setText("error disconnecting from HxM: "+e.getMessage());//never had problem disconnecting from it so far...but just in case there is, the exception message is for debugging
+        }
+    }
+
+    final Handler newHandler=new Handler(){
+        public void handleMessage(Message msg){
+            heartRate=msg.getData().getInt("HeartRate");
+            hrTextView.setText(Integer.toString(heartRate));
+        }
+    };
+
+    //dialog that pops out when user clicks on the floating help button
+    private void sensorHelpDialog() {
+        AlertDialog helpDialog = new AlertDialog.Builder(this).create();
+        helpDialog.setTitle("Trouble using HxM?");
+        helpDialog.setMessage("Check if your Zephyr HxM is paired with your phone via bluetooth\n"+
+                "Make sure your HxM is charged\n"+
+                "Make sure the probes on the strap are placed onto your chest\n"+
+                "Moisten the strap probes with a bit of water"
+        );
+        helpDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        helpDialog.show();
     }
 }

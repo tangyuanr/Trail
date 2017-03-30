@@ -19,6 +19,7 @@ import java.util.List;
 public class DBHandler extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION=6;
     private static final String DATABASE_NAME="healthData";
+    private boolean isEmpty=true;
 
 
 
@@ -51,8 +52,8 @@ public class DBHandler extends SQLiteOpenHelper {
                 + ACTIVITY_TYPE + " TEXT, " + ROUTE_DISTANCE + " REAL, " + BEST_TIME + " INT, " + DATE_OF_BEST_TIME + " TEXT, " + FILENAME_COORDINATES + " TEXT)";
         Log.e(TAG, CREATE_ROUTE_TABLE);
         db.execSQL(CREATE_ROUTE_TABLE);
-        String CREATE_ATTEMPTS_TABLE="CREATE TABLE "+TABLE_ATTEMPTS+" ("+ATTEMPT_ID+" INTEGER PRIMARY KEY AUTOINCREMENT, "+ROUTE_ID+" INT, "+TOTAL_TIME + " INT, "
-                + DATE_OF_ATTEMPT + " TEXT, " + MAP_SCREENSHOT + " TEXT)";
+        String CREATE_ATTEMPTS_TABLE="CREATE TABLE "+TABLE_ATTEMPTS+" ("+ATTEMPT_ID+" INTEGER PRIMARY KEY AUTOINCREMENT, "+ACTIVITY_TYPE+" TEXT, "+TOTAL_TIME + " INT, "
+                + DATE_OF_ATTEMPT + " TEXT, " + ROUTE_NAME + " TEXT, " + MAP_SCREENSHOT + " TEXT)";
         Log.e(TAG, CREATE_ATTEMPTS_TABLE);
         db.execSQL(CREATE_ATTEMPTS_TABLE);
     }
@@ -69,7 +70,7 @@ public class DBHandler extends SQLiteOpenHelper {
     public ArrayList<Route> getRoutes(String activity) { //
         ArrayList<Route> routesList = new ArrayList<>();
         String query;
-        if(activity == "") {    //getRoutes("") will select all the routes
+        if(activity.equals("")) {    //getRoutes("") will select all the routes
             query = "SELECT * FROM " + TABLE_ROUTES;
             Log.d(TAG, query);
         }
@@ -98,7 +99,7 @@ public class DBHandler extends SQLiteOpenHelper {
     }
 
     //add new Route to Route table
-    public long addRoute(Route route) {
+    public void addRoute(Route route) {
         SQLiteDatabase db=this.getWritableDatabase();
         ContentValues contentValues=new ContentValues();
         contentValues.put(ROUTE_NAME, route.getRouteName());//filename of .txt file containing coordinates
@@ -107,15 +108,19 @@ public class DBHandler extends SQLiteOpenHelper {
         contentValues.put(BEST_TIME, route.getBestTime());
         contentValues.put(DATE_OF_BEST_TIME, route.getDateBestTime());
         contentValues.put(FILENAME_COORDINATES, route.getFilename_coordinates());
-        long addedID = db.insert(TABLE_ROUTES, null, contentValues);  //keeping track of the addedID so that we can call addAttempt for the correct RouteID
+        db.insert(TABLE_ROUTES, null, contentValues);  //keeping track of the addedID so that we can call addAttempt for the correct RouteID
         db.close();
-        return addedID;
+    }
+
+    public void deleteRoute(String routeName) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_ROUTES, ROUTE_NAME +  "='" + routeName + "'", null);
     }
 
     //fetch one route
-    public Route getRoute(long rowid) {
+    public Route getRoute(String routeName) {
         Route route = null;
-        String query = "SELECT * FROM " + TABLE_ROUTES +" WHERE  rowid = " + rowid;
+        String query = "SELECT * FROM " + TABLE_ROUTES +" WHERE " + ROUTE_NAME + " ='" + routeName +"'";
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor routeCursor = db.rawQuery(query, null);
         try {
@@ -126,7 +131,7 @@ public class DBHandler extends SQLiteOpenHelper {
                 int bestTime = routeCursor.getInt(4);
                 String dateBestTime = routeCursor.getString(5);
                 String filename_coordinates = routeCursor.getString(6);
-                route = new Route(rowid, nameOfRoute, activityType, totalDistance, bestTime, dateBestTime, filename_coordinates);
+                route = new Route(nameOfRoute, activityType, totalDistance, bestTime, dateBestTime, filename_coordinates);
             }
         } finally {
             routeCursor.close();
@@ -137,32 +142,32 @@ public class DBHandler extends SQLiteOpenHelper {
     }
 
     //adding an attempt to the attempt table
-    public long addAttempt(Attempt attempt) {
+    public void addAttempt(Attempt attempt) {
         SQLiteDatabase db=this.getWritableDatabase();
         ContentValues contentValues=new ContentValues();
-        contentValues.put(ROUTE_ID, attempt.getRoute().getRowID());
+        contentValues.put(ACTIVITY_TYPE, attempt.getRoute().getActivityType());
         contentValues.put(TOTAL_TIME, attempt.getTotalTimeTaken());
         contentValues.put(DATE_OF_ATTEMPT, attempt.getDateOfAttempt());
         contentValues.put(MAP_SCREENSHOT,attempt.getFileNameStaticMapScreenshot());
-        long addedID = db.insert(TABLE_ATTEMPTS, null, contentValues);
+        contentValues.put(ROUTE_NAME, attempt.getRoute().getRouteName());
+        db.insert(TABLE_ATTEMPTS, null, contentValues);
         db.close();
         compareBestTime(attempt);
-        return addedID;
     }
 
     //compares the current record best time for the given route and if the one of the current attempt is better, update the best time of the route table
     private void compareBestTime(Attempt attempt) {
         int totalTime = attempt.getTotalTimeTaken(); //in seconds
-        long rowID = attempt.getRoute().getRowID(); //id of the row
-        String query = "SELECT * FROM " + TABLE_ROUTES + " WHERE  rowid = " + rowID;
+        String routeName = attempt.getRoute().getRouteName();
+        String query = "SELECT * FROM " + TABLE_ROUTES +" WHERE " + ROUTE_NAME + " ='" + routeName +"'";
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(query, null);
         if (cursor != null) {
             cursor.moveToFirst();
             if (cursor.getInt(4) >= totalTime) {
-                query = "UPDATE " + TABLE_ROUTES + " SET " + BEST_TIME + "=" + totalTime + " WHERE rowid = " + rowID;
+                query = "UPDATE " + TABLE_ROUTES + " SET " + BEST_TIME + "=" + totalTime + " WHERE " + ROUTE_NAME + " ='" + routeName +"'";
                 db.execSQL(query);
-                query = "UPDATE " + TABLE_ROUTES + " SET " + DATE_OF_BEST_TIME + "='" + attempt.getDateOfAttempt() + "' WHERE rowid = " + rowID;
+                query = "UPDATE " + TABLE_ROUTES + " SET " + DATE_OF_BEST_TIME + "='" + attempt.getDateOfAttempt() + "' WHERE " + ROUTE_NAME + " ='" + routeName +"'";
                 Log.d(TAG, "Best time updated");
             }
         }
@@ -171,9 +176,9 @@ public class DBHandler extends SQLiteOpenHelper {
     }
 
     // this checks if the Route table is empty. I
-    public boolean isRouteTableEmpty(){
+    public boolean isRouteTableEmpty(String activityType){
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " +TABLE_ROUTES, null);
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " +TABLE_ROUTES + " WHERE " + ACTIVITY_TYPE + " ='" + activityType + "'", null);
         if(cursor != null){
             cursor.moveToFirst();
             int count = cursor.getInt(0);
@@ -185,11 +190,67 @@ public class DBHandler extends SQLiteOpenHelper {
         return true;
     }
 
+    public boolean doesRouteNameExist(String routeName) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String query = "SELECT * FROM " + TABLE_ROUTES + " WHERE " + ROUTE_NAME + " ='" + routeName + "'";
+        Cursor cursor = db.rawQuery(query, null);
+        if (cursor.moveToFirst()) {
+            return true; //yes, it exists
+        } else {
+            return false; //no, it does not exist
+        }
+    }
+
+    //get general info of all attempts from ATTEMPTS table
+    //data will be read in descending order, so that the display order goes from most recent to oldest
+    public HashMap<String, List<String>> getContent(){
+        HashMap<String, List<String>> expandList = new HashMap<String, List<String>>();
+        String placeholder;
+
+        SQLiteDatabase db=this.getReadableDatabase();
+        String selectQuery = "SELECT * FROM "+TABLE_ATTEMPTS;
+        Log.e(TAG, selectQuery);
+
+        Cursor cursor=db.rawQuery(selectQuery,null);
+
+        //read data in reverse order
+        if (cursor.moveToLast()) {
+            while (true) {
+                List<String> dataHolder = new ArrayList<String>();
+
+                placeholder = cursor.getString(cursor.getColumnIndex(ACTIVITY_TYPE));
+                Log.d(TAG, "read ACTIVITY TYPE from TABLE ATTEMPTS: " + placeholder);
+                dataHolder.add("ACTIVITY: " + placeholder);
+
+                placeholder = cursor.getString(cursor.getColumnIndex(ROUTE_NAME));
+                Log.d(TAG, "read ROUTE NAME from TABLE ATTEMPTS: " + placeholder);
+                dataHolder.add("ROUTE:      " + placeholder);
+
+                placeholder = cursor.getString(cursor.getColumnIndex(TOTAL_TIME));
+                Log.d(TAG, "read TOTAL TIME from TABLE ATTEMPTS: " + placeholder);
+                dataHolder.add("TOTAL TIME: " + placeholder);
+
+                placeholder = cursor.getString(cursor.getColumnIndex(MAP_SCREENSHOT));
+                Log.d(TAG, "read MAP SCREENSHOT from TABLE ATTEMPTS: " + placeholder);
+                dataHolder.add("MAP SCREENSHOT url (temporary) " + placeholder);
+
+                //when adding row data is finished, name hashmap key with date
+                placeholder = cursor.getString(cursor.getColumnIndex(DATE_OF_ATTEMPT));
+                Log.d(TAG, "read DATE OF ATTEMPT from TABLE ATTEMPTS");
+                expandList.put("DATE: "+placeholder, dataHolder);
+
+                if (cursor.isFirst()) {
+                    cursor.close();
+                    db.close();
+                    break;
+                }
+
+                cursor.moveToPrevious();
+            }
+        }
 
 
-
-
-
-
+        return expandList;
+    }
 
 }
