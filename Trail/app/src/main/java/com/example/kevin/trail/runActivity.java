@@ -108,25 +108,30 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                         if (!(route == null)) {  //if Route is not null, it means a route was sent was sent by SelectRouteRunning
                             attempt = RunningHelper.getAttempt();   //build up the attempt from the stats held by the activityHelper. the runningHelper already has an instance of Route, so it can build the attempt and return it.
                             Log.d(TAG, "Route is not null. Attempt object built.");
-                            SaveAttemptDialog();    //prompt the user if he wants to save the attempt
+                            SaveAttemptDialog();
+
                         } else {  //else, Route is null and the user selected New Route, so we need to ask the user to give the new route a name
                             NewRouteDialog();
+
                         }
                         long timelastSample = RunningHelper.getTimeLastsample();    //get final stats for display
                         float FinalDistance = RunningHelper.getTotalDistance();    //get final stats for display
                         RunningHelper.stopActivity();
+
                         showStatsDialog(timelastSample, FinalDistance);  //show stats dialog
                         logging = false;
                     }
                     disconnectClicked();//disconnect from HxM sensor
                     sensorReconnect.setVisibility(View.INVISIBLE);
                     sensorHelp.setVisibility(View.INVISIBLE);
+
                 }
 
                 Button  startStopButton= (Button) v;
                 if (startStopButton.getText().equals("stop")){
                     timerHandler.removeCallbacks(timerRunnable);
                     recordedTextViewL.setText(timerTextViewL.getText());
+
                     startStopButton.setText("Start");
                 }else if (startStopButton.getText().equals("Start")){
                     startTime = System.currentTimeMillis();
@@ -190,6 +195,27 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
         builder.show();
 
     }
+    private void ComparisonDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Do you want to see comparison?");
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent intent = new Intent(runActivity.this, comparison.class);
+                startActivity(intent);
+            }
+        });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
+
+
+    }
 
 
 
@@ -226,6 +252,10 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                             //instantiating a new route object with the constructor for the case in which we have no rowID yet
                             route = new Route(inputRouteName, activityType, RunningHelper.getTotalDistance(), totaltime, currentDateandTime, RunningHelper.getCoordinatesFileName());
                             dbHandler.addRoute(route);  //add the New Route to the database and get the rowID of the route that was added
+                            if(route!=null){
+                                ComparisonDialog(); // output comparison dialog
+                            }
+
                             Log.d(TAG, "Route object added to ROUTE_TABLE");
                             attempt = new Attempt(route, totaltime, currentDateandTime, route.getSnapshotURL());
                             dbHandler.addAttempt(attempt); //adding the attempt
@@ -242,6 +272,8 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
             }
         });
         dialog.show();
+
+
     }
 
 

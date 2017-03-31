@@ -190,6 +190,79 @@ public class DBHandler extends SQLiteOpenHelper {
         return true;
     }
 
+
+
+
+
+    ///checking is attempt table is empty
+    public boolean checkattempt(String activityType){
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " +TABLE_ATTEMPTS + " WHERE " + ACTIVITY_TYPE + " ='" + activityType + "'", null);
+        if(cursor != null){
+            cursor.moveToFirst();
+            int count = cursor.getInt(0);
+            if(count > 0){
+                return false;
+            }
+            cursor.close();
+        }
+        return true;
+    }
+///get arraylist of attempts
+    public ArrayList<Attempt> getAttempts(String activity) { //
+        ArrayList<Attempt> attemptList = new ArrayList<>();
+        String query;
+        if(activity.equals("")) {    //getRoutes("") will select all the routes
+            query = "SELECT * FROM " + TABLE_ATTEMPTS;
+            Log.d(TAG, query);
+        }
+        else {  //ex: when we call getRoutes("Running") to only display a specific type;
+            query = "SELECT * FROM " + TABLE_ATTEMPTS + " WHERE " + ACTIVITY_TYPE + " IN ('" + activity + "')";
+            Log.d(TAG, query);
+        }
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor routesCursor = db.rawQuery(query, null);
+        try {
+            while (routesCursor.moveToNext()) {
+                String activityType = routesCursor.getString(1);
+                int totalTime = routesCursor.getInt(2);
+                String DateofAttempt = routesCursor.getString(3);
+                String routeName = routesCursor.getString(4);
+
+                String mapScreenShot = routesCursor.getString(5);
+                Attempt attempt = new Attempt(activityType, totalTime, DateofAttempt, routeName,mapScreenShot);
+                attemptList.add(attempt);
+            }
+        } finally {
+            routesCursor.close();
+        }
+        db.close();
+        return attemptList;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     public boolean doesRouteNameExist(String routeName) {
         SQLiteDatabase db = this.getWritableDatabase();
         String query = "SELECT * FROM " + TABLE_ROUTES + " WHERE " + ROUTE_NAME + " ='" + routeName + "'";

@@ -1,15 +1,18 @@
 package com.example.kevin.trail;
 
+import android.Manifest;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.icu.text.SimpleDateFormat;
 import android.location.Location;
 import android.os.Handler;
 import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -53,7 +56,7 @@ public class hikeActivity extends AppCompatActivity implements
         GoogleMap.OnCameraMoveCanceledListener,
         GoogleMap.OnCameraIdleListener,
         GoogleMap.OnMyLocationButtonClickListener,
-        IHeartRateReciever{
+        IHeartRateReciever {
 
     private static final String TAG = "hikeActivity";
     Route route = null;
@@ -81,14 +84,14 @@ public class hikeActivity extends AppCompatActivity implements
     ArrayList<Location> locationArray = new ArrayList<Location>();
 
     private int heartRate;
-    protected TextView hrTextView=null;
+    protected TextView hrTextView = null;
     private HRSensorHandler hrHandler;
-    protected Button sensorReconnect=null;
-    protected FloatingActionButton sensorHelp=null;
+    protected Button sensorReconnect = null;
+    protected FloatingActionButton sensorHelp = null;
 
     TextView timerTextViewL;
-    long startTime= 0;
-    int noti_id=1;
+    long startTime = 0;
+    int noti_id = 1;
     Handler timerHandler = new Handler();
     Runnable timerRunnable = new Runnable() {
         @Override
@@ -109,10 +112,10 @@ public class hikeActivity extends AppCompatActivity implements
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_hike);
-        hrTextView=(TextView)findViewById(R.id.heartRateText);
-        hrHandler=new HRSensorHandler(this);
-        sensorReconnect=(Button)findViewById(R.id.hrReconnectHike);
-        sensorHelp=(FloatingActionButton)findViewById(R.id.hrReconectHelp);
+        hrTextView = (TextView) findViewById(R.id.heartRateText);
+        hrHandler = new HRSensorHandler(this);
+        sensorReconnect = (Button) findViewById(R.id.hrReconnectHike);
+        sensorHelp = (FloatingActionButton) findViewById(R.id.hrReconectHelp);
 
         startStopButton = (Button) findViewById(R.id.startStopHiking);
         resetTrailButton = (Button) findViewById(R.id.resetTrail);
@@ -175,6 +178,7 @@ public class hikeActivity extends AppCompatActivity implements
                     startUpdateStatsThread();
                 } else {
                     confirmDialog();
+
                 }
             }
         });
@@ -217,16 +221,36 @@ public class hikeActivity extends AppCompatActivity implements
                 .setNegativeButton("No", null)
                 .show();
     }
+    private void ComparisonDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Do you want to see comparison?");
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent intent = new Intent(hikeActivity.this, comparison.class);
+                startActivity(intent);
+            }
+        });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
 
-    public void notificationOp(int id, String time, String distance){
+        builder.show();
+
+
+    }
+
+    public void notificationOp(int id, String time, String distance) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         builder.setSmallIcon(R.mipmap.ic_launcher);
         builder.setContentTitle("Trail : Hiking");
-        builder.setContentText("Time: " + timerTextViewL.getText()+ ", Distance : " + HikingHelper.getTotalDistance());
+        builder.setContentText("Time: " + timerTextViewL.getText() + ", Distance : " + HikingHelper.getTotalDistance());
         NotificationManager NM = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        NM.notify(id,builder.build());
+        NM.notify(id, builder.build());
     }
-
 
 
     private void NewRouteDialog() {
@@ -259,8 +283,11 @@ public class hikeActivity extends AppCompatActivity implements
                             route = new Route(inputRouteName, activityType, HikingHelper.getTotalDistance(), totaltime, currentDateandTime, HikingHelper.getCoordinatesFileName());
                             dbHandler.addRoute(route);
                             Log.d(TAG, "Route object added to ROUTE_TABLE");
-                            attempt=new Attempt(route, totaltime, currentDateandTime, route.getSnapshotURL());
+                            attempt = new Attempt(route, totaltime, currentDateandTime, route.getSnapshotURL());
                             dbHandler.addAttempt(attempt); //adding the attempt
+                            if(route!=null){
+                                ComparisonDialog();
+                            }
                             Log.d(TAG, "Attempt object built and added to database");
                             dialog.dismiss();
                         } else if (routeNameExists) {
@@ -325,6 +352,16 @@ public class hikeActivity extends AppCompatActivity implements
         googleMAP.setOnCameraMoveCanceledListener(this);
         googleMAP.setOnMyLocationButtonClickListener(this);
         buildGoogleApiClient();
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
         googleMAP.setMyLocationEnabled(true);
         if (!(route == null)) {
             selectedRoute = addPolyLine(route.buildLocationArray(), "SelectedRoute");
@@ -347,6 +384,16 @@ public class hikeActivity extends AppCompatActivity implements
         locrequest.setInterval(1000);
         locrequest.setFastestInterval(1000);
         locrequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
         LocationServices.FusedLocationApi.requestLocationUpdates(googleAPIclient, locrequest, this);
         lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleAPIclient);
         if (lastLocation != null) {

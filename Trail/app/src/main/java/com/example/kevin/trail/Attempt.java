@@ -19,6 +19,8 @@ public class Attempt {
     private int totalTimeTaken; //in seconds
     private String dateOfAttempt; //YYMMDD
     private String fileNameStaticMapScreenshot;
+    String Routename;
+    String Activitytype;
 
     //a route must be provided to the constructor (i.e. no attempt without an associated route)
     public Attempt(Route route, int totalTimeTaken, String dateOfAttempt, String URL) {
@@ -26,7 +28,20 @@ public class Attempt {
         this.totalTimeTaken = totalTimeTaken;
         this.dateOfAttempt = dateOfAttempt;
         this.fileNameStaticMapScreenshot=URL;
+    }///Ateempts for data table
+    public Attempt(String activitytype,int totaltime,String dateofattempt,String Routename, String mapscreenshot){
+        this.Activitytype = activitytype;
+        this.totalTimeTaken = totaltime;
+        this.dateOfAttempt = dateofattempt;
+        this.Routename = Routename;
+        this.fileNameStaticMapScreenshot = mapscreenshot;
+
     }
+
+    public String getActivityType() {
+        return Activitytype;
+    }
+    public String getRouteName(){return Routename;  }
 
     public String getFileNameStaticMapScreenshot() {
         return fileNameStaticMapScreenshot;
