@@ -47,7 +47,6 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
     protected TextView caloriesTextView=null;
 
     TextView timerTextViewL;
-    TextView recordedTextViewL;
     long startTime= 0;
 
     int noti_id = 1;
@@ -93,7 +92,6 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
 
         timerTextViewL = (TextView) findViewById(R.id.timerTextView);
         //final Button restButton= (Button) findViewById(R.id.restartB);
-        recordedTextViewL = (TextView) findViewById(R.id.recordedTextView);
 
         startStopButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -105,6 +103,7 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                     connectClicked();//activate heart rate sensor
                     Toast.makeText(runActivity.this, "You've started running", Toast.LENGTH_SHORT).show();
                     startUpdateStatsThread(); //start the thread that receives updates from the service
+                    caloriesTextView.setText(Double.toString(totalCaloriesBurnt));
                 } else {
                     if (RunningHelper.getCurrentNumberOfSamples() < 1) {
                         logging = false;
@@ -132,7 +131,6 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                 Button  startStopButton= (Button) v;
                 if (startStopButton.getText().equals("stop")){
                     timerHandler.removeCallbacks(timerRunnable);
-                    recordedTextViewL.setText(timerTextViewL.getText());
                     startStopButton.setText("Start");
                 }else if (startStopButton.getText().equals("Start")){
                     startTime = System.currentTimeMillis();
@@ -267,11 +265,9 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                     });
                     try {
                         Thread.sleep(5000);
-                        //TODO compile average heart rate
                         totalBPM+=heartRate;//so now it's incrementing at every 5 seconds
                         counter++;
                         totalCaloriesBurnt+=caloriesCalculator(heartRate);
-                        caloriesTextView.setText(Double.toString(totalCaloriesBurnt));
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

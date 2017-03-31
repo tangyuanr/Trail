@@ -182,6 +182,7 @@ public class hikeActivity extends AppCompatActivity implements
                     startStopButton.setText("Stop logging");
                     loggingText.setVisibility(View.VISIBLE);
                     startUpdateStatsThread();
+                    caloriesTxtView.setText(Double.toString(totalCaloriesBurnt));
                 } else {
                     confirmDialog();
                 }
@@ -504,7 +505,6 @@ public class hikeActivity extends AppCompatActivity implements
                         totalBMP+=heartRate;
                         counter++;
                         totalCaloriesBurnt+=caloriesCalculator(heartRate);
-                        caloriesTxtView.setText(Double.toString(totalCaloriesBurnt));
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
