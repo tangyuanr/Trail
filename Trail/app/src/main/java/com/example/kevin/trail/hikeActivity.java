@@ -37,6 +37,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.RuntimeRemoteException;
 
 import org.w3c.dom.Text;
 
@@ -82,7 +83,7 @@ public class hikeActivity extends AppCompatActivity implements
     Location lastLocation;
     ArrayList<Location> locationArray = new ArrayList<Location>();
 
-    private int heartRate;
+
     private int totalBMP=0;
     private int counter=0;
     protected TextView hrTextView=null;
@@ -170,13 +171,15 @@ public class hikeActivity extends AppCompatActivity implements
 
         timerTextViewL = (TextView) findViewById(R.id.timerTextView);
 
+        //connectClicked();//start sensor upon entering the activity
+
         startStopButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (!logging) {
                     logging = true;
                     HikingHelper = new activityHelper(hikeActivity.this, 1);
                     HikingHelper.startActivity(null); //start logging samples
-                    connectClicked();
+                    //connectClicked();
                     startTime = System.currentTimeMillis();
                     timerHandler.postDelayed(timerRunnable, 0);
                     startStopButton.setText("Stop logging");
@@ -213,8 +216,8 @@ public class hikeActivity extends AppCompatActivity implements
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         HikingHelper.stopActivity();
-                        logging = false;
                         disconnectClicked();
+                        logging = false;
                         timerHandler.removeCallbacks(timerRunnable);
                         startStopButton.setText("Start logging");
                         loggingText.setVisibility(View.INVISIBLE);
@@ -461,12 +464,14 @@ public class hikeActivity extends AppCompatActivity implements
             sensorHelp.setVisibility(View.INVISIBLE);
         }catch (RuntimeException e){
             hrTextView.setText("error disconnecting from HxM"+e.getMessage());//never encountered so far, put exception message here to debug
+            sensorReconnect.setVisibility(View.INVISIBLE);
+            sensorHelp.setVisibility(View.INVISIBLE);
         }
     }
     final Handler newHandler=new Handler(){
         public void handleMessage(Message msg){
-            heartRate=msg.getData().getInt("HeartRate");
-            hrTextView.setText(Integer.toString(heartRate));
+            MainActivity.heartRate=msg.getData().getInt("HeartRate");
+            hrTextView.setText(Integer.toString(MainActivity.heartRate));
         }
     };
 
@@ -502,9 +507,9 @@ public class hikeActivity extends AppCompatActivity implements
                     });
                     try {
                         Thread.sleep(5000);
-                        totalBMP+=heartRate;
+                        totalBMP+=MainActivity.heartRate;
                         counter++;
-                        totalCaloriesBurnt+=caloriesCalculator(heartRate);
+                        totalCaloriesBurnt+=caloriesCalculator(MainActivity.heartRate);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
