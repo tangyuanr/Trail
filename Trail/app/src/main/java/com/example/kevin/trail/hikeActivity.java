@@ -38,6 +38,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -81,10 +83,15 @@ public class hikeActivity extends AppCompatActivity implements
     ArrayList<Location> locationArray = new ArrayList<Location>();
 
     private int heartRate;
+    private int totalBMP=0;
+    private int counter=0;
     protected TextView hrTextView=null;
     private HRSensorHandler hrHandler;
     protected Button sensorReconnect=null;
     protected FloatingActionButton sensorHelp=null;
+    private sharedPreferenceHelper sharedPref;
+    private double totalCaloriesBurnt=0;
+    protected TextView caloriesTxtView=null;
 
     TextView timerTextViewL;
     long startTime= 0;
@@ -113,6 +120,8 @@ public class hikeActivity extends AppCompatActivity implements
         hrHandler=new HRSensorHandler(this);
         sensorReconnect=(Button)findViewById(R.id.hrReconnectHike);
         sensorHelp=(FloatingActionButton)findViewById(R.id.hrReconectHelp);
+        sharedPref = new sharedPreferenceHelper(hikeActivity.this);
+        caloriesTxtView=(TextView)findViewById(R.id.caloriesTextView);
 
         startStopButton = (Button) findViewById(R.id.startStopHiking);
         resetTrailButton = (Button) findViewById(R.id.resetTrail);
@@ -259,7 +268,7 @@ public class hikeActivity extends AppCompatActivity implements
                             route = new Route(inputRouteName, activityType, HikingHelper.getTotalDistance(), totaltime, currentDateandTime, HikingHelper.getCoordinatesFileName());
                             dbHandler.addRoute(route);
                             Log.d(TAG, "Route object added to ROUTE_TABLE");
-                            attempt=new Attempt(route, totaltime, currentDateandTime, route.getSnapshotURL());
+                            attempt=new Attempt(route, totaltime, currentDateandTime, route.getSnapshotURL(), totalBMP/counter, (int)totalCaloriesBurnt);
                             dbHandler.addAttempt(attempt); //adding the attempt
                             Log.d(TAG, "Attempt object built and added to database");
                             dialog.dismiss();
@@ -492,6 +501,10 @@ public class hikeActivity extends AppCompatActivity implements
                     });
                     try {
                         Thread.sleep(5000);
+                        totalBMP+=heartRate;
+                        counter++;
+                        totalCaloriesBurnt+=caloriesCalculator(heartRate);
+                        caloriesTxtView.setText(Double.toString(totalCaloriesBurnt));
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -500,5 +513,32 @@ public class hikeActivity extends AppCompatActivity implements
         });
         th.start();
     }
+
+    //calculate calories based on heart rate, called inside the thread at every 5 second
+    private double caloriesCalculator(int HR){
+        double age=Double.parseDouble(sharedPref.getProfileAge());
+        String gender=sharedPref.getProfileGender();
+        double weight=Double.parseDouble(sharedPref.getProfileWeight());
+        double LB_to_KG=0.453592;
+        double DURATION = 5/60;//in minute
+
+        double calories=0;
+
+        //calories formula for female
+        if (gender=="m"||gender=="M"){
+            calories = age * 0.2017 + weight * LB_to_KG * 0.1988 + HR * 0.6309 - 55.0969;
+            calories = calories * DURATION / 4.184;
+        }
+        else if (gender=="f"||gender=="F"){
+            calories = age * 0.074 + weight * LB_to_KG * 0.1263 + 0.4472 * HR - 20.4022;
+            calories = calories * DURATION / 4.184;
+        }
+
+        if (calories<0)
+            calories=0;
+
+        return calories;
+    }
+
 
 }

@@ -44,6 +44,8 @@ public class DBHandler extends SQLiteOpenHelper {
     private static final String TOTAL_TIME = "TotalTime"; //in seconds
     private static final String DATE_OF_ATTEMPT = "DateOfAttempt"; //in seconds
     private static final String MAP_SCREENSHOT = "LinkToMapScreenshot";
+    private static final String AVG_HR="AverageHeartRate";//in BMP
+    private static final String CALORIES="CaloriesBurnt";//in KCal
 
     @Override
     public void onCreate(SQLiteDatabase db){
@@ -53,7 +55,7 @@ public class DBHandler extends SQLiteOpenHelper {
         Log.e(TAG, CREATE_ROUTE_TABLE);
         db.execSQL(CREATE_ROUTE_TABLE);
         String CREATE_ATTEMPTS_TABLE="CREATE TABLE "+TABLE_ATTEMPTS+" ("+ATTEMPT_ID+" INTEGER PRIMARY KEY AUTOINCREMENT, "+ACTIVITY_TYPE+" TEXT, "+TOTAL_TIME + " INT, "
-                + DATE_OF_ATTEMPT + " TEXT, " + ROUTE_NAME + " TEXT, " + MAP_SCREENSHOT + " TEXT)";
+                + DATE_OF_ATTEMPT + " TEXT, " + ROUTE_NAME + " TEXT, " +AVG_HR +" INT, " + CALORIES + " INT, "+ MAP_SCREENSHOT + " TEXT)";
         Log.e(TAG, CREATE_ATTEMPTS_TABLE);
         db.execSQL(CREATE_ATTEMPTS_TABLE);
     }
@@ -227,8 +229,16 @@ public class DBHandler extends SQLiteOpenHelper {
                 dataHolder.add("ROUTE:      " + placeholder);
 
                 placeholder = cursor.getString(cursor.getColumnIndex(TOTAL_TIME));
-                Log.d(TAG, "read TOTAL TIME from TABLE ATTEMPTS: " + placeholder);
+                Log.d(TAG, "read TOTAL TIME from TABLE ATTEMPTS: " + timeReformat(placeholder));
                 dataHolder.add("TOTAL TIME: " + placeholder);
+
+                placeholder = cursor.getString(cursor.getColumnIndex(AVG_HR));
+                Log.d(TAG, "read AVERAGE HEART RATE from TABLE ATTEMPTS: " + placeholder);
+                dataHolder.add("AVERAGE HEART RAGE:      " + placeholder + "BMP");
+
+                placeholder = cursor.getString(cursor.getColumnIndex(CALORIES));
+                Log.d(TAG, "read CALORIES BURNT from TABLE ATTEMPTS: " + placeholder);
+                dataHolder.add("CALORIES BURNT:      " + placeholder+"KCAL");
 
                 placeholder = cursor.getString(cursor.getColumnIndex(MAP_SCREENSHOT));
                 Log.d(TAG, "read MAP SCREENSHOT from TABLE ATTEMPTS: " + placeholder);
@@ -251,6 +261,17 @@ public class DBHandler extends SQLiteOpenHelper {
 
 
         return expandList;
+    }
+
+    private String timeReformat(String timeInSecond){
+        int time=Integer.parseInt(timeInSecond);
+        int seconds = time%60;
+        int minutes = time/60;
+        minutes=minutes%60;
+        int hours=time/3600;
+
+        String formatted=hours+"H"+minutes+"M"+seconds+"S";
+        return formatted;
     }
 
 }

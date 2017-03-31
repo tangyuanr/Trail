@@ -42,6 +42,9 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
     private int counter=0;
     protected Button sensorReconnect=null;
     protected FloatingActionButton sensorHelp=null;
+    private sharedPreferenceHelper sharedPref;
+    private double totalCaloriesBurnt=0;
+    protected TextView caloriesTextView=null;
 
     TextView timerTextViewL;
     TextView recordedTextViewL;
@@ -85,6 +88,8 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
         hrHandler=new HRSensorHandler(this);
         sensorReconnect=(Button)findViewById(R.id.HRreconnect);
         sensorHelp=(FloatingActionButton)findViewById(R.id.floatingHelp);
+        sharedPref=new sharedPreferenceHelper(runActivity.this);
+        caloriesTextView=(TextView)findViewById(R.id.caloriesText);
 
         timerTextViewL = (TextView) findViewById(R.id.timerTextView);
         //final Button restButton= (Button) findViewById(R.id.restartB);
@@ -106,7 +111,8 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                         RunningHelper.stopActivity();
                     } else {
                         if (!(route == null)) {  //if Route is not null, it means a route was sent was sent by SelectRouteRunning
-                            attempt = RunningHelper.getAttempt();   //build up the attempt from the stats held by the activityHelper. the runningHelper already has an instance of Route, so it can build the attempt and return it.
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmm");
+                            attempt = new Attempt(route, (int) RunningHelper.getTimeLastsample() / 1000, sdf.format(new Date()), route.getSnapshotURL(), totalBPM/counter, (int)totalCaloriesBurnt);
                             Log.d(TAG, "Route is not null. Attempt object built.");
                             SaveAttemptDialog();    //prompt the user if he wants to save the attempt
                         } else {  //else, Route is null and the user selected New Route, so we need to ask the user to give the new route a name
@@ -227,7 +233,7 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                             route = new Route(inputRouteName, activityType, RunningHelper.getTotalDistance(), totaltime, currentDateandTime, RunningHelper.getCoordinatesFileName());
                             dbHandler.addRoute(route);  //add the New Route to the database and get the rowID of the route that was added
                             Log.d(TAG, "Route object added to ROUTE_TABLE");
-                            attempt = new Attempt(route, totaltime, currentDateandTime, route.getSnapshotURL());
+                            attempt = new Attempt(route, totaltime, currentDateandTime, route.getSnapshotURL(), totalBPM/counter, (int)totalCaloriesBurnt);
                             dbHandler.addAttempt(attempt); //adding the attempt
                             Log.d(TAG, "Attempt object built and added to database");
                             dialog.dismiss();
@@ -264,6 +270,8 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                         //TODO compile average heart rate
                         totalBPM+=heartRate;//so now it's incrementing at every 5 seconds
                         counter++;
+                        totalCaloriesBurnt+=caloriesCalculator(heartRate);
+                        caloriesTextView.setText(Double.toString(totalCaloriesBurnt));
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -281,7 +289,8 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
         alertDialog.setTitle("Run ended");
         alertDialog.setMessage("You have runned " + String.format("%.2f", FinalDistance) + " km in " + (time) + " minutes.\n"
                 + "Average pace: " + RunningHelper.getFinalAveragePaceFormatted() + " min/km.\n"+
-                "Average heart rage: "+totalBPM/counter+" BPM");
+                "Average heart rage: "+totalBPM/counter+" BPM\n"+
+                "Total calories burnt: "+totalCaloriesBurnt+" KCal");
         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
@@ -348,5 +357,31 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                     }
                 });
         helpDialog.show();
+    }
+
+    //calculate calories based on heart rate, called inside the thread at every 5 second
+    private double caloriesCalculator(int HR){
+        double age=Double.parseDouble(sharedPref.getProfileAge());
+        String gender=sharedPref.getProfileGender();
+        double weight=Double.parseDouble(sharedPref.getProfileWeight());
+        double LB_to_KG=0.453592;
+        double DURATION = 5/60;//in minute
+
+        double calories=0;
+
+        //calories formula for female
+        if (gender=="m"||gender=="M"){
+            calories = age * 0.2017 + weight * LB_to_KG * 0.1988 + HR * 0.6309 - 55.0969;
+            calories = calories * DURATION / 4.184;
+        }
+        else if (gender=="f"||gender=="F"){
+            calories = age * 0.074 + weight * LB_to_KG * 0.1263 + 0.4472 * HR - 20.4022;
+            calories = calories * DURATION / 4.184;
+        }
+
+        if (calories<0)
+            calories=0;
+
+        return calories;
     }
 }

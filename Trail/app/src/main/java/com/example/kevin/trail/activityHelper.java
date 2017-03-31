@@ -63,9 +63,9 @@ public class activityHelper {
         context.stopService(intent);
     }
 
-    public Attempt getAttempt() {
-        return new Attempt(route, (int) tLastSample/1000, getDate(), route.getSnapshotURL()); //tLastSample is in milliseconds so we divide by 1000
-    }
+//    public Attempt getAttempt() {
+//        return new Attempt(route, (int) tLastSample/1000, getDate(), route.getSnapshotURL()); //tLastSample is in milliseconds so we divide by 1000
+//    }
 
     private String getDate() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
