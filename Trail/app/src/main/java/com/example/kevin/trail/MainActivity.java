@@ -89,11 +89,25 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
                 }
             });
 
-            bikeButtonlink.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View view) {
-                    goToBikeActivity();
+      //      bikeButtonlink.setOnClickListener(new View.OnClickListener() {
+        //        public void onClick(View view) {
+          //          goToBikeActivity();
+            //    }
+           // });
+
+        bikeButtonlink.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                if (dbhandler.isRouteTableEmpty("Biking")) {
+                    Intent intent = new Intent(MainActivity.this, loggerActivity.class);
+                    intent.putExtra("activityType", "Biking");
+                    startActivity(intent);
+                } else {
+                    Intent intent = new Intent(MainActivity.this, routeManager.class);
+                    intent.putExtra("activityType", "Biking");
+                    startActivity(intent);
                 }
-            });
+            }
+        });
 
         graphButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
@@ -154,10 +168,6 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
         startActivity(intent);
     }
 
-    void goToBikeActivity() {
-        Intent intent = new Intent(MainActivity.this, bikeActivity.class);
-        startActivity(intent);
-    }
 
     void goToHistoryActivity() {
         Intent intent = new Intent(MainActivity.this, historyActivity.class);

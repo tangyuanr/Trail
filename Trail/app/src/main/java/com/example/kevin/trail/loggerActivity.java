@@ -1,9 +1,11 @@
 package com.example.kevin.trail;
 
+import android.Manifest;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -11,6 +13,7 @@ import android.location.Location;
 import android.os.Handler;
 import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -91,15 +94,15 @@ public class loggerActivity extends AppCompatActivity implements
     private String imagefilename;
 
 
-    private int totalBMP=0;
-    private int counter=0;
-    protected TextView hrTextView=null;
+    private int totalBMP = 0;
+    private int counter = 0;
+    protected TextView hrTextView = null;
     //private HRSensorHandler hrHandler;
-    protected Button sensorReconnect=null;
-    protected FloatingActionButton sensorHelp=null;
+    protected Button sensorReconnect = null;
+    protected FloatingActionButton sensorHelp = null;
     private sharedPreferenceHelper sharedPref;
-    private double totalCaloriesBurnt=0;
-    protected TextView caloriesTxtView=null;
+    private double totalCaloriesBurnt = 0;
+    protected TextView caloriesTxtView = null;
 
     TextView timerTextViewL;
     long startTime = 0;
@@ -124,12 +127,12 @@ public class loggerActivity extends AppCompatActivity implements
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_logger);
-        hrTextView=(TextView)findViewById(R.id.heartRateText);
+        hrTextView = (TextView) findViewById(R.id.heartRateText);
         //hrHandler=new HRSensorHandler(this);
-        sensorReconnect=(Button)findViewById(R.id.hrReconnectHike);
-        sensorHelp=(FloatingActionButton)findViewById(R.id.hrReconectHelp);
+        sensorReconnect = (Button) findViewById(R.id.hrReconnectHike);
+        sensorHelp = (FloatingActionButton) findViewById(R.id.hrReconectHelp);
         sharedPref = new sharedPreferenceHelper(loggerActivity.this);
-        caloriesTxtView=(TextView)findViewById(R.id.caloriesTextView);
+        caloriesTxtView = (TextView) findViewById(R.id.caloriesTextView);
 
         startStopButton = (Button) findViewById(R.id.startStop);
         resetTrailButton = (Button) findViewById(R.id.resetTrail);
@@ -157,7 +160,9 @@ public class loggerActivity extends AppCompatActivity implements
         routeNameTextView = (TextView) findViewById(R.id.routeName);
         totalDistanceTravelledTextView = (TextView) findViewById(R.id.distanceTravelled);
         Intent receivedIntent = getIntent();    //retrieve the intent that was sent to check if it has a Route object
-        if(receivedIntent.hasExtra("activityType")) {activityType = receivedIntent.getStringExtra("activityType");}
+        if (receivedIntent.hasExtra("activityType")) {
+            activityType = receivedIntent.getStringExtra("activityType");
+        }
         if (receivedIntent.hasExtra("route")) {  //if the intent has a route object
             route = (Route) receivedIntent.getSerializableExtra("route");
             routeOrAttempt = "attempt";
@@ -196,7 +201,7 @@ public class loggerActivity extends AppCompatActivity implements
                     startUpdateStatsThread();
                     caloriesTxtView.setText(Double.toString(totalCaloriesBurnt));
 
-                    if (MainActivity.heartRate==0){
+                    if (MainActivity.heartRate == 0) {
                         sensorReconnect.setVisibility(View.VISIBLE);
                         sensorHelp.setVisibility(View.VISIBLE);
                     }
@@ -217,7 +222,7 @@ public class loggerActivity extends AppCompatActivity implements
                     sensorReconnect.setVisibility(View.INVISIBLE);
                     sensorHelp.setVisibility(View.INVISIBLE);
 
-                }catch(RuntimeException e){
+                } catch (RuntimeException e) {
                     hrTextView.setText("error connecting to HxM");
                     sensorReconnect.setVisibility(View.VISIBLE);
                     sensorHelp.setVisibility(View.VISIBLE);
@@ -279,9 +284,9 @@ public class loggerActivity extends AppCompatActivity implements
                 int totaltime = (int) activityhelper.getTimeLastsample() / 1000;
                 java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
                 String currentDateandTime = sdf.format(new Date());
-                String snapshotURL=route.getStaticAPIURL(loggerActivity.this, 250, 250);
+                String snapshotURL = route.getStaticAPIURL(loggerActivity.this, 250, 250);
                 imageDownload(loggerActivity.this, snapshotURL);
-                attempt=new Attempt(route, totaltime, activityhelper.getTotalDistance(), currentDateandTime,snapshotURL , totalBMP/counter, (int)totalCaloriesBurnt, imagefilename);
+                attempt = new Attempt(route, totaltime, activityhelper.getTotalDistance(), currentDateandTime, snapshotURL, totalBMP / counter, (int) totalCaloriesBurnt, imagefilename);
                 dbHandler.addAttempt(attempt); //save the attempt to the database
                 Log.d(TAG, "Attempt added to the database");
             }
@@ -330,9 +335,9 @@ public class loggerActivity extends AppCompatActivity implements
                                 dbHandler.addRoute(route);
                                 Log.d(TAG, "Route object added to ROUTE_TABLE");
 
-                                String snapshotURL=route.getStaticAPIURL(loggerActivity.this, 250, 250);
+                                String snapshotURL = route.getStaticAPIURL(loggerActivity.this, 250, 250);
                                 imageDownload(loggerActivity.this, snapshotURL);
-                                attempt=new Attempt(route, totaltime, activityhelper.getTotalDistance(), currentDateandTime,snapshotURL , totalBMP/counter, (int)totalCaloriesBurnt, imagefilename);
+                                attempt = new Attempt(route, totaltime, activityhelper.getTotalDistance(), currentDateandTime, snapshotURL, totalBMP / counter, (int) totalCaloriesBurnt, imagefilename);
                                 dbHandler.addAttempt(attempt); //adding the attempt
                                 Log.d(TAG, "Attempt object built and added to database");
                                 dialog.dismiss();
@@ -377,6 +382,9 @@ public class loggerActivity extends AppCompatActivity implements
             case "Hiking":
                 string = "Hike";
                 break;
+            case "Biking":
+                string = "Bike";
+                break;
         }
         alertDialog.setTitle(string + " ended");
         switch (activityType) {
@@ -385,6 +393,9 @@ public class loggerActivity extends AppCompatActivity implements
                 break;
             case "Hiking":
                 string = "hiked";
+                break;
+            case "Biking":
+                string = "biked";
                 break;
         }
         alertDialog.setMessage("You have " + string + " " + String.format("%.2f", FinalDistance) + " km in " + (time) + " minutes.\n");
@@ -417,6 +428,16 @@ public class loggerActivity extends AppCompatActivity implements
         googleMAP.setOnCameraMoveCanceledListener(this);
         googleMAP.setOnMyLocationButtonClickListener(this);
         buildGoogleApiClient();
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
         googleMAP.setMyLocationEnabled(true);
         if (!(route == null)) {
             selectedRoute = addPolyLine(route.buildLocationArray(), "SelectedRoute");
