@@ -112,7 +112,7 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                     } else {
                         if (!(route == null)) {  //if Route is not null, it means a route was sent was sent by SelectRouteRunning
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmm");
-                            attempt = new Attempt(route, (int) RunningHelper.getTimeLastsample() / 1000, sdf.format(new Date()), route.getSnapshotURL(), totalBPM/counter, (int)totalCaloriesBurnt);
+                            attempt = new Attempt(route, (int) RunningHelper.getTimeLastsample() / 1000, RunningHelper.getTotalDistance(), sdf.format(new Date()), route.getSnapshotURL(), totalBPM/counter, (int)totalCaloriesBurnt);
                             Log.d(TAG, "Route is not null. Attempt object built.");
                             SaveAttemptDialog();    //prompt the user if he wants to save the attempt
                         } else {  //else, Route is null and the user selected New Route, so we need to ask the user to give the new route a name
@@ -241,7 +241,7 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                             route = new Route(inputRouteName, activityType, RunningHelper.getTotalDistance(), totaltime, currentDateandTime, RunningHelper.getCoordinatesFileName());
                             dbHandler.addRoute(route);  //add the New Route to the database and get the rowID of the route that was added
                             Log.d(TAG, "Route object added to ROUTE_TABLE");
-                            attempt = new Attempt(route, totaltime, currentDateandTime, route.getSnapshotURL(), totalBPM/counter, (int)totalCaloriesBurnt);
+                            attempt = new Attempt(route, totaltime, RunningHelper.getTotalDistance(), currentDateandTime, route.getSnapshotURL(), totalBPM/counter, (int)totalCaloriesBurnt);
                             dbHandler.addAttempt(attempt); //adding the attempt
                             Log.d(TAG, "Attempt object built and added to database");
                             dialog.dismiss();

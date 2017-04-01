@@ -55,14 +55,17 @@ public class historyActivity extends AppCompatActivity {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v,
                                         int groupPosition, int childPosition, long id) {
-                Toast.makeText(
-                        getApplicationContext(),
-                        titles.get(groupPosition)
-                                + " -> "
-                                + detail.get(
-                                titles.get(groupPosition)).get(
-                                childPosition), Toast.LENGTH_SHORT
-                ).show();
+                //display map snapshot when user clicks on "SEE MAP SNAPSHOT" child item
+
+
+//                Toast.makeText(
+//                        getApplicationContext(),
+//                        titles.get(groupPosition)
+//                                + " -> "
+//                                + detail.get(
+//                                titles.get(groupPosition)).get(
+//                                childPosition), Toast.LENGTH_SHORT
+//                ).show();
                 return false;
             }
         });

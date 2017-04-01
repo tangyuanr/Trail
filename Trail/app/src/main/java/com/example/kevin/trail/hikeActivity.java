@@ -286,7 +286,7 @@ public class hikeActivity extends AppCompatActivity implements
                             route = new Route(inputRouteName, activityType, HikingHelper.getTotalDistance(), totaltime, currentDateandTime, HikingHelper.getCoordinatesFileName());
                             dbHandler.addRoute(route);
                             Log.d(TAG, "Route object added to ROUTE_TABLE");
-                            attempt=new Attempt(route, totaltime, currentDateandTime, route.getSnapshotURL(), totalBMP/counter, (int)totalCaloriesBurnt);
+                            attempt=new Attempt(route, totaltime, HikingHelper.getTotalDistance(), currentDateandTime, route.getSnapshotURL(), totalBMP/counter, (int)totalCaloriesBurnt);
                             dbHandler.addAttempt(attempt); //adding the attempt
                             Log.d(TAG, "Attempt object built and added to database");
                             dialog.dismiss();

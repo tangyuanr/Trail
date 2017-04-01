@@ -46,6 +46,7 @@ public class DBHandler extends SQLiteOpenHelper {
     private static final String MAP_SCREENSHOT = "LinkToMapScreenshot";
     private static final String AVG_HR="AverageHeartRate";//in BMP
     private static final String CALORIES="CaloriesBurnt";//in KCal
+    private static final String TOTAL_DISTANCE="TotalDistance";//in km
 
     @Override
     public void onCreate(SQLiteDatabase db){
@@ -54,7 +55,7 @@ public class DBHandler extends SQLiteOpenHelper {
                 + ACTIVITY_TYPE + " TEXT, " + ROUTE_DISTANCE + " REAL, " + BEST_TIME + " INT, " + DATE_OF_BEST_TIME + " TEXT, " + FILENAME_COORDINATES + " TEXT)";
         Log.e(TAG, CREATE_ROUTE_TABLE);
         db.execSQL(CREATE_ROUTE_TABLE);
-        String CREATE_ATTEMPTS_TABLE="CREATE TABLE "+TABLE_ATTEMPTS+" ("+ATTEMPT_ID+" INTEGER PRIMARY KEY AUTOINCREMENT, "+ACTIVITY_TYPE+" TEXT, "+TOTAL_TIME + " INT, "
+        String CREATE_ATTEMPTS_TABLE="CREATE TABLE "+TABLE_ATTEMPTS+" ("+ATTEMPT_ID+" INTEGER PRIMARY KEY AUTOINCREMENT, "+ACTIVITY_TYPE+" TEXT, "+TOTAL_DISTANCE+" TEXT, "+TOTAL_TIME + " INT, "
                 + DATE_OF_ATTEMPT + " TEXT, " + ROUTE_NAME + " TEXT, " +AVG_HR +" INT, " + CALORIES + " INT, "+ MAP_SCREENSHOT + " TEXT)";
         Log.e(TAG, CREATE_ATTEMPTS_TABLE);
         db.execSQL(CREATE_ATTEMPTS_TABLE);
@@ -152,6 +153,9 @@ public class DBHandler extends SQLiteOpenHelper {
         contentValues.put(DATE_OF_ATTEMPT, attempt.getDateOfAttempt());
         contentValues.put(MAP_SCREENSHOT,attempt.getFileNameStaticMapScreenshot());
         contentValues.put(ROUTE_NAME, attempt.getRoute().getRouteName());
+        contentValues.put(AVG_HR, attempt.getAverageHeartRate());
+        contentValues.put(CALORIES, attempt.getCaloriesBurnt());
+        contentValues.put(TOTAL_DISTANCE, attempt.getTotalDistance());
         db.insert(TABLE_ATTEMPTS, null, contentValues);
         db.close();
         compareBestTime(attempt);
@@ -230,7 +234,11 @@ public class DBHandler extends SQLiteOpenHelper {
 
                 placeholder = cursor.getString(cursor.getColumnIndex(TOTAL_TIME));
                 Log.d(TAG, "read TOTAL TIME from TABLE ATTEMPTS: " + timeReformat(placeholder));
-                dataHolder.add("TOTAL TIME: " + placeholder);
+                dataHolder.add("TOTAL TIME: " + timeReformat(placeholder));
+
+                placeholder = cursor.getString(cursor.getColumnIndex(TOTAL_DISTANCE));
+                Log.d(TAG, "read TOTAL DISTANCE from TABLE ATTEMPTS: " + placeholder);
+                dataHolder.add("TOTAL DISTANCE: " + placeholder+"KM");
 
                 placeholder = cursor.getString(cursor.getColumnIndex(AVG_HR));
                 Log.d(TAG, "read AVERAGE HEART RATE from TABLE ATTEMPTS: " + placeholder);
@@ -270,7 +278,7 @@ public class DBHandler extends SQLiteOpenHelper {
         minutes=minutes%60;
         int hours=time/3600;
 
-        String formatted=hours+"H"+minutes+"M"+seconds+"S";
+        String formatted=hours+" Hour "+minutes+" Min "+seconds+" Sec";
         return formatted;
     }
 
