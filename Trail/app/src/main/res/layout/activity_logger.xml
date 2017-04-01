@@ -5,7 +5,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="fill_parent"
                 android:orientation="vertical"
-                tools:context="com.example.kevin.trail.hikeActivity">
+                tools:context="com.example.kevin.trail.loggerActivity">
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:map="http://schemas.android.com/apk/res-auto"
@@ -14,7 +14,7 @@
               android:name="com.google.android.gms.maps.SupportMapFragment"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              tools:context=".hikeActivity"
+              tools:context=".loggerActivity"
         android:layout_below="@+id/relativeLayout2" />
 
     <RelativeLayout
@@ -26,7 +26,7 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/startStopHiking"
+            android:id="@+id/startStop"
             android:text="Start logging"/>
 
         <TextView
@@ -34,7 +34,7 @@
             android:text="Your performance is being logged."
             android:textSize="25sp"
             android:id="@+id/loggingText"
-            android:layout_toRightOf="@id/startStopHiking"
+            android:layout_toRightOf="@id/startStop"
             android:visibility="invisible"
             android:textColor="#32CD32"
             android:layout_height="wrap_content"/>
@@ -43,8 +43,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="No route selected"
-            android:layout_below="@id/startStopHiking"
-            android:id="@+id/routeNameHiking"
+            android:layout_below="@id/startStop"
+            android:id="@+id/routeName"
             android:textColor="#FFF"/>
 
         <TextView
@@ -52,7 +52,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:layout_below="@id/routeNameHiking"
+            android:layout_below="@id/routeName"
             android:hint="Time elapsed: 00:00"
             android:textAlignment="center"
             android:textSize="18sp"

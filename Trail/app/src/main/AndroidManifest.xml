@@ -32,7 +32,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".hikeActivity"
+            android:name=".loggerActivity"
             android:label="Trail - Hike tracker"
             android:screenOrientation="portrait"/>
         <activity
@@ -48,15 +48,7 @@
 
         <activity android:name=".historyActivity"/>
         <activity
-            android:name=".runActivity"
-            android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-            </intent-filter>
-            >
-        </activity>
-        <activity
-            android:name=".SelectRouteRunning"
+            android:name=".routeManager"
             android:label="Select a Route"
             android:screenOrientation="portrait"/>
         <!--

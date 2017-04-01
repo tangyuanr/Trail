@@ -1,13 +1,9 @@
 package com.example.kevin.trail;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -82,10 +78,11 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
             hikeButtonlink.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
                     if (dbhandler.isRouteTableEmpty("Hiking")) {
-                        Intent intent = new Intent(MainActivity.this, hikeActivity.class);
+                        Intent intent = new Intent(MainActivity.this, loggerActivity.class);
+                        intent.putExtra("activityType", "Hiking");
                         startActivity(intent);
                     } else {
-                        Intent intent = new Intent(MainActivity.this, SelectRouteRunning.class);
+                        Intent intent = new Intent(MainActivity.this, routeManager.class);
                         intent.putExtra("activityType", "Hiking");
                         startActivity(intent);
                     }
@@ -119,10 +116,11 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
             runButtonlink.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
                     if (dbhandler.isRouteTableEmpty("Running")) {
-                        Intent intent = new Intent(MainActivity.this, runActivity.class);
+                        Intent intent = new Intent(MainActivity.this, loggerActivity.class);
+                        intent.putExtra("activityType", "Running");
                         startActivity(intent);
                     } else {
-                        Intent intent = new Intent(MainActivity.this, SelectRouteRunning.class);
+                        Intent intent = new Intent(MainActivity.this, routeManager.class);
                         intent.putExtra("activityType", "Running");
                         startActivity(intent);
                         ;

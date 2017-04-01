@@ -26,7 +26,7 @@ import java.util.Date;
 
 public class activityHelper {
 
-    private int mActivityType;  //0 for running..variable to keep track of what activity. useless for now but could be useful later on.
+    private String mActivityType;
     private Context context;
     private ServiceGPS serviceGPS;
     private Intent intent;
@@ -41,7 +41,7 @@ public class activityHelper {
 
     private static final String TAG = "activityHelper";
 
-    public activityHelper(Context context, int activityType) {
+    public activityHelper(Context context, String activityType) {
         mActivityType = activityType;
         this.context = context;
     }
