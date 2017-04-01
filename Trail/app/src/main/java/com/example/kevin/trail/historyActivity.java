@@ -84,6 +84,7 @@ public class historyActivity extends AppCompatActivity {
 
                     snapshot.setImageBitmap(BitmapFactory.decodeFile(imageFileName));
                     snapshot.setVisibility(View.VISIBLE);
+                    snapshot.bringToFront();
                 }
 
 //                Toast.makeText(

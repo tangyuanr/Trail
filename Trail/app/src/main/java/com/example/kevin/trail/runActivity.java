@@ -125,7 +125,8 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                         if (!(route == null)) {  //if Route is not null, it means a route was sent was sent by SelectRouteRunning
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmm");
                             String snapshotURL=route.getStaticAPIURL(runActivity.this, 250, 250);
-                            imageDownload(runActivity.this, snapshotURL);
+                            imagefilename=sdf.format(new Date())+".JPEG";
+                            imageDownload(runActivity.this, snapshotURL, imagefilename);
                             attempt = new Attempt(route, (int) RunningHelper.getTimeLastsample() / 1000, RunningHelper.getTotalDistance(), sdf.format(new Date()), snapshotURL, totalBPM/counter, (int)totalCaloriesBurnt, imagefilename);
                             Log.d(TAG, "Route is not null. Attempt object built.");
                             SaveAttemptDialog();    //prompt the user if he wants to save the attempt
@@ -207,7 +208,8 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
                 String currentDateandTime = sdf.format(new Date());
                 String snapshotURL=route.getStaticAPIURL(runActivity.this, 250, 250);
-                imageDownload(runActivity.this, snapshotURL);
+                imagefilename=currentDateandTime+".JPEG";
+                imageDownload(runActivity.this, snapshotURL, imagefilename);
                 attempt = new Attempt(route, (int) RunningHelper.getTimeLastsample() / 1000, RunningHelper.getTotalDistance(), currentDateandTime, snapshotURL, totalBPM/counter, (int)totalCaloriesBurnt, imagefilename);
 
                 dbHandler.addAttempt(attempt); //save the attempt to the database
@@ -263,7 +265,8 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                             Log.d(TAG, "Route object added to ROUTE_TABLE");
 
                             String snapshotURL=route.getStaticAPIURL(runActivity.this, 250, 250);
-                            imageDownload(runActivity.this, snapshotURL);
+                            imagefilename=currentDateandTime+".JPEG";
+                            imageDownload(runActivity.this, snapshotURL, imagefilename);
                             attempt = new Attempt(route, totaltime, RunningHelper.getTotalDistance(), currentDateandTime, snapshotURL, totalBPM/counter, (int)totalCaloriesBurnt, imagefilename);
                             dbHandler.addAttempt(attempt); //adding the attempt
                             Log.d(TAG, "Attempt object built and added to database");
@@ -432,12 +435,12 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
     }
 
     //map snapshot saving
-    public void imageDownload(Context context, String url){
+    public void imageDownload(Context context, String url, String filename){
         Picasso.with(context)
                 .load(url)
-                .into(getTarget(url));
+                .into(getTarget(filename));
     }
-    private Target getTarget(final String url){
+    private Target getTarget(final String filename){
         Target target = new Target(){
             @Override
             public void onBitmapLoaded(final Bitmap bitmap, Picasso.LoadedFrom from){
@@ -448,9 +451,7 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                         final String currentDateandTime = sdf.format(new Date());
 
                         String path = Trail.getAppContext().getFilesDir() + "/";
-                        String imageName=currentDateandTime+".JPEG";
-                        imagefilename=imageName;
-                        File file=new File(path+imagefilename);
+                        File file=new File(path+filename);
 
                         try{
                             file.createNewFile();

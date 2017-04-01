@@ -134,8 +134,8 @@
             android:text="Calories burnt (KCal):"
             android:textColor="@color/common_google_signin_btn_text_dark_default"
             android:layout_below="@+id/distanceTravelled"
-            android:layout_toRightOf="@+id/distanceTravelled"
-            android:layout_toEndOf="@+id/distanceTravelled" />
+            android:layout_toRightOf="@+id/resetTrail"
+            android:layout_toEndOf="@+id/resetTrail" />
 
         <TextView
             android:id="@+id/caloriesTextView"
