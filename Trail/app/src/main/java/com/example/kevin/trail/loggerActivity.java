@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.icu.text.SimpleDateFormat;
 import android.location.Location;
 import android.os.Handler;
 import android.os.Message;
@@ -39,11 +38,8 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.maps.model.RuntimeRemoteException;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
-
-import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -55,7 +51,7 @@ import java.util.List;
  * Created by Andre & Jiayin
  */
 
-public class hikeActivity extends AppCompatActivity implements
+public class loggerActivity extends AppCompatActivity implements
         OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
@@ -67,17 +63,17 @@ public class hikeActivity extends AppCompatActivity implements
         GoogleMap.OnMyLocationButtonClickListener,
         IHeartRateReciever {
 
-    private static final String TAG = "hikeActivity";
+    private static final String TAG = "loggerActivity";
     Route route = null;
     Attempt attempt = null;
-    activityHelper HikingHelper;
+    activityHelper activityhelper;
     private Button startStopButton;
     private Button resetTrailButton;
     private TextView routeNameTextView;
     private TextView loggingText;
-    private TextView totalDistanceHikedTextView;
+    private TextView totalDistanceTravelledTextView;
     private boolean logging = false;
-    private final String activityType = "Hiking";
+    private String activityType = null;
     private Switch showSelectedRoute;
     private Switch showPreviousRoute;
     private float totalDistanceHiked;
@@ -117,7 +113,7 @@ public class hikeActivity extends AppCompatActivity implements
             int minutes = seconds / 60;
             seconds = seconds % 60;
             timerTextViewL.setText("Time elapsed: " + String.format("%d:%02d", minutes, seconds));
-            notificationOp(noti_id, String.format("%d:%02d", minutes, seconds), String.format("%.2f", HikingHelper.getTotalDistance()));
+            notificationOp(noti_id, String.format("%d:%02d", minutes, seconds), String.format("%.2f", activityhelper.getTotalDistance()));
             timerHandler.postDelayed(this, 500);
         }
     };
@@ -127,15 +123,15 @@ public class hikeActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.activity_hike);
+        setContentView(R.layout.activity_logger);
         hrTextView=(TextView)findViewById(R.id.heartRateText);
         //hrHandler=new HRSensorHandler(this);
         sensorReconnect=(Button)findViewById(R.id.hrReconnectHike);
         sensorHelp=(FloatingActionButton)findViewById(R.id.hrReconectHelp);
-        sharedPref = new sharedPreferenceHelper(hikeActivity.this);
+        sharedPref = new sharedPreferenceHelper(loggerActivity.this);
         caloriesTxtView=(TextView)findViewById(R.id.caloriesTextView);
 
-        startStopButton = (Button) findViewById(R.id.startStopHiking);
+        startStopButton = (Button) findViewById(R.id.startStop);
         resetTrailButton = (Button) findViewById(R.id.resetTrail);
         resetTrailButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -158,9 +154,10 @@ public class hikeActivity extends AppCompatActivity implements
         });
 
         loggingText = (TextView) findViewById(R.id.loggingText);
-        routeNameTextView = (TextView) findViewById(R.id.routeNameHiking);
-        totalDistanceHikedTextView = (TextView) findViewById(R.id.distanceTravelled);
+        routeNameTextView = (TextView) findViewById(R.id.routeName);
+        totalDistanceTravelledTextView = (TextView) findViewById(R.id.distanceTravelled);
         Intent receivedIntent = getIntent();    //retrieve the intent that was sent to check if it has a Route object
+        if(receivedIntent.hasExtra("activityType")) {activityType = receivedIntent.getStringExtra("activityType");}
         if (receivedIntent.hasExtra("route")) {  //if the intent has a route object
             route = (Route) receivedIntent.getSerializableExtra("route");
             routeOrAttempt = "attempt";
@@ -176,7 +173,7 @@ public class hikeActivity extends AppCompatActivity implements
                     }
                 }
             });
-            Log.d(TAG, "Route object received by hikeActivity");
+            Log.d(TAG, "Route object received by loggerActivity");
         } else {
             routeOrAttempt = "route";
         }
@@ -189,8 +186,8 @@ public class hikeActivity extends AppCompatActivity implements
             public void onClick(View v) {
                 if (!logging) {
                     logging = true;
-                    HikingHelper = new activityHelper(hikeActivity.this, 1);
-                    HikingHelper.startActivity(null); //start logging samples
+                    activityhelper = new activityHelper(loggerActivity.this, activityType);
+                    activityhelper.startActivity(null); //start logging samples
                     connectClicked();
                     startTime = System.currentTimeMillis();
                     timerHandler.postDelayed(timerRunnable, 0);
@@ -215,7 +212,7 @@ public class hikeActivity extends AppCompatActivity implements
             public void onClick(View v) {
                 try {
                     MainActivity.hrHandler.Connect();
-                    MainActivity.hrHandler.setReciver(hikeActivity.this);
+                    MainActivity.hrHandler.setReciver(loggerActivity.this);
                     //make sensor reconnection buttons disappear if connection is established
                     sensorReconnect.setVisibility(View.INVISIBLE);
                     sensorHelp.setVisibility(View.INVISIBLE);
@@ -243,21 +240,20 @@ public class hikeActivity extends AppCompatActivity implements
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        HikingHelper.stopActivity();
+                        activityhelper.stopActivity();
                         //disconnectClicked();
                         logging = false;
                         timerHandler.removeCallbacks(timerRunnable);
                         startStopButton.setText("Start logging");
                         loggingText.setVisibility(View.INVISIBLE);
                         if (!(route == null)) {
-                            //attempt = HikingHelper.getAttempt();
                             SaveAttemptDialog();
 
                         } else {
                             NewRouteDialog();
                         }
-                        long timelastSample = HikingHelper.getTimeLastsample();    //get final stats for display
-                        float FinalDistance = HikingHelper.getTotalDistance();    //get final stats for display
+                        long timelastSample = activityhelper.getTimeLastsample();    //get final stats for display
+                        float FinalDistance = activityhelper.getTotalDistance();    //get final stats for display
                         showStatsDialog(timelastSample, FinalDistance);
                     }
                 })
@@ -268,8 +264,8 @@ public class hikeActivity extends AppCompatActivity implements
     public void notificationOp(int id, String time, String distance) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         builder.setSmallIcon(R.mipmap.ic_launcher);
-        builder.setContentTitle("Trail : Hiking");
-        builder.setContentText("Time: " + timerTextViewL.getText() + ", Distance : " + HikingHelper.getTotalDistance());
+        builder.setContentTitle("Trail : " + activityType);
+        builder.setContentText("Time: " + timerTextViewL.getText() + ", Distance : " + activityhelper.getTotalDistance());
         NotificationManager NM = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         NM.notify(id, builder.build());
     }
@@ -280,12 +276,12 @@ public class hikeActivity extends AppCompatActivity implements
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                int totaltime = (int) HikingHelper.getTimeLastsample() / 1000;
+                int totaltime = (int) activityhelper.getTimeLastsample() / 1000;
                 java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
                 String currentDateandTime = sdf.format(new Date());
-                String snapshotURL=route.getStaticAPIURL(hikeActivity.this, 250, 250);
-                imageDownload(hikeActivity.this, snapshotURL);
-                attempt=new Attempt(route, totaltime, HikingHelper.getTotalDistance(), currentDateandTime,snapshotURL , totalBMP/counter, (int)totalCaloriesBurnt, imagefilename);
+                String snapshotURL=route.getStaticAPIURL(loggerActivity.this, 250, 250);
+                imageDownload(loggerActivity.this, snapshotURL);
+                attempt=new Attempt(route, totaltime, activityhelper.getTotalDistance(), currentDateandTime,snapshotURL , totalBMP/counter, (int)totalCaloriesBurnt, imagefilename);
                 dbHandler.addAttempt(attempt); //save the attempt to the database
                 Log.d(TAG, "Attempt added to the database");
             }
@@ -321,29 +317,29 @@ public class hikeActivity extends AppCompatActivity implements
                     public void onClick(View view) {
                         String inputRouteName = input.getText().toString();
                         if (inputRouteName.matches("^.*[^a-zA-Z0-9 ].*$")) {
-                            Toast.makeText(hikeActivity.this, "The route name can only contain alphanumeric characters", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(loggerActivity.this, "The route name can only contain alphanumeric characters", Toast.LENGTH_SHORT).show();
                         } else {
                             boolean routeNameExists = dbHandler.doesRouteNameExist(inputRouteName);
                             if (!(routeNameExists || inputRouteName.isEmpty())) {
                                 //the user wants to save the route. it obviously means he wants to save the attempt with it as well. so we need to build both objects.
-                                int totaltime = (int) HikingHelper.getTimeLastsample() / 1000;
+                                int totaltime = (int) activityhelper.getTimeLastsample() / 1000;
                                 java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
                                 String currentDateandTime = sdf.format(new Date());
                                 //instantiating a new route object with the constructor for the case in which we have no rowID yet
-                                route = new Route(inputRouteName, activityType, HikingHelper.getTotalDistance(), totaltime, currentDateandTime, HikingHelper.getCoordinatesFileName());
+                                route = new Route(inputRouteName, activityType, activityhelper.getTotalDistance(), totaltime, currentDateandTime, activityhelper.getCoordinatesFileName());
                                 dbHandler.addRoute(route);
                                 Log.d(TAG, "Route object added to ROUTE_TABLE");
 
-                                String snapshotURL=route.getStaticAPIURL(hikeActivity.this, 250, 250);
-                                imageDownload(hikeActivity.this, snapshotURL);
-                                attempt=new Attempt(route, totaltime, HikingHelper.getTotalDistance(), currentDateandTime,snapshotURL , totalBMP/counter, (int)totalCaloriesBurnt, imagefilename);
+                                String snapshotURL=route.getStaticAPIURL(loggerActivity.this, 250, 250);
+                                imageDownload(loggerActivity.this, snapshotURL);
+                                attempt=new Attempt(route, totaltime, activityhelper.getTotalDistance(), currentDateandTime,snapshotURL , totalBMP/counter, (int)totalCaloriesBurnt, imagefilename);
                                 dbHandler.addAttempt(attempt); //adding the attempt
                                 Log.d(TAG, "Attempt object built and added to database");
                                 dialog.dismiss();
                             } else if (routeNameExists) {
-                                Toast.makeText(hikeActivity.this, "Route name already exists", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(loggerActivity.this, "Route name already exists", Toast.LENGTH_SHORT).show();
                             } else if (inputRouteName.isEmpty()) {
-                                Toast.makeText(hikeActivity.this, "Route name cannot be empty", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(loggerActivity.this, "Route name cannot be empty", Toast.LENGTH_SHORT).show();
                             }
                         }
 
@@ -373,8 +369,25 @@ public class hikeActivity extends AppCompatActivity implements
 
         long time = timeLastSample / (60000); //in minutes
         AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-        alertDialog.setTitle("Hike ended");
-        alertDialog.setMessage("You have hiked " + String.format("%.2f", FinalDistance) + " km in " + (time) + " minutes.\n");
+        String string = null;
+        switch (activityType) {
+            case "Running":
+                string = "Run";
+                break;
+            case "Hiking":
+                string = "Hike";
+                break;
+        }
+        alertDialog.setTitle(string + " ended");
+        switch (activityType) {
+            case "Running":
+                string = "runned";
+                break;
+            case "Hiking":
+                string = "hiked";
+                break;
+        }
+        alertDialog.setMessage("You have " + string + " " + String.format("%.2f", FinalDistance) + " km in " + (time) + " minutes.\n");
         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
@@ -497,7 +510,7 @@ public class hikeActivity extends AppCompatActivity implements
         super.onDestroy();
         if (logging)// if logging is still true
         {
-            HikingHelper.stopActivity();
+            activityhelper.stopActivity();
             //disconnectClicked();//disconnect from HxM
         }
     }
@@ -513,7 +526,7 @@ public class hikeActivity extends AppCompatActivity implements
     private void connectClicked(){
         try{
             //hrHandler.Connect();
-            MainActivity.hrHandler.setReciver(hikeActivity.this);
+            MainActivity.hrHandler.setReciver(loggerActivity.this);
             //make sensor reconnection buttons disappear if connection is established
             sensorReconnect.setVisibility(View.INVISIBLE);
             sensorHelp.setVisibility(View.INVISIBLE);
@@ -579,8 +592,8 @@ public class hikeActivity extends AppCompatActivity implements
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Log.d(TAG, "TOTAL DISTANCE " + String.valueOf(HikingHelper.getTotalDistance()));
-                            totalDistanceHikedTextView.setText("Distance traveled: " + String.format("%.2f", HikingHelper.getTotalDistance()) + " km");
+                            Log.d(TAG, "TOTAL DISTANCE " + String.valueOf(activityhelper.getTotalDistance()));
+                            totalDistanceTravelledTextView.setText("Distance travelled: " + String.format("%.2f", activityhelper.getTotalDistance()) + " km");
                             caloriesTxtView.setText(String.format("%.2f",totalCaloriesBurnt));
                             if (MainActivity.heartRate==0){
                                 sensorReconnect.setVisibility(View.VISIBLE);
