@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
     DBHandler dbhandler;
 
     public static int heartRate;
-    private HRSensorHandler hrHandler;
+    public static HRSensorHandler hrHandler;
 
 
     @Override

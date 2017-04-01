@@ -36,8 +36,8 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
     DBHandler dbHandler = new DBHandler(this);
 
     protected TextView hrTextView=null;
-    private int heartRate=0;
-    HRSensorHandler hrHandler;
+    //private int heartRate=0; //using the static heart rate from mainActivity now
+    //HRSensorHandler hrHandler;
     private int totalBPM=0;
     private int counter=0;
     protected Button sensorReconnect=null;
@@ -84,7 +84,7 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
         totalDistance = (TextView) findViewById(R.id.totalDistance);
         latestPace = (TextView) findViewById(R.id.latestpace);;
         RunningHelper = new activityHelper(runActivity.this, 0); //instantiate a running helper object, the int parameter is the type of activity. 0 for running.
-        hrHandler=new HRSensorHandler(this);
+        //hrHandler=new HRSensorHandler(this);
         sensorReconnect=(Button)findViewById(R.id.HRreconnect);
         sensorHelp=(FloatingActionButton)findViewById(R.id.floatingHelp);
         sharedPref=new sharedPreferenceHelper(runActivity.this);
@@ -100,10 +100,11 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                     Log.d(TAG, "RunningHelper.startActivity(route) called");
                     logging = true; //boolean so that the same button acts as an on/off toggle
 
-                    connectClicked();//activate heart rate sensor
+                    //make hrHandler send heart rate messages here
+                    MainActivity.hrHandler.setReciver(runActivity.this);
+
                     Toast.makeText(runActivity.this, "You've started running", Toast.LENGTH_SHORT).show();
                     startUpdateStatsThread(); //start the thread that receives updates from the service
-                    caloriesTextView.setText(Double.toString(totalCaloriesBurnt));
                 } else {
                     if (RunningHelper.getCurrentNumberOfSamples() < 1) {
                         logging = false;
@@ -123,7 +124,7 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                         showStatsDialog(timelastSample, FinalDistance);  //show stats dialog
                         logging = false;
                     }
-                    disconnectClicked();//disconnect from HxM sensor
+                    //disconnectClicked();//disconnect from HxM sensor
                     sensorReconnect.setVisibility(View.INVISIBLE);
                     sensorHelp.setVisibility(View.INVISIBLE);
                 }
@@ -143,7 +144,16 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
         //handles sensor reconnection
         sensorReconnect.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
-                connectClicked();//try to connect to sensor
+                try{
+                    MainActivity.hrHandler.Connect();
+                    MainActivity.hrHandler.setReciver(runActivity.this);
+                    sensorReconnect.setVisibility(View.INVISIBLE);
+                    sensorHelp.setVisibility(View.INVISIBLE);
+                }catch(RuntimeException e){
+                    hrTextView.setText("error connecting to HxM");
+                    sensorReconnect.setVisibility(View.VISIBLE);
+                    sensorHelp.setVisibility(View.VISIBLE);
+                }
             }
         });
         sensorHelp.setOnClickListener(new View.OnClickListener() {
@@ -162,7 +172,7 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
         //if still logging
         if (logging) {
             RunningHelper.stopActivity();//stop GPS
-            disconnectClicked();//stop heart rate monitor
+            //disconnectClicked();//stop heart rate monitor
         }
     }
 
@@ -255,22 +265,31 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
 
             public void run() {
                 while (logging == true) {
+                    try {
+                        Thread.sleep(5000);
+                        totalBPM+=MainActivity.heartRate;//so now it's incrementing at every 5 seconds
+                        counter++;
+                        totalCaloriesBurnt+=caloriesCalculator(MainActivity.heartRate);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             totalDistance.setText(String.format("%.2f", RunningHelper.getTotalDistance()));
                             latestPace.setText(RunningHelper.getPaceFormatted());
-
+                            caloriesTextView.setText(String.format("%.2f",totalCaloriesBurnt));
+                            if (MainActivity.heartRate==0){
+                                sensorReconnect.setVisibility(View.VISIBLE);
+                                sensorHelp.setVisibility(View.VISIBLE);
+                            }
+                            else {
+                                sensorReconnect.setVisibility(View.INVISIBLE);
+                                sensorHelp.setVisibility(View.INVISIBLE);
+                            }
                         }
                     });
-                    try {
-                        Thread.sleep(5000);
-                        totalBPM+=heartRate;//so now it's incrementing at every 5 seconds
-                        counter++;
-                        totalCaloriesBurnt+=caloriesCalculator(heartRate);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+
                 }
             }
         });
@@ -307,8 +326,8 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
     private void connectClicked(){
         try{
 
-            hrHandler.Connect();
-            hrHandler.setReciver(runActivity.this);
+            //hrHandler.Connect();
+            //hrHandler.setReciver(runActivity.this);
             sensorReconnect.setVisibility(View.INVISIBLE);
             sensorHelp.setVisibility(View.INVISIBLE);
         }catch (RuntimeException e) {
@@ -321,8 +340,8 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
     //disconnect with HxM HR Sensor
     private void disconnectClicked(){
         try{
-            hrHandler.setReciver(null);
-            hrHandler.Disconnect();
+            //hrHandler.setReciver(null);
+            //hrHandler.Disconnect();
             sensorReconnect.setVisibility(View.INVISIBLE);
             sensorHelp.setVisibility(View.INVISIBLE);
         }catch (RuntimeException e){
@@ -332,8 +351,8 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
 
     final Handler newHandler=new Handler(){
         public void handleMessage(Message msg){
-            heartRate=msg.getData().getInt("HeartRate");
-            hrTextView.setText(Integer.toString(heartRate));
+            MainActivity.heartRate=msg.getData().getInt("HeartRate");
+            hrTextView.setText(Integer.toString(MainActivity.heartRate));
         }
     };
 
@@ -361,18 +380,26 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
         String gender=sharedPref.getProfileGender();
         double weight=Double.parseDouble(sharedPref.getProfileWeight());
         double LB_to_KG=0.453592;
-        double DURATION = 5/60;//in minute
+        double DURATION = (double)5/60;//in minute
 
         double calories=0;
 
-        //calories formula for female
-        if (gender=="m"||gender=="M"){
-            calories = age * 0.2017 + weight * LB_to_KG * 0.1988 + HR * 0.6309 - 55.0969;
+        //calories formula for male
+        if (gender.equals("m")||gender.equals("M")){
+            double age_factor=age*0.2017;
+            double weight_factor=weight*LB_to_KG*0.1988;
+            double HR_factor=HR*0.6309;
+            calories = age_factor+weight_factor+HR_factor - 55.0969;
             calories = calories * DURATION / 4.184;
+            Log.e(TAG, "Weight: "+weight+", Age: "+age+", Gender: "+gender+". With heart rate "+HR+", calories calculated: "+calories);
         }
-        else if (gender=="f"||gender=="F"){
-            calories = age * 0.074 + weight * LB_to_KG * 0.1263 + 0.4472 * HR - 20.4022;
-            calories = calories * DURATION / 4.184;
+        //calories formula for female
+        else if (gender.equals("f")||gender.equals("F")){
+            double age_factor=age*0.074;
+            double weight_factor=weight*LB_to_KG*0.1263;
+            double HR_factor=HR*0.4472;
+            calories = (age_factor+ weight_factor + HR_factor - 20.4022) * DURATION /4.184;
+            Log.e(TAG, "Weight: "+weight+", Age: "+age+", Gender: "+gender+". With heart rate "+HR+", calories calculated: "+calories);
         }
 
         if (calories<0)

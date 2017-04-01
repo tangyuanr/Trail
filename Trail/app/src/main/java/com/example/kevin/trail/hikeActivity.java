@@ -87,7 +87,7 @@ public class hikeActivity extends AppCompatActivity implements
     private int totalBMP=0;
     private int counter=0;
     protected TextView hrTextView=null;
-    private HRSensorHandler hrHandler;
+    //private HRSensorHandler hrHandler;
     protected Button sensorReconnect=null;
     protected FloatingActionButton sensorHelp=null;
     private sharedPreferenceHelper sharedPref;
@@ -118,7 +118,7 @@ public class hikeActivity extends AppCompatActivity implements
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_hike);
         hrTextView=(TextView)findViewById(R.id.heartRateText);
-        hrHandler=new HRSensorHandler(this);
+        //hrHandler=new HRSensorHandler(this);
         sensorReconnect=(Button)findViewById(R.id.hrReconnectHike);
         sensorHelp=(FloatingActionButton)findViewById(R.id.hrReconectHelp);
         sharedPref = new sharedPreferenceHelper(hikeActivity.this);
@@ -171,21 +171,24 @@ public class hikeActivity extends AppCompatActivity implements
 
         timerTextViewL = (TextView) findViewById(R.id.timerTextView);
 
-        //connectClicked();//start sensor upon entering the activity
-
         startStopButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (!logging) {
                     logging = true;
                     HikingHelper = new activityHelper(hikeActivity.this, 1);
                     HikingHelper.startActivity(null); //start logging samples
-                    //connectClicked();
+                    connectClicked();
                     startTime = System.currentTimeMillis();
                     timerHandler.postDelayed(timerRunnable, 0);
                     startStopButton.setText("Stop logging");
                     loggingText.setVisibility(View.VISIBLE);
                     startUpdateStatsThread();
                     caloriesTxtView.setText(Double.toString(totalCaloriesBurnt));
+
+                    if (MainActivity.heartRate==0){
+                        sensorReconnect.setVisibility(View.VISIBLE);
+                        sensorHelp.setVisibility(View.VISIBLE);
+                    }
                 } else {
                     confirmDialog();
                 }
@@ -196,7 +199,18 @@ public class hikeActivity extends AppCompatActivity implements
         sensorReconnect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                connectClicked();
+                try {
+                    MainActivity.hrHandler.Connect();
+                    MainActivity.hrHandler.setReciver(hikeActivity.this);
+                    //make sensor reconnection buttons disappear if connection is established
+                    sensorReconnect.setVisibility(View.INVISIBLE);
+                    sensorHelp.setVisibility(View.INVISIBLE);
+
+                }catch(RuntimeException e){
+                    hrTextView.setText("error connecting to HxM");
+                    sensorReconnect.setVisibility(View.VISIBLE);
+                    sensorHelp.setVisibility(View.VISIBLE);
+                }
             }
         });
         sensorHelp.setOnClickListener(new View.OnClickListener() {
@@ -216,7 +230,7 @@ public class hikeActivity extends AppCompatActivity implements
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         HikingHelper.stopActivity();
-                        disconnectClicked();
+                        //disconnectClicked();
                         logging = false;
                         timerHandler.removeCallbacks(timerRunnable);
                         startStopButton.setText("Start logging");
@@ -430,7 +444,7 @@ public class hikeActivity extends AppCompatActivity implements
         if (logging)// if logging is still true
         {
             HikingHelper.stopActivity();
-            disconnectClicked();//disconnect from HxM
+            //disconnectClicked();//disconnect from HxM
         }
     }
 
@@ -443,8 +457,8 @@ public class hikeActivity extends AppCompatActivity implements
     //connect with HxM HR Sensor
     private void connectClicked(){
         try{
-            hrHandler.Connect();
-            hrHandler.setReciver(hikeActivity.this);
+            //hrHandler.Connect();
+            MainActivity.hrHandler.setReciver(hikeActivity.this);
             //make sensor reconnection buttons disappear if connection is established
             sensorReconnect.setVisibility(View.INVISIBLE);
             sensorHelp.setVisibility(View.INVISIBLE);
@@ -458,8 +472,8 @@ public class hikeActivity extends AppCompatActivity implements
     //disconnect with HxM HR Sensor
     private void disconnectClicked(){
         try{
-            hrHandler.setReciver(null);
-            hrHandler.Disconnect();
+            //hrHandler.setReciver(null);
+            //hrHandler.Disconnect();
             sensorReconnect.setVisibility(View.INVISIBLE);
             sensorHelp.setVisibility(View.INVISIBLE);
         }catch (RuntimeException e){
@@ -498,13 +512,6 @@ public class hikeActivity extends AppCompatActivity implements
 
             public void run() {
                 while (logging == true) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Log.d(TAG, "TOTAL DISTANCE " + String.valueOf(HikingHelper.getTotalDistance()));
-                            totalDistanceHikedTextView.setText("Distance traveled: " + String.format("%.2f", HikingHelper.getTotalDistance()) + " km");
-                        }
-                    });
                     try {
                         Thread.sleep(5000);
                         totalBMP+=MainActivity.heartRate;
@@ -513,6 +520,24 @@ public class hikeActivity extends AppCompatActivity implements
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.d(TAG, "TOTAL DISTANCE " + String.valueOf(HikingHelper.getTotalDistance()));
+                            totalDistanceHikedTextView.setText("Distance traveled: " + String.format("%.2f", HikingHelper.getTotalDistance()) + " km");
+                            caloriesTxtView.setText(String.format("%.2f",totalCaloriesBurnt));
+                            if (MainActivity.heartRate==0){
+                                sensorReconnect.setVisibility(View.VISIBLE);
+                                sensorHelp.setVisibility(View.VISIBLE);
+                            }
+                            else {
+                                sensorReconnect.setVisibility(View.INVISIBLE);
+                                sensorHelp.setVisibility(View.INVISIBLE);
+                            }
+                        }
+                    });
+
+
                 }
             }
         });
@@ -525,23 +550,32 @@ public class hikeActivity extends AppCompatActivity implements
         String gender=sharedPref.getProfileGender();
         double weight=Double.parseDouble(sharedPref.getProfileWeight());
         double LB_to_KG=0.453592;
-        double DURATION = 5/60;//in minute
+        double DURATION = (double)5/60;//in minute
 
         double calories=0;
 
         //calories formula for female
-        if (gender=="m"||gender=="M"){
-            calories = age * 0.2017 + weight * LB_to_KG * 0.1988 + HR * 0.6309 - 55.0969;
+        if (gender.equals("m")||gender.equals("M")){
+            double age_factor=age*0.2017;
+            double weight_factor=weight*LB_to_KG*0.1988;
+            double HR_factor=HR*0.6309;
+            calories = age_factor+weight_factor+HR_factor - 55.0969;
             calories = calories * DURATION / 4.184;
+            Log.e(TAG, "Weight: "+weight+", Age: "+age+", Gender: "+gender+". With heart rate "+HR+", calories calculated: "+calories);
         }
-        else if (gender=="f"||gender=="F"){
-            calories = age * 0.074 + weight * LB_to_KG * 0.1263 + 0.4472 * HR - 20.4022;
-            calories = calories * DURATION / 4.184;
+        else if (gender.equals("f")||gender.equals("F")){
+            double age_factor=age*0.074;
+            double weight_factor=weight*LB_to_KG*0.1263;
+            double HR_factor=HR*0.4472;
+            calories = (age_factor+ weight_factor + HR_factor - 20.4022) * DURATION /4.184;
+            Log.e(TAG, "Weight: "+weight+", Age: "+age+", Gender: "+gender+". With heart rate "+HR+", calories calculated: "+calories);
         }
 
         if (calories<0)
             calories=0;
 
+
+        Log.e(TAG, "END OF METHOD: gender "+gender+", age: "+age+" , weight: "+weight+", calories: "+calories);
         return calories;
     }
 
