@@ -280,7 +280,8 @@ public class loggerActivity extends AppCompatActivity implements
                 java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
                 String currentDateandTime = sdf.format(new Date());
                 String snapshotURL=route.getStaticAPIURL(loggerActivity.this, 250, 250);
-                imageDownload(loggerActivity.this, snapshotURL);
+                imagefilename=sdf.format(new Date())+".JPEG";
+                imageDownload(loggerActivity.this, snapshotURL, imagefilename);
                 attempt=new Attempt(route, totaltime, activityhelper.getTotalDistance(), currentDateandTime,snapshotURL , totalBMP/counter, (int)totalCaloriesBurnt, imagefilename);
                 dbHandler.addAttempt(attempt); //save the attempt to the database
                 Log.d(TAG, "Attempt added to the database");
@@ -331,7 +332,8 @@ public class loggerActivity extends AppCompatActivity implements
                                 Log.d(TAG, "Route object added to ROUTE_TABLE");
 
                                 String snapshotURL=route.getStaticAPIURL(loggerActivity.this, 250, 250);
-                                imageDownload(loggerActivity.this, snapshotURL);
+                                imagefilename=sdf.format(new Date())+".JPEG";
+                                imageDownload(loggerActivity.this, snapshotURL, imagefilename);
                                 attempt=new Attempt(route, totaltime, activityhelper.getTotalDistance(), currentDateandTime,snapshotURL , totalBMP/counter, (int)totalCaloriesBurnt, imagefilename);
                                 dbHandler.addAttempt(attempt); //adding the attempt
                                 Log.d(TAG, "Attempt object built and added to database");
@@ -649,41 +651,42 @@ public class loggerActivity extends AppCompatActivity implements
     }
 
     //map snapshot saving
-    public void imageDownload(Context context, String url){
+    public void imageDownload(Context context, String url, String filename){
         Picasso.with(context)
                 .load(url)
-                .into(new Target(){
+                .into(getTarget(filename));
+    }
+    private Target getTarget(final String filename){
+        Target target = new Target(){
+            @Override
+            public void onBitmapLoaded(final Bitmap bitmap, Picasso.LoadedFrom from){
+                new Thread(new Runnable(){
                     @Override
-                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from){
+                    public void run(){
+                        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
+                        final String currentDateandTime = sdf.format(new Date());
+
+                        String path = Trail.getAppContext().getFilesDir() + "/";
+                        File file=new File(path+filename);
+
                         try{
-                            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
-                            final String currentDateandTime = sdf.format(new Date());
-
-                            String path = Trail.getAppContext().getFilesDir() + "/";
-                            File dir=new File(path);
-                            if (!dir.exists())
-                                dir.mkdirs();
-
-                            //TODO save image inside dir
-                            String imageName=currentDateandTime+".jpg";
-                            imagefilename=imageName;
-
-                            dir=new File(dir, imageName);
-                            FileOutputStream out = new FileOutputStream(dir);
-                            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
-
-                            out.flush();
-                            out.close();
+                            file.createNewFile();
+                            FileOutputStream ostream=new FileOutputStream(file);
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, ostream);
+                            ostream.flush();
+                            ostream.close();
 
                         }catch (Exception e){
                             Log.e(TAG, e.getMessage());
                         }
                     }
-                    @Override
-                    public void onBitmapFailed(Drawable errorDrawable){}
-
-                    @Override
-                    public void onPrepareLoad(Drawable placeholderDrawable){}
-                });
+                }).start();
+            }
+            @Override
+            public void onBitmapFailed(Drawable errordrawable){}
+            @Override
+            public void onPrepareLoad(Drawable placeholderdrawable){}
+        };
+        return target;
     }
 }
