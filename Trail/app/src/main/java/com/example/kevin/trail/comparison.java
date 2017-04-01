@@ -90,52 +90,52 @@ public class comparison extends AppCompatActivity {
                         double recentpaces = (recentattempt.getTotalTimeTaken()) / ((60) * recentattempt.getTotalDistance());//min per km
                         double pacechanges = recentpaces - previouspaces;
 
-                        title.setText("Comparing " + myattempt.get(myattempt.size() - 1).getRouteName() + " with previous attempt at date :"+myattempt.get(myattempt.size() - 1).getDate().substring(0,4) +"-"+myattempt.get(myattempt.size() - 1).getDate().substring(4,6)+"-"+myattempt.get(myattempt.size() - 1).getDate().substring(6,8) );
+                        title.setText("Comparing " + myattempt.get(myattempt.size() - 1).getRouteName() + " at date :"+myattempt.get(myattempt.size() - 1).getDate().substring(0,4) +"-"+myattempt.get(myattempt.size() - 1).getDate().substring(4,6)+"-"+myattempt.get(myattempt.size() - 1).getDate().substring(6,8) );
                         if (recentdistances > previousdistances) {
-                            distancechange.setText("You covered " + distancechanges * 1000 + " m more than previous session");
+                            distancechange.setText("You covered " + Math.round((distancechanges * 1000)) + " m more distance");
                         } else if (recentdistances < previousdistances) {
-                            distancechange.setText("You covered " + (-1 * distancechanges) * 1000 + " m less than previous session");
+                            distancechange.setText("You covered " + Math.round((-1 * distancechanges) * 1000) + " m less distance");
                         } else {
-                            distancechange.setText("You covered same distance as previous session");
+                            distancechange.setText("You covered same distance");
                         }
 
                         if (recenttimes > previoustimes) {
-                            timechange.setText("You spend " + timechanges + " more than previous session");
+                            timechange.setText("You spend " + timechanges + " more ");
                         } else if (recenttimes < previoustimes) {
-                            timechange.setText("You spend " + timechangez + " less than previous session");
+                            timechange.setText("You spend " + timechangez + " more");
                         } else {
                             timechange.setText("You spend same time as previous session");
                         }
 
                         if (recentspeeds > previousspeeds) {
-                            speedchange.setText("Your speed was " + speedchanges + " m/s more than previous session");
+                            speedchange.setText("Your speed was " + Math.round((speedchanges)/10)*10 + " m/s more ");
                         } else if (recentspeeds < previousspeeds) {
-                            speedchange.setText("Your speed was " + (-1 * speedchanges) + " m/s less than previous session");
+                            speedchange.setText("Your speed was " + (-1 * Math.round((speedchanges)/10)*10) + " m/s less ");
                         } else if ((previoustimes == 0) && (recenttimes == 0)) { ///checking for divide by zero exception
                             speedchange.setText("Speed comparison is invalid");
 
                         } else if ((previoustimes == 0)) { ///checking for divide by zero exception
-                            speedchange.setText("Your speed was " + recentspeeds + " m/s more than previous session");
+                            speedchange.setText("Your speed was " + Math.round(recentspeeds/10)*10 + " m/s more ");
 
                         } else if ((recenttimes == 0)) { ///checking for divide by zero exception
-                            speedchange.setText("Your speed was " + previousspeeds + " m/s less than previous session");
+                            speedchange.setText("Your speed was " + Math.round(previousspeeds/10)*10 + " m/s less ");
 
                         } else {
                             speedchange.setText("Your speed was  same as previous session");
                         }
 
                         if (recentpaces > previouspaces) {
-                            pacechange.setText("Your pace was " + pacechanges + " min/km more than previous session");
+                            pacechange.setText("Your pace was " + Math.round(pacechanges/10)*10 + " min/km more ");
                         } else if (recentpaces < previouspaces) {
-                            pacechange.setText("Your pace was " + (-1 * pacechanges) + " min/km less than previous session");
+                            pacechange.setText("Your pace was " + (-1 *Math.round( pacechanges/10)*10) + " min/km less ");
                         } else if ((previousdistances == 0) && (recentdistances == 0)) { ///checking for divide by zero exception
                             pacechange.setText("pace comparison is invalid");
 
                         } else if ((previousdistances == 0)) { ///checking for divide by zero exception
-                            pacechange.setText("Your pace was " + recentpaces + " min/km more than previous session");
+                            pacechange.setText("Your pace was " +Math.round( recentpaces/10)*10 + " min/km more ");
 
                         } else if ((recentdistances == 0)) { ///checking for divide by zero exception
-                            pacechange.setText("Your speed was " + previouspaces + " min/km less than previous session");
+                            pacechange.setText("Your speed was " + Math.round(previouspaces/10)*10 + " min/km less ");
 
                         } else {
                             pacechange.setText("Your pace was  same as previous session");
