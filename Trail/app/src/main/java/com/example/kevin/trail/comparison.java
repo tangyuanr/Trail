@@ -144,7 +144,7 @@ public class comparison extends AppCompatActivity {
                             pacechange.setText("Your pace was " + recentpaces + " min/km more ");
 
                         } else if ((recentdistances == 0)) { ///checking for divide by zero exception
-                            pacechange.setText("Your speed was " + previouspaces + " min/km less ");
+                            pacechange.setText("Your pace was " + previouspaces + " min/km less ");
 
                         } else {
                             pacechange.setText("Your pace was  same as previous session");
