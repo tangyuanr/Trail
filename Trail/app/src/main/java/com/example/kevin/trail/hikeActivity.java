@@ -250,7 +250,7 @@ public class hikeActivity extends AppCompatActivity implements
                         startStopButton.setText("Start logging");
                         loggingText.setVisibility(View.INVISIBLE);
                         if (!(route == null)) {
-                            attempt = HikingHelper.getAttempt();
+                            //attempt = HikingHelper.getAttempt();
                             SaveAttemptDialog();
 
                         } else {
@@ -280,6 +280,12 @@ public class hikeActivity extends AppCompatActivity implements
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                int totaltime = (int) HikingHelper.getTimeLastsample() / 1000;
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
+                String currentDateandTime = sdf.format(new Date());
+                String snapshotURL=route.getStaticAPIURL(hikeActivity.this, 250, 250);
+                imageDownload(hikeActivity.this, snapshotURL);
+                attempt=new Attempt(route, totaltime, HikingHelper.getTotalDistance(), currentDateandTime,snapshotURL , totalBMP/counter, (int)totalCaloriesBurnt, imagefilename);
                 dbHandler.addAttempt(attempt); //save the attempt to the database
                 Log.d(TAG, "Attempt added to the database");
             }
