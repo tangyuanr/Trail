@@ -10,7 +10,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.ExpandableListView;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -22,12 +21,12 @@ import java.util.ArrayList;
  */
 
 
-public class SelectRouteRunning extends AppCompatActivity {
+public class routeManager extends AppCompatActivity {
 
     DBHandler dbhandler = new DBHandler(this);  //instantiate and initialize dbHandler
     ArrayList<Route> listOfRoutes = new ArrayList<Route>();     //list of Route objects that will contain all the routes
     ListView listview;
-    private static final String TAG = "SelectRouteRunning";
+    private static final String TAG = "routeManager";
     private String activityType;
     ActionBar actionBar;
     private Menu menuActionBar;
@@ -52,7 +51,8 @@ public class SelectRouteRunning extends AppCompatActivity {
         newRouteButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Log.d(TAG, "User selects new route");
-                Intent intent = new Intent(SelectRouteRunning.this, getClassIntent(activityType));
+                Intent intent = new Intent(routeManager.this, loggerActivity.class);
+                intent.putExtra("activityType", activityType);
                 startActivity(intent);
             }
         });
@@ -86,7 +86,7 @@ public class SelectRouteRunning extends AppCompatActivity {
 
 
         listOfRoutes = dbhandler.getRoutes(activityType);    //get all the routes stored in the route table, activity type "Running". this is for the ActivityType column in the database.
-        listview.setAdapter(new RouteAdapter(SelectRouteRunning.this, listOfRoutes)); // custom routeAdapter to bind the data to the listview
+        listview.setAdapter(new RouteAdapter(routeManager.this, listOfRoutes)); // custom routeAdapter to bind the data to the listview
 
 
         //this is called when an item in the listview has been clicked (when the user chooses a route)
@@ -94,9 +94,10 @@ public class SelectRouteRunning extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Route selectedRoute = (Route) parent.getAdapter().getItem(position);
-                Intent intent = new Intent(SelectRouteRunning.this, getClassIntent(activityType));
+                Intent intent = new Intent(routeManager.this, loggerActivity.class);
                 Log.d(TAG, selectedRoute.getRouteName());
-                intent.putExtra("route", selectedRoute);    //serializable object that can be passed in intents
+                intent.putExtra("route", selectedRoute);//serializable object that can be passed in intents
+                intent.putExtra("activityType", selectedRoute.getActivityType());
                 startActivity(intent);
             }
         });
@@ -113,11 +114,11 @@ public class SelectRouteRunning extends AppCompatActivity {
     }
 
 
-    private Class<?> getClassIntent(String activity) {
-        if(activity.equals("Running")) {return runActivity.class;}
-        else if(activity.equals("Hiking")) {return hikeActivity.class;}
-        else {return null;}
-    }
+//    private Class<?> getClassIntent(String activity) {
+//        if(activity.equals("Running")) {return runActivity.class;}
+//        else if(activity.equals("Hiking")) {return loggerActivity.class;}
+//        else {return null;}
+//    }
 
 
 }
