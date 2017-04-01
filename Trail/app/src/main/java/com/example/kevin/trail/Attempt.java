@@ -23,6 +23,7 @@ public class Attempt {
     String Activitytype;
     float totalDistance;
 
+
     //a route must be provided to the constructor (i.e. no attempt without an associated route)
     public Attempt(Route route, int totalTimeTaken, String dateOfAttempt, String URL,float distance) {
         this.route = route;
@@ -35,7 +36,7 @@ public class Attempt {
         this.Activitytype = activitytype;
         this.totalTimeTaken = totaltime;
         this.dateOfAttempt = dateofattempt;
-        this.Routename = Routename;
+
         this.fileNameStaticMapScreenshot = mapscreenshot;
         this.totalDistance = distance;
 
@@ -53,6 +54,7 @@ public class Attempt {
     }
 
     public Route getRoute() {
+
         return route;
     }
 

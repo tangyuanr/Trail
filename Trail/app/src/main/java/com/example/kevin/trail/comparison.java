@@ -10,7 +10,7 @@ import java.util.ArrayList;
 public class comparison extends AppCompatActivity {
     EditText    distancechange , timechange, speedchange , pacechange,title;
     DBHandler db = new DBHandler(this);
-    ArrayList<Route> myroute;
+    ArrayList<Route> myattemptroute =new ArrayList<Route>();
     ArrayList<Attempt> myattempt;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,27 +58,38 @@ public class comparison extends AppCompatActivity {
 
                 myattempt = db.getAttempts("Running");
 
+
             }
+
+
             if(db.getAttempts("").get(db.getAttempts("").size()-1).getActivityType().equals("Hiking"))   {                 ///checking if latest activity is running
 
                 myattempt = db.getAttempts("Hiking");
+
 
             }
             if(db.getAttempts("").get(db.getAttempts("").size()-1).getActivityType().equals("Biking"))   {                 ///checking if latest activity is running
 
                 myattempt = db.getAttempts("Biking");
 
+
             }
+
+
             if (myattempt != null) {
                 if (myattempt.size() >= 2) {
+
+
+
+
                     ///comparing attempt
                   Attempt recentattempt =myattempt.get(myattempt.size()-1);
                     Attempt previousattempt =myattempt.get(myattempt.size()-2);
                     if((recentattempt!=null)||(previousattempt!=null)) {
-                        double recentdistances = recentattempt.getTotalDistance();
-                        double previousdistances = previousattempt.getTotalDistance();
-                        double distancechanges = recentdistances - previousdistances;
-                        distancechanges=distancechanges*100000;           ////rounding off to 6 decimal places
+                        double recentdistances = myattempt.get(myattempt.size()-1).getTotalDistance();
+
+                        double distancechanges = recentdistances ;
+                        distancechanges=distancechanges*1000000;           ////rounding off to 6 decimal places
                         distancechanges = Math.round(distancechanges);
                         distancechanges = distancechanges/1000000;
                         // distancechange.setText("" + ((myroute.get(myroute.size() - 1).getTotalDistance()) - (myroute.get(myroute.size() - 2).getTotalDistance())));
@@ -100,12 +111,8 @@ public class comparison extends AppCompatActivity {
                         pacechanges = pacechanges/1000000;////rounding off to 6 decimal places
 
                         title.setText("Comparing " + myattempt.get(myattempt.size() - 1).getRouteName() + " at date :"+myattempt.get(myattempt.size() - 1).getDate().substring(0,4) +"-"+myattempt.get(myattempt.size() - 1).getDate().substring(4,6)+"-"+myattempt.get(myattempt.size() - 1).getDate().substring(6,8) );
-                        if (recentdistances > previousdistances) {
-                            distancechange.setText("You covered " +distancechanges  + " m more distance");
-                        } else if (recentdistances < previousdistances) {
-                            distancechange.setText("You covered " +  distancechanges + " m less distance");
-                        } else {
-                            distancechange.setText("You covered same distance");
+                        if (recentdistances > 0) {
+                            distancechange.setText("You covered " +distancechanges  + " km");
                         }
 
                         if (recenttimes > previoustimes) {
@@ -137,14 +144,12 @@ public class comparison extends AppCompatActivity {
                             pacechange.setText("Your pace was " + pacechanges + " min/km more ");
                         } else if (recentpaces < previouspaces) {
                             pacechange.setText("Your pace was " + (-1 * pacechanges) + " min/km less ");
-                        } else if ((previousdistances == 0) && (recentdistances == 0)) { ///checking for divide by zero exception
+                        } else if ( (recentdistances == 0)) { ///checking for divide by zero exception
                             pacechange.setText("pace comparison is invalid");
 
-                        } else if ((previousdistances == 0)) { ///checking for divide by zero exception
-                            pacechange.setText("Your pace was " + recentpaces + " min/km more ");
+                        }
 
-                        } else if ((recentdistances == 0)) { ///checking for divide by zero exception
-                            pacechange.setText("Your pace was " + previouspaces + " min/km less ");
+                        }
 
                         } else {
                             pacechange.setText("Your pace was  same as previous session");
@@ -171,5 +176,5 @@ public class comparison extends AppCompatActivity {
 
 
 
-    }
-}
+
+
