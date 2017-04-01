@@ -72,25 +72,25 @@ public class comparison extends AppCompatActivity {
             if (myattempt != null) {
                 if (myattempt.size() >= 2) {
                     ///comparing attempt
-                  Route recentattemptroute =db.getRoute(myattempt.get(myattempt.size()-1).getRouteName());
-                    Route previousattemptroute =db.getRoute(myattempt.get(myattempt.size()-2).getRouteName());
-                    if((recentattemptroute!=null)||(previousattemptroute!=null)) {
-                        double recentdistances = recentattemptroute.getTotalDistance();
-                        double previousdistances = previousattemptroute.getTotalDistance();
+                  Attempt recentattempt =myattempt.get(myattempt.size()-1);
+                    Attempt previousattempt =myattempt.get(myattempt.size()-2);
+                    if((recentattempt!=null)||(previousattempt!=null)) {
+                        double recentdistances = recentattempt.getTotalDistance();
+                        double previousdistances = previousattempt.getTotalDistance();
                         double distancechanges = recentdistances - previousdistances;
                         // distancechange.setText("" + ((myroute.get(myroute.size() - 1).getTotalDistance()) - (myroute.get(myroute.size() - 2).getTotalDistance())));
-                        float recenttimes = (recentattemptroute.getBestTime()) / 60;
-                        float previoustimes = (previousattemptroute.getBestTime()) / 60;
-                        String timechanges = ((recentattemptroute.getBestTime()) - (previousattemptroute.getBestTime())) / 60 + " min";
-                        String timechangez = (-1 * ((recentattemptroute.getBestTime()) - (previousattemptroute.getBestTime())) / 60) + " min";
-                        double recentspeeds = ((recentattemptroute.getTotalDistance()) * (1000)) / ((recentattemptroute.getBestTime()));
-                        double previousspeeds = ((previousattemptroute.getTotalDistance()) * (1000)) / ((previousattemptroute.getBestTime()));
+                        float recenttimes = (recentattempt.getTotalTimeTaken()) / 60;
+                        float previoustimes = (previousattempt.getTotalTimeTaken()) / 60;
+                        String timechanges = ((recentattempt.getTotalTimeTaken()) - (previousattempt.getTotalTimeTaken())) / 60 + " min";
+                        String timechangez = (-1 * ((recentattempt.getTotalTimeTaken()) - (previousattempt.getTotalTimeTaken())) / 60) + " min";
+                        double recentspeeds = ((recentattempt.getTotalDistance()) * (1000)) / ((recentattempt.getTotalTimeTaken()));
+                        double previousspeeds = ((previousattempt.getTotalDistance()) * (1000)) / ((previousattempt.getTotalTimeTaken()));
                         double speedchanges = recentspeeds - previousspeeds;
-                        double previouspaces = (previousattemptroute.getBestTime()) / ((60) * previousattemptroute.getTotalDistance());//min per km
-                        double recentpaces = (recentattemptroute.getBestTime()) / ((60) * recentattemptroute.getTotalDistance());//min per km
+                        double previouspaces = (previousattempt.getTotalTimeTaken()) / ((60) * previousattempt.getTotalDistance());//min per km
+                        double recentpaces = (recentattempt.getTotalTimeTaken()) / ((60) * recentattempt.getTotalDistance());//min per km
                         double pacechanges = recentpaces - previouspaces;
 
-                        title.setText("Comparing " + myattempt.get(myattempt.size() - 1).getRouteName() + " with " + myattempt.get(myattempt.size() - 2).getRouteName());
+                        title.setText("Comparing " + myattempt.get(myattempt.size() - 1).getRouteName() + " with previous attempt at date :"+myattempt.get(myattempt.size() - 1).getDate().substring(0,4) +"-"+myattempt.get(myattempt.size() - 1).getDate().substring(4,6)+"-"+myattempt.get(myattempt.size() - 1).getDate().substring(6,8) );
                         if (recentdistances > previousdistances) {
                             distancechange.setText("You covered " + distancechanges * 1000 + " m more than previous session");
                         } else if (recentdistances < previousdistances) {

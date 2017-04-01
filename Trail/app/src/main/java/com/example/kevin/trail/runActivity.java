@@ -43,6 +43,7 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
     protected Button sensorReconnect=null;
     protected FloatingActionButton sensorHelp=null;
 
+
     TextView timerTextViewL;
     TextView recordedTextViewL;
     long startTime= 0;
@@ -93,6 +94,7 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
         startStopButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (!logging) {
+                    boolean checkifattemptisSaved = false;
                     RunningHelper.startActivity(route); //when the user clicks start, running activity (activity in the traditional sense, not android sense) starts and data starts being collected.
                     Log.d(TAG, "RunningHelper.startActivity(route) called");
                     logging = true; //boolean so that the same button acts as an on/off toggle
@@ -109,6 +111,8 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                             attempt = RunningHelper.getAttempt();   //build up the attempt from the stats held by the activityHelper. the runningHelper already has an instance of Route, so it can build the attempt and return it.
                             Log.d(TAG, "Route is not null. Attempt object built.");
                             SaveAttemptDialog();
+
+
 
                         } else {  //else, Route is null and the user selected New Route, so we need to ask the user to give the new route a name
                             NewRouteDialog();
@@ -182,6 +186,7 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dbHandler.addAttempt(attempt); //save the attempt to the database
+                ComparisonDialog();
                 Log.d(TAG, "Attempt added to the database");
             }
         });
@@ -252,12 +257,10 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                             //instantiating a new route object with the constructor for the case in which we have no rowID yet
                             route = new Route(inputRouteName, activityType, RunningHelper.getTotalDistance(), totaltime, currentDateandTime, RunningHelper.getCoordinatesFileName());
                             dbHandler.addRoute(route);  //add the New Route to the database and get the rowID of the route that was added
-                            if(route!=null){
-                                ComparisonDialog(); // output comparison dialog
-                            }
+
 
                             Log.d(TAG, "Route object added to ROUTE_TABLE");
-                            attempt = new Attempt(route, totaltime, currentDateandTime, route.getSnapshotURL());
+                            attempt = new Attempt(route, totaltime, currentDateandTime, route.getSnapshotURL(),RunningHelper.getTotalDistance());
                             dbHandler.addAttempt(attempt); //adding the attempt
                             Log.d(TAG, "Attempt object built and added to database");
                             dialog.dismiss();

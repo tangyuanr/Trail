@@ -37,6 +37,7 @@ public class DBHandler extends SQLiteOpenHelper {
     private static final String ATTEMPT_ID="AttemptID";
     private static final String ACTIVITY_TYPE="ActivityType";
     private static final String ROUTE_DISTANCE="RouteDistance"; //in km
+    private static final String ATTEMPT_DISTANCE="AttemptDistance";
     private static final String ROUTE_NAME="RouteName";
     private static final String BEST_TIME="BestTime"; //in seconds
     private static final String DATE_OF_BEST_TIME = "DateOfBestTime"; //YYYYMMDD
@@ -53,7 +54,7 @@ public class DBHandler extends SQLiteOpenHelper {
         Log.e(TAG, CREATE_ROUTE_TABLE);
         db.execSQL(CREATE_ROUTE_TABLE);
         String CREATE_ATTEMPTS_TABLE="CREATE TABLE "+TABLE_ATTEMPTS+" ("+ATTEMPT_ID+" INTEGER PRIMARY KEY AUTOINCREMENT, "+ACTIVITY_TYPE+" TEXT, "+TOTAL_TIME + " INT, "
-                + DATE_OF_ATTEMPT + " TEXT, " + ROUTE_NAME + " TEXT, " + MAP_SCREENSHOT + " TEXT)";
+                + DATE_OF_ATTEMPT + " TEXT, " + ROUTE_NAME + " TEXT, " + MAP_SCREENSHOT + " TEXT, " + ATTEMPT_DISTANCE +" REAL)";
         Log.e(TAG, CREATE_ATTEMPTS_TABLE);
         db.execSQL(CREATE_ATTEMPTS_TABLE);
     }
@@ -150,6 +151,7 @@ public class DBHandler extends SQLiteOpenHelper {
         contentValues.put(DATE_OF_ATTEMPT, attempt.getDateOfAttempt());
         contentValues.put(MAP_SCREENSHOT,attempt.getFileNameStaticMapScreenshot());
         contentValues.put(ROUTE_NAME, attempt.getRoute().getRouteName());
+        contentValues.put(ATTEMPT_DISTANCE, attempt.getRoute().getTotalDistance());
         db.insert(TABLE_ATTEMPTS, null, contentValues);
         db.close();
         compareBestTime(attempt);
@@ -221,20 +223,21 @@ public class DBHandler extends SQLiteOpenHelper {
             Log.d(TAG, query);
         }
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor routesCursor = db.rawQuery(query, null);
+        Cursor attemptCursor = db.rawQuery(query, null);
         try {
-            while (routesCursor.moveToNext()) {
-                String activityType = routesCursor.getString(1);
-                int totalTime = routesCursor.getInt(2);
-                String DateofAttempt = routesCursor.getString(3);
-                String routeName = routesCursor.getString(4);
+            while (attemptCursor.moveToNext()) {
+                String activityType = attemptCursor.getString(1);
+                int totalTime = attemptCursor.getInt(2);
+                String DateofAttempt = attemptCursor.getString(3);
+                String routeName = attemptCursor.getString(4);
 
-                String mapScreenShot = routesCursor.getString(5);
-                Attempt attempt = new Attempt(activityType, totalTime, DateofAttempt, routeName,mapScreenShot);
+                String mapScreenShot = attemptCursor.getString(5);
+                float attemptdistance = attemptCursor.getFloat(6);
+                Attempt attempt = new Attempt(activityType, totalTime, DateofAttempt, routeName,mapScreenShot,attemptdistance);
                 attemptList.add(attempt);
             }
         } finally {
-            routesCursor.close();
+            attemptCursor.close();
         }
         db.close();
         return attemptList;
