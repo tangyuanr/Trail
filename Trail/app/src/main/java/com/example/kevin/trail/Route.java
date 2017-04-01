@@ -25,7 +25,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Created by Ezekiel.
+ * Created by Andre & Jiayin
  * Route object.
  * It has:
  * String routeName

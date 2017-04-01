@@ -1,13 +1,12 @@
 package com.example.kevin.trail;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.os.Build;
-import android.support.v4.app.ActivityCompat;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -15,7 +14,7 @@ import com.intentfilter.androidpermissions.PermissionManager;
 
 import static java.util.Collections.singleton;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements IHeartRateReciever{
 
     private sharedPreferenceHelper sharedPreferenceHelper;
     protected Button timerButtonlink = null;
@@ -26,7 +25,11 @@ public class MainActivity extends AppCompatActivity {
     protected Button mapButtonlink = null;
     protected Button sensorButtonlink=null;
     protected Button infoButtonlink = null;
+    protected Button graphButton = null;
     DBHandler dbhandler;
+
+    public static int heartRate;
+    public static HRSensorHandler hrHandler;
 
 
     @Override
@@ -39,6 +42,15 @@ public class MainActivity extends AppCompatActivity {
         checkAndAskPermissions(trail);
         sharedPreferenceHelper = new sharedPreferenceHelper(MainActivity.this);
 
+        hrHandler=new HRSensorHandler(this);
+        try {
+            hrHandler.Connect();
+            hrHandler.setReciver(MainActivity.this);
+        }
+        catch(RuntimeException e){
+            Log.d("MainActivity", e.getMessage());
+        }
+
         infoButtonlink = (Button) findViewById(R.id.infoB);
             timerButtonlink = (Button) findViewById(R.id.timerButton);
             hikeButtonlink = (Button) findViewById(R.id.hikeButton);
@@ -46,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
             historyButtonlink = (Button) findViewById(R.id.historyButton);
             runButtonlink = (Button) findViewById(R.id.runButton);
             mapButtonlink = (Button) findViewById(R.id.mapButton);
+            graphButton = (Button) findViewById(R.id.graphButton);
             sensorButtonlink = (Button) findViewById(R.id.sensorButton);
             dbhandler = new DBHandler(this);
 
@@ -65,10 +78,11 @@ public class MainActivity extends AppCompatActivity {
             hikeButtonlink.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
                     if (dbhandler.isRouteTableEmpty("Hiking")) {
-                        Intent intent = new Intent(MainActivity.this, hikeActivity.class);
+                        Intent intent = new Intent(MainActivity.this, loggerActivity.class);
+                        intent.putExtra("activityType", "Hiking");
                         startActivity(intent);
                     } else {
-                        Intent intent = new Intent(MainActivity.this, SelectRouteRunning.class);
+                        Intent intent = new Intent(MainActivity.this, routeManager.class);
                         intent.putExtra("activityType", "Hiking");
                         startActivity(intent);
                     }
@@ -80,6 +94,13 @@ public class MainActivity extends AppCompatActivity {
                     goToBikeActivity();
                 }
             });
+
+        graphButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, graphActivity.class);
+                startActivity(intent);
+            }
+        });
 
             historyButtonlink.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
@@ -95,10 +116,11 @@ public class MainActivity extends AppCompatActivity {
             runButtonlink.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
                     if (dbhandler.isRouteTableEmpty("Running")) {
-                        Intent intent = new Intent(MainActivity.this, runActivity.class);
+                        Intent intent = new Intent(MainActivity.this, loggerActivity.class);
+                        intent.putExtra("activityType", "Running");
                         startActivity(intent);
                     } else {
-                        Intent intent = new Intent(MainActivity.this, SelectRouteRunning.class);
+                        Intent intent = new Intent(MainActivity.this, routeManager.class);
                         intent.putExtra("activityType", "Running");
                         startActivity(intent);
                         ;
@@ -168,4 +190,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    @Override
+    public void heartRateReceived(int heartRate){
+        Message msg=new Message();
+        msg.getData().putInt("HeartRate", heartRate);
+        newHandler.sendMessage(msg);
+    }
+    final Handler newHandler=new Handler(){
+        public void handleMessage(Message msg){
+            heartRate=msg.getData().getInt("HeartRate");
+        }
+    };
 }

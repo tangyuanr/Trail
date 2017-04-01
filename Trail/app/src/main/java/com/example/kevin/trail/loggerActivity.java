@@ -4,8 +4,9 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.icu.text.SimpleDateFormat;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Handler;
 import android.os.Message;
@@ -37,13 +38,20 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Created by Andre & Jiayin
+ */
 
-public class hikeActivity extends AppCompatActivity implements
+public class loggerActivity extends AppCompatActivity implements
         OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
@@ -53,19 +61,19 @@ public class hikeActivity extends AppCompatActivity implements
         GoogleMap.OnCameraMoveCanceledListener,
         GoogleMap.OnCameraIdleListener,
         GoogleMap.OnMyLocationButtonClickListener,
-        IHeartRateReciever{
+        IHeartRateReciever {
 
-    private static final String TAG = "hikeActivity";
+    private static final String TAG = "loggerActivity";
     Route route = null;
     Attempt attempt = null;
-    activityHelper HikingHelper;
+    activityHelper activityhelper;
     private Button startStopButton;
     private Button resetTrailButton;
     private TextView routeNameTextView;
     private TextView loggingText;
-    private TextView totalDistanceHikedTextView;
+    private TextView totalDistanceTravelledTextView;
     private boolean logging = false;
-    private final String activityType = "Hiking";
+    private String activityType = null;
     private Switch showSelectedRoute;
     private Switch showPreviousRoute;
     private float totalDistanceHiked;
@@ -73,22 +81,29 @@ public class hikeActivity extends AppCompatActivity implements
     GoogleMap googleMAP;
     SupportMapFragment mapFrag;
     LocationRequest locrequest;
+    String routeOrAttempt;
     GoogleApiClient googleAPIclient;
     Polyline selectedRoute = null;
     Polyline previousTrail = null;
     boolean followUser = true;
     Location lastLocation;
     ArrayList<Location> locationArray = new ArrayList<Location>();
+    private String imagefilename;
 
-    private int heartRate;
+
+    private int totalBMP=0;
+    private int counter=0;
     protected TextView hrTextView=null;
-    private HRSensorHandler hrHandler;
+    //private HRSensorHandler hrHandler;
     protected Button sensorReconnect=null;
     protected FloatingActionButton sensorHelp=null;
+    private sharedPreferenceHelper sharedPref;
+    private double totalCaloriesBurnt=0;
+    protected TextView caloriesTxtView=null;
 
     TextView timerTextViewL;
-    long startTime= 0;
-    int noti_id=1;
+    long startTime = 0;
+    int noti_id = 1;
     Handler timerHandler = new Handler();
     Runnable timerRunnable = new Runnable() {
         @Override
@@ -98,7 +113,7 @@ public class hikeActivity extends AppCompatActivity implements
             int minutes = seconds / 60;
             seconds = seconds % 60;
             timerTextViewL.setText("Time elapsed: " + String.format("%d:%02d", minutes, seconds));
-            notificationOp(noti_id, String.format("%d:%02d", minutes, seconds), String.format("%.2f", HikingHelper.getTotalDistance()));
+            notificationOp(noti_id, String.format("%d:%02d", minutes, seconds), String.format("%.2f", activityhelper.getTotalDistance()));
             timerHandler.postDelayed(this, 500);
         }
     };
@@ -108,13 +123,15 @@ public class hikeActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.activity_hike);
+        setContentView(R.layout.activity_logger);
         hrTextView=(TextView)findViewById(R.id.heartRateText);
-        hrHandler=new HRSensorHandler(this);
+        //hrHandler=new HRSensorHandler(this);
         sensorReconnect=(Button)findViewById(R.id.hrReconnectHike);
         sensorHelp=(FloatingActionButton)findViewById(R.id.hrReconectHelp);
+        sharedPref = new sharedPreferenceHelper(loggerActivity.this);
+        caloriesTxtView=(TextView)findViewById(R.id.caloriesTextView);
 
-        startStopButton = (Button) findViewById(R.id.startStopHiking);
+        startStopButton = (Button) findViewById(R.id.startStop);
         resetTrailButton = (Button) findViewById(R.id.resetTrail);
         resetTrailButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -137,11 +154,13 @@ public class hikeActivity extends AppCompatActivity implements
         });
 
         loggingText = (TextView) findViewById(R.id.loggingText);
-        routeNameTextView = (TextView) findViewById(R.id.routeNameHiking);
-        totalDistanceHikedTextView = (TextView) findViewById(R.id.distanceTravelled);
+        routeNameTextView = (TextView) findViewById(R.id.routeName);
+        totalDistanceTravelledTextView = (TextView) findViewById(R.id.distanceTravelled);
         Intent receivedIntent = getIntent();    //retrieve the intent that was sent to check if it has a Route object
+        if(receivedIntent.hasExtra("activityType")) {activityType = receivedIntent.getStringExtra("activityType");}
         if (receivedIntent.hasExtra("route")) {  //if the intent has a route object
             route = (Route) receivedIntent.getSerializableExtra("route");
+            routeOrAttempt = "attempt";
             routeNameTextView.setText(route.getRouteName());
             showSelectedRoute = (Switch) findViewById(R.id.showSelectedRoute);
             showSelectedRoute.setVisibility(View.VISIBLE);
@@ -154,7 +173,9 @@ public class hikeActivity extends AppCompatActivity implements
                     }
                 }
             });
-            Log.d(TAG, "Route object received by hikeActivity");
+            Log.d(TAG, "Route object received by loggerActivity");
+        } else {
+            routeOrAttempt = "route";
         }
         mapFrag = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFrag.getMapAsync(this);
@@ -165,14 +186,20 @@ public class hikeActivity extends AppCompatActivity implements
             public void onClick(View v) {
                 if (!logging) {
                     logging = true;
-                    HikingHelper = new activityHelper(hikeActivity.this, 1);
-                    HikingHelper.startActivity(null); //start logging samples
+                    activityhelper = new activityHelper(loggerActivity.this, activityType);
+                    activityhelper.startActivity(null); //start logging samples
                     connectClicked();
                     startTime = System.currentTimeMillis();
                     timerHandler.postDelayed(timerRunnable, 0);
                     startStopButton.setText("Stop logging");
                     loggingText.setVisibility(View.VISIBLE);
                     startUpdateStatsThread();
+                    caloriesTxtView.setText(Double.toString(totalCaloriesBurnt));
+
+                    if (MainActivity.heartRate==0){
+                        sensorReconnect.setVisibility(View.VISIBLE);
+                        sensorHelp.setVisibility(View.VISIBLE);
+                    }
                 } else {
                     confirmDialog();
                 }
@@ -183,7 +210,18 @@ public class hikeActivity extends AppCompatActivity implements
         sensorReconnect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                connectClicked();
+                try {
+                    MainActivity.hrHandler.Connect();
+                    MainActivity.hrHandler.setReciver(loggerActivity.this);
+                    //make sensor reconnection buttons disappear if connection is established
+                    sensorReconnect.setVisibility(View.INVISIBLE);
+                    sensorHelp.setVisibility(View.INVISIBLE);
+
+                }catch(RuntimeException e){
+                    hrTextView.setText("error connecting to HxM");
+                    sensorReconnect.setVisibility(View.VISIBLE);
+                    sensorHelp.setVisibility(View.VISIBLE);
+                }
             }
         });
         sensorHelp.setOnClickListener(new View.OnClickListener() {
@@ -197,20 +235,25 @@ public class hikeActivity extends AppCompatActivity implements
     private void confirmDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder
-                .setTitle("Stop logging route")
-                .setMessage("Are you sure you want to stop logging your route?")
+                .setTitle("Stop logging " + routeOrAttempt)
+                .setMessage("Are you sure you want to stop logging your " + routeOrAttempt + "?")
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        HikingHelper.stopActivity();
+                        activityhelper.stopActivity();
+                        //disconnectClicked();
                         logging = false;
-                        disconnectClicked();
                         timerHandler.removeCallbacks(timerRunnable);
                         startStopButton.setText("Start logging");
                         loggingText.setVisibility(View.INVISIBLE);
-                        NewRouteDialog();
-                        long timelastSample = HikingHelper.getTimeLastsample();    //get final stats for display
-                        float FinalDistance = HikingHelper.getTotalDistance();    //get final stats for display
+                        if (!(route == null)) {
+                            SaveAttemptDialog();
+
+                        } else {
+                            NewRouteDialog();
+                        }
+                        long timelastSample = activityhelper.getTimeLastsample();    //get final stats for display
+                        float FinalDistance = activityhelper.getTotalDistance();    //get final stats for display
                         showStatsDialog(timelastSample, FinalDistance);
                     }
                 })
@@ -218,15 +261,39 @@ public class hikeActivity extends AppCompatActivity implements
                 .show();
     }
 
-    public void notificationOp(int id, String time, String distance){
+    public void notificationOp(int id, String time, String distance) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         builder.setSmallIcon(R.mipmap.ic_launcher);
-        builder.setContentTitle("Trail : Hiking");
-        builder.setContentText("Time: " + timerTextViewL.getText()+ ", Distance : " + HikingHelper.getTotalDistance());
+        builder.setContentTitle("Trail : " + activityType);
+        builder.setContentText("Time: " + timerTextViewL.getText() + ", Distance : " + activityhelper.getTotalDistance());
         NotificationManager NM = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        NM.notify(id,builder.build());
+        NM.notify(id, builder.build());
     }
 
+    private void SaveAttemptDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Save attempt?");
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                int totaltime = (int) activityhelper.getTimeLastsample() / 1000;
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
+                String currentDateandTime = sdf.format(new Date());
+                String snapshotURL=route.getStaticAPIURL(loggerActivity.this, 250, 250);
+                imageDownload(loggerActivity.this, snapshotURL);
+                attempt=new Attempt(route, totaltime, activityhelper.getTotalDistance(), currentDateandTime,snapshotURL , totalBMP/counter, (int)totalCaloriesBurnt, imagefilename);
+                dbHandler.addAttempt(attempt); //save the attempt to the database
+                Log.d(TAG, "Attempt added to the database");
+            }
+        });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        builder.show();
+    }
 
 
     private void NewRouteDialog() {
@@ -249,25 +316,33 @@ public class hikeActivity extends AppCompatActivity implements
                     @Override
                     public void onClick(View view) {
                         String inputRouteName = input.getText().toString();
-                        boolean routeNameExists = dbHandler.doesRouteNameExist(inputRouteName);
-                        if (!(routeNameExists || inputRouteName.isEmpty())) {
-                            //the user wants to save the route. it obviously means he wants to save the attempt with it as well. so we need to build both objects.
-                            int totaltime = (int) HikingHelper.getTimeLastsample() / 1000;
-                            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
-                            String currentDateandTime = sdf.format(new Date());
-                            //instantiating a new route object with the constructor for the case in which we have no rowID yet
-                            route = new Route(inputRouteName, activityType, HikingHelper.getTotalDistance(), totaltime, currentDateandTime, HikingHelper.getCoordinatesFileName());
-                            dbHandler.addRoute(route);
-                            Log.d(TAG, "Route object added to ROUTE_TABLE");
-                            attempt=new Attempt(route, totaltime, currentDateandTime, route.getSnapshotURL());
-                            dbHandler.addAttempt(attempt); //adding the attempt
-                            Log.d(TAG, "Attempt object built and added to database");
-                            dialog.dismiss();
-                        } else if (routeNameExists) {
-                            Toast.makeText(hikeActivity.this, "Route name already exists", Toast.LENGTH_SHORT).show();
-                        } else if (inputRouteName.isEmpty()) {
-                            Toast.makeText(hikeActivity.this, "Route name cannot be empty", Toast.LENGTH_SHORT).show();
+                        if (inputRouteName.matches("^.*[^a-zA-Z0-9 ].*$")) {
+                            Toast.makeText(loggerActivity.this, "The route name can only contain alphanumeric characters", Toast.LENGTH_SHORT).show();
+                        } else {
+                            boolean routeNameExists = dbHandler.doesRouteNameExist(inputRouteName);
+                            if (!(routeNameExists || inputRouteName.isEmpty())) {
+                                //the user wants to save the route. it obviously means he wants to save the attempt with it as well. so we need to build both objects.
+                                int totaltime = (int) activityhelper.getTimeLastsample() / 1000;
+                                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
+                                String currentDateandTime = sdf.format(new Date());
+                                //instantiating a new route object with the constructor for the case in which we have no rowID yet
+                                route = new Route(inputRouteName, activityType, activityhelper.getTotalDistance(), totaltime, currentDateandTime, activityhelper.getCoordinatesFileName());
+                                dbHandler.addRoute(route);
+                                Log.d(TAG, "Route object added to ROUTE_TABLE");
+
+                                String snapshotURL=route.getStaticAPIURL(loggerActivity.this, 250, 250);
+                                imageDownload(loggerActivity.this, snapshotURL);
+                                attempt=new Attempt(route, totaltime, activityhelper.getTotalDistance(), currentDateandTime,snapshotURL , totalBMP/counter, (int)totalCaloriesBurnt, imagefilename);
+                                dbHandler.addAttempt(attempt); //adding the attempt
+                                Log.d(TAG, "Attempt object built and added to database");
+                                dialog.dismiss();
+                            } else if (routeNameExists) {
+                                Toast.makeText(loggerActivity.this, "Route name already exists", Toast.LENGTH_SHORT).show();
+                            } else if (inputRouteName.isEmpty()) {
+                                Toast.makeText(loggerActivity.this, "Route name cannot be empty", Toast.LENGTH_SHORT).show();
+                            }
                         }
+
                     }
                 });
             }
@@ -294,8 +369,25 @@ public class hikeActivity extends AppCompatActivity implements
 
         long time = timeLastSample / (60000); //in minutes
         AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-        alertDialog.setTitle("Hike ended");
-        alertDialog.setMessage("You have hiked " + String.format("%.2f", FinalDistance) + " km in " + (time) + " minutes.\n");
+        String string = null;
+        switch (activityType) {
+            case "Running":
+                string = "Run";
+                break;
+            case "Hiking":
+                string = "Hike";
+                break;
+        }
+        alertDialog.setTitle(string + " ended");
+        switch (activityType) {
+            case "Running":
+                string = "runned";
+                break;
+            case "Hiking":
+                string = "hiked";
+                break;
+        }
+        alertDialog.setMessage("You have " + string + " " + String.format("%.2f", FinalDistance) + " km in " + (time) + " minutes.\n");
         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
@@ -364,7 +456,9 @@ public class hikeActivity extends AppCompatActivity implements
 
     @Override
     public void onLocationChanged(Location location) {
-        if(lastLocation == null) {lastLocation = location;}
+        if (lastLocation == null) {
+            lastLocation = location;
+        }
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         if (followUser) {
             googleMAP.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
@@ -416,26 +510,27 @@ public class hikeActivity extends AppCompatActivity implements
         super.onDestroy();
         if (logging)// if logging is still true
         {
-            HikingHelper.stopActivity();
-            disconnectClicked();//disconnect from HxM
+            activityhelper.stopActivity();
+            //disconnectClicked();//disconnect from HxM
         }
     }
 
     @Override
-    public void heartRateReceived(int heartRate){
-        Message msg=new Message();
+    public void heartRateReceived(int heartRate) {
+        Message msg = new Message();
         msg.getData().putInt("HeartRate", heartRate);
         newHandler.sendMessage(msg);
     }
+
     //connect with HxM HR Sensor
     private void connectClicked(){
         try{
-            hrHandler.Connect();
-            hrHandler.setReciver(hikeActivity.this);
+            //hrHandler.Connect();
+            MainActivity.hrHandler.setReciver(loggerActivity.this);
             //make sensor reconnection buttons disappear if connection is established
             sensorReconnect.setVisibility(View.INVISIBLE);
             sensorHelp.setVisibility(View.INVISIBLE);
-        }catch (RuntimeException e) {
+        } catch (RuntimeException e) {
             hrTextView.setText("error connecting to HxM");
             sensorReconnect.setVisibility(View.VISIBLE);
             sensorHelp.setVisibility(View.VISIBLE);
@@ -445,18 +540,20 @@ public class hikeActivity extends AppCompatActivity implements
     //disconnect with HxM HR Sensor
     private void disconnectClicked(){
         try{
-            hrHandler.setReciver(null);
-            hrHandler.Disconnect();
+            //hrHandler.setReciver(null);
+            //hrHandler.Disconnect();
             sensorReconnect.setVisibility(View.INVISIBLE);
             sensorHelp.setVisibility(View.INVISIBLE);
         }catch (RuntimeException e){
             hrTextView.setText("error disconnecting from HxM"+e.getMessage());//never encountered so far, put exception message here to debug
+            sensorReconnect.setVisibility(View.INVISIBLE);
+            sensorHelp.setVisibility(View.INVISIBLE);
         }
     }
     final Handler newHandler=new Handler(){
         public void handleMessage(Message msg){
-            heartRate=msg.getData().getInt("HeartRate");
-            hrTextView.setText(Integer.toString(heartRate));
+            MainActivity.heartRate=msg.getData().getInt("HeartRate");
+            hrTextView.setText(Integer.toString(MainActivity.heartRate));
         }
     };
 
@@ -464,9 +561,9 @@ public class hikeActivity extends AppCompatActivity implements
     private void sensorHelpDialog() {
         AlertDialog helpDialog = new AlertDialog.Builder(this).create();
         helpDialog.setTitle("Trouble using HxM?");
-        helpDialog.setMessage("Check if your Zephyr HxM is paired with your phone via bluetooth\n"+
-                "Make sure your HxM is charged\n"+
-                "Make sure the probes on the strap are placed onto your chest\n"+
+        helpDialog.setMessage("Check if your Zephyr HxM is paired with your phone via bluetooth\n" +
+                "Make sure your HxM is charged\n" +
+                "Make sure the probes on the strap are placed onto your chest\n" +
                 "Moisten the strap probes with a bit of water"
         );
         helpDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
@@ -477,28 +574,116 @@ public class hikeActivity extends AppCompatActivity implements
                 });
         helpDialog.show();
     }
+
     //thread that receives distance updates from the service
     private void startUpdateStatsThread() {
         Thread th = new Thread(new Runnable() {
 
             public void run() {
                 while (logging == true) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Log.d(TAG, "TOTAL DISTANCE " + String.valueOf(HikingHelper.getTotalDistance()));
-                            totalDistanceHikedTextView.setText("Distance traveled: " + String.format("%.2f", HikingHelper.getTotalDistance()) + " km");
-                        }
-                    });
                     try {
                         Thread.sleep(5000);
+                        totalBMP+=MainActivity.heartRate;
+                        counter++;
+                        totalCaloriesBurnt+=caloriesCalculator(MainActivity.heartRate);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.d(TAG, "TOTAL DISTANCE " + String.valueOf(activityhelper.getTotalDistance()));
+                            totalDistanceTravelledTextView.setText("Distance travelled: " + String.format("%.2f", activityhelper.getTotalDistance()) + " km");
+                            caloriesTxtView.setText(String.format("%.2f",totalCaloriesBurnt));
+                            if (MainActivity.heartRate==0){
+                                sensorReconnect.setVisibility(View.VISIBLE);
+                                sensorHelp.setVisibility(View.VISIBLE);
+                            }
+                            else {
+                                sensorReconnect.setVisibility(View.INVISIBLE);
+                                sensorHelp.setVisibility(View.INVISIBLE);
+                            }
+                        }
+                    });
+
+
                 }
             }
         });
         th.start();
     }
 
+    //calculate calories based on heart rate, called inside the thread at every 5 second
+    private double caloriesCalculator(int HR){
+        double age=Double.parseDouble(sharedPref.getProfileAge());
+        String gender=sharedPref.getProfileGender();
+        double weight=Double.parseDouble(sharedPref.getProfileWeight());
+        double LB_to_KG=0.453592;
+        double DURATION = (double)5/60;//in minute
+
+        double calories=0;
+
+        //calories formula for female
+        if (gender.equals("m")||gender.equals("M")){
+            double age_factor=age*0.2017;
+            double weight_factor=weight*LB_to_KG*0.1988;
+            double HR_factor=HR*0.6309;
+            calories = age_factor+weight_factor+HR_factor - 55.0969;
+            calories = calories * DURATION / 4.184;
+            Log.e(TAG, "Weight: "+weight+", Age: "+age+", Gender: "+gender+". With heart rate "+HR+", calories calculated: "+calories);
+        }
+        else if (gender.equals("f")||gender.equals("F")){
+            double age_factor=age*0.074;
+            double weight_factor=weight*LB_to_KG*0.1263;
+            double HR_factor=HR*0.4472;
+            calories = (age_factor+ weight_factor + HR_factor - 20.4022) * DURATION /4.184;
+            Log.e(TAG, "Weight: "+weight+", Age: "+age+", Gender: "+gender+". With heart rate "+HR+", calories calculated: "+calories);
+        }
+
+        if (calories<0)
+            calories=0;
+
+
+        Log.e(TAG, "END OF METHOD: gender "+gender+", age: "+age+" , weight: "+weight+", calories: "+calories);
+        return calories;
+    }
+
+    //map snapshot saving
+    public void imageDownload(Context context, String url){
+        Picasso.with(context)
+                .load(url)
+                .into(new Target(){
+                    @Override
+                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from){
+                        try{
+                            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
+                            final String currentDateandTime = sdf.format(new Date());
+
+                            String path = Trail.getAppContext().getFilesDir() + "/";
+                            File dir=new File(path);
+                            if (!dir.exists())
+                                dir.mkdirs();
+
+                            //TODO save image inside dir
+                            String imageName=currentDateandTime+".jpg";
+                            imagefilename=imageName;
+
+                            dir=new File(dir, imageName);
+                            FileOutputStream out = new FileOutputStream(dir);
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+
+                            out.flush();
+                            out.close();
+
+                        }catch (Exception e){
+                            Log.e(TAG, e.getMessage());
+                        }
+                    }
+                    @Override
+                    public void onBitmapFailed(Drawable errorDrawable){}
+
+                    @Override
+                    public void onPrepareLoad(Drawable placeholderDrawable){}
+                });
+    }
 }
