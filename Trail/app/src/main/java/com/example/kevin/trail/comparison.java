@@ -108,34 +108,34 @@ public class comparison extends AppCompatActivity {
                         }
 
                         if (recentspeeds > previousspeeds) {
-                            speedchange.setText("Your speed was " + Math.round((speedchanges)/10)*10 + " m/s more ");
+                            speedchange.setText("Your speed was " + (Math.round((speedchanges)*10000))/10000 + " m/s more ");
                         } else if (recentspeeds < previousspeeds) {
-                            speedchange.setText("Your speed was " + (-1 * Math.round((speedchanges)/10)*10) + " m/s less ");
+                            speedchange.setText("Your speed was " + (-1 * (Math.round((speedchanges)*10000))/10000) + " m/s less ");
                         } else if ((previoustimes == 0) && (recenttimes == 0)) { ///checking for divide by zero exception
                             speedchange.setText("Speed comparison is invalid");
 
                         } else if ((previoustimes == 0)) { ///checking for divide by zero exception
-                            speedchange.setText("Your speed was " + Math.round(recentspeeds/10)*10 + " m/s more ");
+                            speedchange.setText("Your speed was " + (Math.round(recentspeeds*10000))/10000 + " m/s more ");
 
                         } else if ((recenttimes == 0)) { ///checking for divide by zero exception
-                            speedchange.setText("Your speed was " + Math.round(previousspeeds/10)*10 + " m/s less ");
+                            speedchange.setText("Your speed was " + (Math.round(previousspeeds*10000))/10000 + " m/s less ");
 
                         } else {
                             speedchange.setText("Your speed was  same as previous session");
                         }
 
                         if (recentpaces > previouspaces) {
-                            pacechange.setText("Your pace was " + Math.round(pacechanges/10)*10 + " min/km more ");
+                            pacechange.setText("Your pace was " + (Math.round(pacechanges*10000))/10000 + " min/km more ");
                         } else if (recentpaces < previouspaces) {
-                            pacechange.setText("Your pace was " + (-1 *Math.round( pacechanges/10)*10) + " min/km less ");
+                            pacechange.setText("Your pace was " + (-1 *(Math.round( pacechanges*10000))/10000) + " min/km less ");
                         } else if ((previousdistances == 0) && (recentdistances == 0)) { ///checking for divide by zero exception
                             pacechange.setText("pace comparison is invalid");
 
                         } else if ((previousdistances == 0)) { ///checking for divide by zero exception
-                            pacechange.setText("Your pace was " +Math.round( recentpaces/10)*10 + " min/km more ");
+                            pacechange.setText("Your pace was " +(Math.round( recentpaces*10000))/10000 + " min/km more ");
 
                         } else if ((recentdistances == 0)) { ///checking for divide by zero exception
-                            pacechange.setText("Your speed was " + Math.round(previouspaces/10)*10 + " min/km less ");
+                            pacechange.setText("Your speed was " + (Math.round(previouspaces*10000))/10000 + " min/km less ");
 
                         } else {
                             pacechange.setText("Your pace was  same as previous session");
