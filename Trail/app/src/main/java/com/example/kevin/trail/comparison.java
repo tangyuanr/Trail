@@ -78,6 +78,9 @@ public class comparison extends AppCompatActivity {
                         double recentdistances = recentattempt.getTotalDistance();
                         double previousdistances = previousattempt.getTotalDistance();
                         double distancechanges = recentdistances - previousdistances;
+                        distancechanges=distancechanges*100000;           ////rounding off to 6 decimal places
+                        distancechanges = Math.round(distancechanges);
+                        distancechanges = distancechanges/1000000;
                         // distancechange.setText("" + ((myroute.get(myroute.size() - 1).getTotalDistance()) - (myroute.get(myroute.size() - 2).getTotalDistance())));
                         float recenttimes = (recentattempt.getTotalTimeTaken()) / 60;
                         float previoustimes = (previousattempt.getTotalTimeTaken()) / 60;
@@ -86,15 +89,21 @@ public class comparison extends AppCompatActivity {
                         double recentspeeds = ((recentattempt.getTotalDistance()) * (1000)) / ((recentattempt.getTotalTimeTaken()));
                         double previousspeeds = ((previousattempt.getTotalDistance()) * (1000)) / ((previousattempt.getTotalTimeTaken()));
                         double speedchanges = recentspeeds - previousspeeds;
+                        speedchanges=speedchanges*100000;////rounding off to 6 decimal places
+                        speedchanges = Math.round(speedchanges);
+                        speedchanges = speedchanges/1000000;////rounding off to 6 decimal places
                         double previouspaces = (previousattempt.getTotalTimeTaken()) / ((60) * previousattempt.getTotalDistance());//min per km
                         double recentpaces = (recentattempt.getTotalTimeTaken()) / ((60) * recentattempt.getTotalDistance());//min per km
                         double pacechanges = recentpaces - previouspaces;
+                        pacechanges=pacechanges*100000;      ////rounding off to 6 decimal places
+                        pacechanges = Math.round(pacechanges);
+                        pacechanges = pacechanges/1000000;////rounding off to 6 decimal places
 
                         title.setText("Comparing " + myattempt.get(myattempt.size() - 1).getRouteName() + " at date :"+myattempt.get(myattempt.size() - 1).getDate().substring(0,4) +"-"+myattempt.get(myattempt.size() - 1).getDate().substring(4,6)+"-"+myattempt.get(myattempt.size() - 1).getDate().substring(6,8) );
                         if (recentdistances > previousdistances) {
-                            distancechange.setText("You covered " + Math.round((distancechanges * 1000)) + " m more distance");
+                            distancechange.setText("You covered " +distancechanges  + " m more distance");
                         } else if (recentdistances < previousdistances) {
-                            distancechange.setText("You covered " + Math.round((-1 * distancechanges) * 1000) + " m less distance");
+                            distancechange.setText("You covered " +  distancechanges + " m less distance");
                         } else {
                             distancechange.setText("You covered same distance");
                         }
@@ -108,34 +117,34 @@ public class comparison extends AppCompatActivity {
                         }
 
                         if (recentspeeds > previousspeeds) {
-                            speedchange.setText("Your speed was " + (Math.round((speedchanges)*10000))/10000 + " m/s more ");
+                            speedchange.setText("Your speed was " + speedchanges + " m/s more ");
                         } else if (recentspeeds < previousspeeds) {
-                            speedchange.setText("Your speed was " + (-1 * (Math.round((speedchanges)*10000))/10000) + " m/s less ");
+                            speedchange.setText("Your speed was " + (-1 * (speedchanges)) + " m/s less ");
                         } else if ((previoustimes == 0) && (recenttimes == 0)) { ///checking for divide by zero exception
                             speedchange.setText("Speed comparison is invalid");
 
                         } else if ((previoustimes == 0)) { ///checking for divide by zero exception
-                            speedchange.setText("Your speed was " + (Math.round(recentspeeds*10000))/10000 + " m/s more ");
+                            speedchange.setText("Your speed was " + recentspeeds + " m/s more ");
 
                         } else if ((recenttimes == 0)) { ///checking for divide by zero exception
-                            speedchange.setText("Your speed was " + (Math.round(previousspeeds*10000))/10000 + " m/s less ");
+                            speedchange.setText("Your speed was " + previousspeeds + " m/s less ");
 
                         } else {
                             speedchange.setText("Your speed was  same as previous session");
                         }
 
                         if (recentpaces > previouspaces) {
-                            pacechange.setText("Your pace was " + (Math.round(pacechanges*10000))/10000 + " min/km more ");
+                            pacechange.setText("Your pace was " + pacechanges + " min/km more ");
                         } else if (recentpaces < previouspaces) {
-                            pacechange.setText("Your pace was " + (-1 *(Math.round( pacechanges*10000))/10000) + " min/km less ");
+                            pacechange.setText("Your pace was " + (-1 * pacechanges) + " min/km less ");
                         } else if ((previousdistances == 0) && (recentdistances == 0)) { ///checking for divide by zero exception
                             pacechange.setText("pace comparison is invalid");
 
                         } else if ((previousdistances == 0)) { ///checking for divide by zero exception
-                            pacechange.setText("Your pace was " +(Math.round( recentpaces*10000))/10000 + " min/km more ");
+                            pacechange.setText("Your pace was " + recentpaces + " min/km more ");
 
                         } else if ((recentdistances == 0)) { ///checking for divide by zero exception
-                            pacechange.setText("Your speed was " + (Math.round(previouspaces*10000))/10000 + " min/km less ");
+                            pacechange.setText("Your speed was " + previouspaces + " min/km less ");
 
                         } else {
                             pacechange.setText("Your pace was  same as previous session");
