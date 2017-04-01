@@ -33,7 +33,7 @@ import java.util.Date;
 
 
 /**
- * Created by Ezekiel on 3/9/2017.
+ * Created by Andre & Jiayin
  * Logs GPS coordinates and writes them to a file
  * This runs as a service and can be called from any activity.
  */
