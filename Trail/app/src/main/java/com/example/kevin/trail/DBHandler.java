@@ -212,7 +212,7 @@ public class DBHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor attemptCursor = db.rawQuery(query, null);
         attemptCursor.moveToNext();
-        String date = attemptCursor.getString(3); // yyyyMMdd_HHmm
+        String date = attemptCursor.getString(attemptCursor.getColumnIndex(DATE_OF_ATTEMPT)); // yyyyMMdd_HHmm
         attemptCursor.close();
         db.close();
         return convertStringToDateTime(date);
