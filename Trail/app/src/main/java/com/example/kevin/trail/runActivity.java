@@ -5,6 +5,8 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
@@ -19,6 +21,11 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
+
+import java.io.File;
+import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -32,6 +39,7 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
     Route route = null;
     Attempt attempt = null;
     private String activityType = "Running";
+    private String imagefilename;
 
     DBHandler dbHandler = new DBHandler(this);
 
@@ -112,7 +120,9 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                     } else {
                         if (!(route == null)) {  //if Route is not null, it means a route was sent was sent by SelectRouteRunning
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmm");
-                            attempt = new Attempt(route, (int) RunningHelper.getTimeLastsample() / 1000, RunningHelper.getTotalDistance(), sdf.format(new Date()), route.getSnapshotURL(), totalBPM/counter, (int)totalCaloriesBurnt);
+                            String snapshotURL=route.getStaticAPIURL(runActivity.this, 250, 250);
+                            imageDownload(runActivity.this, snapshotURL);
+                            attempt = new Attempt(route, (int) RunningHelper.getTimeLastsample() / 1000, RunningHelper.getTotalDistance(), sdf.format(new Date()), snapshotURL, totalBPM/counter, (int)totalCaloriesBurnt, imagefilename);
                             Log.d(TAG, "Route is not null. Attempt object built.");
                             SaveAttemptDialog();    //prompt the user if he wants to save the attempt
                         } else {  //else, Route is null and the user selected New Route, so we need to ask the user to give the new route a name
@@ -190,6 +200,12 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
+                String currentDateandTime = sdf.format(new Date());
+                String snapshotURL=route.getStaticAPIURL(runActivity.this, 250, 250);
+                imageDownload(runActivity.this, snapshotURL);
+                attempt = new Attempt(route, (int) RunningHelper.getTimeLastsample() / 1000, RunningHelper.getTotalDistance(), currentDateandTime, snapshotURL, totalBPM/counter, (int)totalCaloriesBurnt, imagefilename);
+
                 dbHandler.addAttempt(attempt); //save the attempt to the database
                 Log.d(TAG, "Attempt added to the database");
             }
@@ -241,7 +257,10 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                             route = new Route(inputRouteName, activityType, RunningHelper.getTotalDistance(), totaltime, currentDateandTime, RunningHelper.getCoordinatesFileName());
                             dbHandler.addRoute(route);  //add the New Route to the database and get the rowID of the route that was added
                             Log.d(TAG, "Route object added to ROUTE_TABLE");
-                            attempt = new Attempt(route, totaltime, RunningHelper.getTotalDistance(), currentDateandTime, route.getSnapshotURL(), totalBPM/counter, (int)totalCaloriesBurnt);
+
+                            String snapshotURL=route.getStaticAPIURL(runActivity.this, 250, 250);
+                            imageDownload(runActivity.this, snapshotURL);
+                            attempt = new Attempt(route, totaltime, RunningHelper.getTotalDistance(), currentDateandTime, snapshotURL, totalBPM/counter, (int)totalCaloriesBurnt, imagefilename);
                             dbHandler.addAttempt(attempt); //adding the attempt
                             Log.d(TAG, "Attempt object built and added to database");
                             dialog.dismiss();
@@ -406,5 +425,47 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
             calories=0;
 
         return calories;
+    }
+
+    //map snapshot saving
+    public void imageDownload(Context context, String url){
+        Picasso.with(context)
+                .load(url)
+                .into(getTarget(url));
+    }
+    private Target getTarget(final String url){
+        Target target = new Target(){
+            @Override
+            public void onBitmapLoaded(final Bitmap bitmap, Picasso.LoadedFrom from){
+                new Thread(new Runnable(){
+                    @Override
+                    public void run(){
+                        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
+                        final String currentDateandTime = sdf.format(new Date());
+
+                        String path = Trail.getAppContext().getFilesDir() + "/";
+                        String imageName=currentDateandTime+".JPEG";
+                        imagefilename=imageName;
+                        File file=new File(path+imagefilename);
+
+                        try{
+                            file.createNewFile();
+                            FileOutputStream ostream=new FileOutputStream(file);
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, ostream);
+                            ostream.flush();
+                            ostream.close();
+
+                        }catch (Exception e){
+                            Log.e(TAG, e.getMessage());
+                        }
+                    }
+                }).start();
+            }
+            @Override
+            public void onBitmapFailed(Drawable errordrawable){}
+            @Override
+            public void onPrepareLoad(Drawable placeholderdrawable){}
+        };
+        return target;
     }
 }

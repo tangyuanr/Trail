@@ -4,7 +4,9 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.icu.text.SimpleDateFormat;
 import android.location.Location;
 import android.os.Handler;
@@ -38,9 +40,13 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RuntimeRemoteException;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import org.w3c.dom.Text;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -82,6 +88,7 @@ public class hikeActivity extends AppCompatActivity implements
     boolean followUser = true;
     Location lastLocation;
     ArrayList<Location> locationArray = new ArrayList<Location>();
+    private String imagefilename;
 
 
     private int totalBMP=0;
@@ -286,7 +293,10 @@ public class hikeActivity extends AppCompatActivity implements
                             route = new Route(inputRouteName, activityType, HikingHelper.getTotalDistance(), totaltime, currentDateandTime, HikingHelper.getCoordinatesFileName());
                             dbHandler.addRoute(route);
                             Log.d(TAG, "Route object added to ROUTE_TABLE");
-                            attempt=new Attempt(route, totaltime, HikingHelper.getTotalDistance(), currentDateandTime, route.getSnapshotURL(), totalBMP/counter, (int)totalCaloriesBurnt);
+
+                            String snapshotURL=route.getStaticAPIURL(hikeActivity.this, 250, 250);
+                            imageDownload(hikeActivity.this, snapshotURL);
+                            attempt=new Attempt(route, totaltime, HikingHelper.getTotalDistance(), currentDateandTime,snapshotURL , totalBMP/counter, (int)totalCaloriesBurnt, imagefilename);
                             dbHandler.addAttempt(attempt); //adding the attempt
                             Log.d(TAG, "Attempt object built and added to database");
                             dialog.dismiss();
@@ -579,5 +589,42 @@ public class hikeActivity extends AppCompatActivity implements
         return calories;
     }
 
+    //map snapshot saving
+    public void imageDownload(Context context, String url){
+        Picasso.with(context)
+                .load(url)
+                .into(new Target(){
+                    @Override
+                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from){
+                        try{
+                            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
+                            final String currentDateandTime = sdf.format(new Date());
 
+                            String path = Trail.getAppContext().getFilesDir() + "/";
+                            File dir=new File(path);
+                            if (!dir.exists())
+                                dir.mkdirs();
+
+                            //TODO save image inside dir
+                            String imageName=currentDateandTime+".jpg";
+                            imagefilename=imageName;
+
+                            dir=new File(dir, imageName);
+                            FileOutputStream out = new FileOutputStream(dir);
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+
+                            out.flush();
+                            out.close();
+
+                        }catch (Exception e){
+                            Log.e(TAG, e.getMessage());
+                        }
+                    }
+                    @Override
+                    public void onBitmapFailed(Drawable errorDrawable){}
+
+                    @Override
+                    public void onPrepareLoad(Drawable placeholderDrawable){}
+                });
+    }
 }

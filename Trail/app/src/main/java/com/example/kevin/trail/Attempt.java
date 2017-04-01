@@ -22,9 +22,10 @@ public class Attempt {
     private int averageHeartRate;//BMP
     private int caloriesBurnt;//KCal
     private float totalDistance;
+    private String imagefilename;
 
     //a route must be provided to the constructor (i.e. no attempt without an associated route)
-    public Attempt(Route route, int totalTimeTaken, float distance, String dateOfAttempt, String URL, int avgHR, int calories) {
+    public Attempt(Route route, int totalTimeTaken, float distance, String dateOfAttempt, String URL, int avgHR, int calories, String imagename) {
         this.route = route;
         this.totalTimeTaken = totalTimeTaken;
         this.dateOfAttempt = dateOfAttempt;
@@ -32,6 +33,7 @@ public class Attempt {
         this.averageHeartRate=avgHR;
         this.caloriesBurnt=calories;
         this.totalDistance=distance;
+        this.imagefilename=imagename;
     }
 
     public String getFileNameStaticMapScreenshot() {
@@ -57,6 +59,8 @@ public class Attempt {
     public int getCaloriesBurnt() { return caloriesBurnt; }
 
     public float getTotalDistance() { return totalDistance; }
+
+    public String getImagefilename(){return imagefilename;}
 
 
 }

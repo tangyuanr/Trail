@@ -47,6 +47,7 @@ public class DBHandler extends SQLiteOpenHelper {
     private static final String AVG_HR="AverageHeartRate";//in BMP
     private static final String CALORIES="CaloriesBurnt";//in KCal
     private static final String TOTAL_DISTANCE="TotalDistance";//in km
+    private static final String IMAGEFILENAME="ImageFileName";//ending in .jpg
 
     @Override
     public void onCreate(SQLiteDatabase db){
@@ -56,7 +57,7 @@ public class DBHandler extends SQLiteOpenHelper {
         Log.e(TAG, CREATE_ROUTE_TABLE);
         db.execSQL(CREATE_ROUTE_TABLE);
         String CREATE_ATTEMPTS_TABLE="CREATE TABLE "+TABLE_ATTEMPTS+" ("+ATTEMPT_ID+" INTEGER PRIMARY KEY AUTOINCREMENT, "+ACTIVITY_TYPE+" TEXT, "+TOTAL_DISTANCE+" TEXT, "+TOTAL_TIME + " INT, "
-                + DATE_OF_ATTEMPT + " TEXT, " + ROUTE_NAME + " TEXT, " +AVG_HR +" INT, " + CALORIES + " INT, "+ MAP_SCREENSHOT + " TEXT)";
+                + DATE_OF_ATTEMPT + " TEXT, " + ROUTE_NAME + " TEXT, " +AVG_HR +" INT, " + CALORIES + " INT, "+ IMAGEFILENAME+" TEXT, "+MAP_SCREENSHOT + " TEXT)";
         Log.e(TAG, CREATE_ATTEMPTS_TABLE);
         db.execSQL(CREATE_ATTEMPTS_TABLE);
     }
@@ -156,6 +157,7 @@ public class DBHandler extends SQLiteOpenHelper {
         contentValues.put(AVG_HR, attempt.getAverageHeartRate());
         contentValues.put(CALORIES, attempt.getCaloriesBurnt());
         contentValues.put(TOTAL_DISTANCE, attempt.getTotalDistance());
+        contentValues.put(IMAGEFILENAME, attempt.getImagefilename());
         db.insert(TABLE_ATTEMPTS, null, contentValues);
         db.close();
         compareBestTime(attempt);
@@ -248,9 +250,7 @@ public class DBHandler extends SQLiteOpenHelper {
                 Log.d(TAG, "read CALORIES BURNT from TABLE ATTEMPTS: " + placeholder);
                 dataHolder.add("CALORIES BURNT:      " + placeholder+"KCAL");
 
-                placeholder = cursor.getString(cursor.getColumnIndex(MAP_SCREENSHOT));
-                Log.d(TAG, "read MAP SCREENSHOT from TABLE ATTEMPTS: " + placeholder);
-                dataHolder.add("MAP SCREENSHOT url (temporary) " + placeholder);
+                dataHolder.add("See map snapshot");//click on this item to see the snapshot of map
 
                 //when adding row data is finished, name hashmap key with date
                 placeholder = cursor.getString(cursor.getColumnIndex(DATE_OF_ATTEMPT));
@@ -280,6 +280,16 @@ public class DBHandler extends SQLiteOpenHelper {
 
         String formatted=hours+" Hour "+minutes+" Min "+seconds+" Sec";
         return formatted;
+    }
+
+    public String getImageFileName(String savedDate){
+        SQLiteDatabase db=this.getReadableDatabase();
+        String query="SELECT * FROM "+TABLE_ATTEMPTS + " WHERE "+DATE_OF_ATTEMPT+" = '"+savedDate+"'";
+        Cursor cursor=db.rawQuery(query, null);
+        if (cursor.moveToFirst())
+            return cursor.getString(cursor.getColumnIndex(IMAGEFILENAME));
+        else
+            return null;
     }
 
 }
