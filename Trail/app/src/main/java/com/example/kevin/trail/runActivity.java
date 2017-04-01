@@ -29,6 +29,10 @@ import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * Created by Andre & Jiayin
+ */
+
 public class runActivity extends AppCompatActivity implements IHeartRateReciever{
     private boolean logging = false;
     activityHelper RunningHelper;
