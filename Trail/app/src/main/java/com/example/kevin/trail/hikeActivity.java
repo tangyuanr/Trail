@@ -4,7 +4,9 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.icu.text.SimpleDateFormat;
 import android.location.Location;
 import android.os.Handler;
@@ -37,7 +39,14 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.RuntimeRemoteException;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
+import org.w3c.dom.Text;
+
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -83,12 +92,18 @@ public class hikeActivity extends AppCompatActivity implements
     boolean followUser = true;
     Location lastLocation;
     ArrayList<Location> locationArray = new ArrayList<Location>();
+    private String imagefilename;
 
-    private int heartRate;
-    protected TextView hrTextView = null;
-    private HRSensorHandler hrHandler;
-    protected Button sensorReconnect = null;
-    protected FloatingActionButton sensorHelp = null;
+
+    private int totalBMP=0;
+    private int counter=0;
+    protected TextView hrTextView=null;
+    //private HRSensorHandler hrHandler;
+    protected Button sensorReconnect=null;
+    protected FloatingActionButton sensorHelp=null;
+    private sharedPreferenceHelper sharedPref;
+    private double totalCaloriesBurnt=0;
+    protected TextView caloriesTxtView=null;
 
     TextView timerTextViewL;
     long startTime = 0;
@@ -113,10 +128,12 @@ public class hikeActivity extends AppCompatActivity implements
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_hike);
-        hrTextView = (TextView) findViewById(R.id.heartRateText);
-        hrHandler = new HRSensorHandler(this);
-        sensorReconnect = (Button) findViewById(R.id.hrReconnectHike);
-        sensorHelp = (FloatingActionButton) findViewById(R.id.hrReconectHelp);
+        hrTextView=(TextView)findViewById(R.id.heartRateText);
+        //hrHandler=new HRSensorHandler(this);
+        sensorReconnect=(Button)findViewById(R.id.hrReconnectHike);
+        sensorHelp=(FloatingActionButton)findViewById(R.id.hrReconectHelp);
+        sharedPref = new sharedPreferenceHelper(hikeActivity.this);
+        caloriesTxtView=(TextView)findViewById(R.id.caloriesTextView);
 
         startStopButton = (Button) findViewById(R.id.startStopHiking);
         resetTrailButton = (Button) findViewById(R.id.resetTrail);
@@ -180,6 +197,12 @@ public class hikeActivity extends AppCompatActivity implements
                     startStopButton.setText("Stop logging");
                     loggingText.setVisibility(View.VISIBLE);
                     startUpdateStatsThread();
+                    caloriesTxtView.setText(Double.toString(totalCaloriesBurnt));
+
+                    if (MainActivity.heartRate==0){
+                        sensorReconnect.setVisibility(View.VISIBLE);
+                        sensorHelp.setVisibility(View.VISIBLE);
+                    }
                 } else {
                     confirmDialog();
                 }
@@ -190,7 +213,18 @@ public class hikeActivity extends AppCompatActivity implements
         sensorReconnect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                connectClicked();
+                try {
+                    MainActivity.hrHandler.Connect();
+                    MainActivity.hrHandler.setReciver(hikeActivity.this);
+                    //make sensor reconnection buttons disappear if connection is established
+                    sensorReconnect.setVisibility(View.INVISIBLE);
+                    sensorHelp.setVisibility(View.INVISIBLE);
+
+                }catch(RuntimeException e){
+                    hrTextView.setText("error connecting to HxM");
+                    sensorReconnect.setVisibility(View.VISIBLE);
+                    sensorHelp.setVisibility(View.VISIBLE);
+                }
             }
         });
         sensorHelp.setOnClickListener(new View.OnClickListener() {
@@ -210,13 +244,13 @@ public class hikeActivity extends AppCompatActivity implements
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         HikingHelper.stopActivity();
+                        //disconnectClicked();
                         logging = false;
-                        disconnectClicked();
                         timerHandler.removeCallbacks(timerRunnable);
                         startStopButton.setText("Start logging");
                         loggingText.setVisibility(View.INVISIBLE);
                         if (!(route == null)) {
-                            attempt = HikingHelper.getAttempt();
+                            //attempt = HikingHelper.getAttempt();
                             SaveAttemptDialog();
 
                         } else {
@@ -246,6 +280,12 @@ public class hikeActivity extends AppCompatActivity implements
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                int totaltime = (int) HikingHelper.getTimeLastsample() / 1000;
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
+                String currentDateandTime = sdf.format(new Date());
+                String snapshotURL=route.getStaticAPIURL(hikeActivity.this, 250, 250);
+                imageDownload(hikeActivity.this, snapshotURL);
+                attempt=new Attempt(route, totaltime, HikingHelper.getTotalDistance(), currentDateandTime,snapshotURL , totalBMP/counter, (int)totalCaloriesBurnt, imagefilename);
                 dbHandler.addAttempt(attempt); //save the attempt to the database
                 Log.d(TAG, "Attempt added to the database");
             }
@@ -293,7 +333,10 @@ public class hikeActivity extends AppCompatActivity implements
                                 route = new Route(inputRouteName, activityType, HikingHelper.getTotalDistance(), totaltime, currentDateandTime, HikingHelper.getCoordinatesFileName());
                                 dbHandler.addRoute(route);
                                 Log.d(TAG, "Route object added to ROUTE_TABLE");
-                                attempt = new Attempt(route, totaltime, currentDateandTime, route.getSnapshotURL());
+
+                                String snapshotURL=route.getStaticAPIURL(hikeActivity.this, 250, 250);
+                                imageDownload(hikeActivity.this, snapshotURL);
+                                attempt=new Attempt(route, totaltime, HikingHelper.getTotalDistance(), currentDateandTime,snapshotURL , totalBMP/counter, (int)totalCaloriesBurnt, imagefilename);
                                 dbHandler.addAttempt(attempt); //adding the attempt
                                 Log.d(TAG, "Attempt object built and added to database");
                                 dialog.dismiss();
@@ -455,7 +498,7 @@ public class hikeActivity extends AppCompatActivity implements
         if (logging)// if logging is still true
         {
             HikingHelper.stopActivity();
-            disconnectClicked();//disconnect from HxM
+            //disconnectClicked();//disconnect from HxM
         }
     }
 
@@ -467,10 +510,10 @@ public class hikeActivity extends AppCompatActivity implements
     }
 
     //connect with HxM HR Sensor
-    private void connectClicked() {
-        try {
-            hrHandler.Connect();
-            hrHandler.setReciver(hikeActivity.this);
+    private void connectClicked(){
+        try{
+            //hrHandler.Connect();
+            MainActivity.hrHandler.setReciver(hikeActivity.this);
             //make sensor reconnection buttons disappear if connection is established
             sensorReconnect.setVisibility(View.INVISIBLE);
             sensorHelp.setVisibility(View.INVISIBLE);
@@ -482,21 +525,22 @@ public class hikeActivity extends AppCompatActivity implements
     }
 
     //disconnect with HxM HR Sensor
-    private void disconnectClicked() {
-        try {
-            hrHandler.setReciver(null);
-            hrHandler.Disconnect();
+    private void disconnectClicked(){
+        try{
+            //hrHandler.setReciver(null);
+            //hrHandler.Disconnect();
             sensorReconnect.setVisibility(View.INVISIBLE);
             sensorHelp.setVisibility(View.INVISIBLE);
-        } catch (RuntimeException e) {
-            hrTextView.setText("error disconnecting from HxM" + e.getMessage());//never encountered so far, put exception message here to debug
+        }catch (RuntimeException e){
+            hrTextView.setText("error disconnecting from HxM"+e.getMessage());//never encountered so far, put exception message here to debug
+            sensorReconnect.setVisibility(View.INVISIBLE);
+            sensorHelp.setVisibility(View.INVISIBLE);
         }
     }
-
-    final Handler newHandler = new Handler() {
-        public void handleMessage(Message msg) {
-            heartRate = msg.getData().getInt("HeartRate");
-            hrTextView.setText(Integer.toString(heartRate));
+    final Handler newHandler=new Handler(){
+        public void handleMessage(Message msg){
+            MainActivity.heartRate=msg.getData().getInt("HeartRate");
+            hrTextView.setText(Integer.toString(MainActivity.heartRate));
         }
     };
 
@@ -524,22 +568,109 @@ public class hikeActivity extends AppCompatActivity implements
 
             public void run() {
                 while (logging == true) {
+                    try {
+                        Thread.sleep(5000);
+                        totalBMP+=MainActivity.heartRate;
+                        counter++;
+                        totalCaloriesBurnt+=caloriesCalculator(MainActivity.heartRate);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             Log.d(TAG, "TOTAL DISTANCE " + String.valueOf(HikingHelper.getTotalDistance()));
                             totalDistanceHikedTextView.setText("Distance traveled: " + String.format("%.2f", HikingHelper.getTotalDistance()) + " km");
+                            caloriesTxtView.setText(String.format("%.2f",totalCaloriesBurnt));
+                            if (MainActivity.heartRate==0){
+                                sensorReconnect.setVisibility(View.VISIBLE);
+                                sensorHelp.setVisibility(View.VISIBLE);
+                            }
+                            else {
+                                sensorReconnect.setVisibility(View.INVISIBLE);
+                                sensorHelp.setVisibility(View.INVISIBLE);
+                            }
                         }
                     });
-                    try {
-                        Thread.sleep(5000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+
+
                 }
             }
         });
         th.start();
     }
 
+    //calculate calories based on heart rate, called inside the thread at every 5 second
+    private double caloriesCalculator(int HR){
+        double age=Double.parseDouble(sharedPref.getProfileAge());
+        String gender=sharedPref.getProfileGender();
+        double weight=Double.parseDouble(sharedPref.getProfileWeight());
+        double LB_to_KG=0.453592;
+        double DURATION = (double)5/60;//in minute
+
+        double calories=0;
+
+        //calories formula for female
+        if (gender.equals("m")||gender.equals("M")){
+            double age_factor=age*0.2017;
+            double weight_factor=weight*LB_to_KG*0.1988;
+            double HR_factor=HR*0.6309;
+            calories = age_factor+weight_factor+HR_factor - 55.0969;
+            calories = calories * DURATION / 4.184;
+            Log.e(TAG, "Weight: "+weight+", Age: "+age+", Gender: "+gender+". With heart rate "+HR+", calories calculated: "+calories);
+        }
+        else if (gender.equals("f")||gender.equals("F")){
+            double age_factor=age*0.074;
+            double weight_factor=weight*LB_to_KG*0.1263;
+            double HR_factor=HR*0.4472;
+            calories = (age_factor+ weight_factor + HR_factor - 20.4022) * DURATION /4.184;
+            Log.e(TAG, "Weight: "+weight+", Age: "+age+", Gender: "+gender+". With heart rate "+HR+", calories calculated: "+calories);
+        }
+
+        if (calories<0)
+            calories=0;
+
+
+        Log.e(TAG, "END OF METHOD: gender "+gender+", age: "+age+" , weight: "+weight+", calories: "+calories);
+        return calories;
+    }
+
+    //map snapshot saving
+    public void imageDownload(Context context, String url){
+        Picasso.with(context)
+                .load(url)
+                .into(new Target(){
+                    @Override
+                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from){
+                        try{
+                            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
+                            final String currentDateandTime = sdf.format(new Date());
+
+                            String path = Trail.getAppContext().getFilesDir() + "/";
+                            File dir=new File(path);
+                            if (!dir.exists())
+                                dir.mkdirs();
+
+                            //TODO save image inside dir
+                            String imageName=currentDateandTime+".jpg";
+                            imagefilename=imageName;
+
+                            dir=new File(dir, imageName);
+                            FileOutputStream out = new FileOutputStream(dir);
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+
+                            out.flush();
+                            out.close();
+
+                        }catch (Exception e){
+                            Log.e(TAG, e.getMessage());
+                        }
+                    }
+                    @Override
+                    public void onBitmapFailed(Drawable errorDrawable){}
+
+                    @Override
+                    public void onPrepareLoad(Drawable placeholderDrawable){}
+                });
+    }
 }

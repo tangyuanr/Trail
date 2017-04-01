@@ -27,13 +27,21 @@ public class Attempt {
     private int totalTimeTaken; //in seconds
     private String dateOfAttempt; //YYMMDD_mmss
     private String fileNameStaticMapScreenshot;
+    private int averageHeartRate;//BMP
+    private int caloriesBurnt;//KCal
+    private float totalDistance;
+    private String imagefilename;
 
     //a route must be provided to the constructor (i.e. no attempt without an associated route)
-    public Attempt(Route route, int totalTimeTaken, String dateOfAttempt, String URL) {
+    public Attempt(Route route, int totalTimeTaken, float distance, String dateOfAttempt, String URL, int avgHR, int calories, String imagename) {
         this.route = route;
         this.totalTimeTaken = totalTimeTaken;
         this.dateOfAttempt = dateOfAttempt;
         this.fileNameStaticMapScreenshot=URL;
+        this.averageHeartRate=avgHR;
+        this.caloriesBurnt=calories;
+        this.totalDistance=distance;
+        this.imagefilename=imagename;
     }
 
     public String getFileNameStaticMapScreenshot() {
@@ -58,6 +66,14 @@ public class Attempt {
         DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMdd_HHmm");
         return formatter.parseDateTime(dateOfAttempt);
     }
+
+    public int getAverageHeartRate(){return averageHeartRate;}
+
+    public int getCaloriesBurnt() { return caloriesBurnt; }
+
+    public float getTotalDistance() { return totalDistance; }
+
+    public String getImagefilename(){return imagefilename;}
 
 
 }

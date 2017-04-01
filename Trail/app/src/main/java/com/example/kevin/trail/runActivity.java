@@ -5,6 +5,8 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
@@ -19,6 +21,11 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
+
+import java.io.File;
+import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -36,19 +43,22 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
     Route route = null;
     Attempt attempt = null;
     private String activityType = "Running";
+    private String imagefilename;
 
     DBHandler dbHandler = new DBHandler(this);
 
     protected TextView hrTextView=null;
-    private int heartRate=0;
-    HRSensorHandler hrHandler;
+    //private int heartRate=0; //using the static heart rate from mainActivity now
+    //HRSensorHandler hrHandler;
     private int totalBPM=0;
     private int counter=0;
     protected Button sensorReconnect=null;
     protected FloatingActionButton sensorHelp=null;
+    private sharedPreferenceHelper sharedPref;
+    private double totalCaloriesBurnt=0;
+    protected TextView caloriesTextView=null;
 
     TextView timerTextViewL;
-    TextView recordedTextViewL;
     long startTime= 0;
 
     int noti_id = 1;
@@ -86,13 +96,14 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
         totalDistance = (TextView) findViewById(R.id.totalDistance);
         latestPace = (TextView) findViewById(R.id.latestpace);;
         RunningHelper = new activityHelper(runActivity.this, 0); //instantiate a running helper object, the int parameter is the type of activity. 0 for running.
-        hrHandler=new HRSensorHandler(this);
+        //hrHandler=new HRSensorHandler(this);
         sensorReconnect=(Button)findViewById(R.id.HRreconnect);
         sensorHelp=(FloatingActionButton)findViewById(R.id.floatingHelp);
+        sharedPref=new sharedPreferenceHelper(runActivity.this);
+        caloriesTextView=(TextView)findViewById(R.id.caloriesText);
 
         timerTextViewL = (TextView) findViewById(R.id.timerTextView);
         //final Button restButton= (Button) findViewById(R.id.restartB);
-        recordedTextViewL = (TextView) findViewById(R.id.recordedTextView);
 
         startStopButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -101,7 +112,9 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                     Log.d(TAG, "RunningHelper.startActivity(route) called");
                     logging = true; //boolean so that the same button acts as an on/off toggle
 
-                    connectClicked();//activate heart rate sensor
+                    //make hrHandler send heart rate messages here
+                    MainActivity.hrHandler.setReciver(runActivity.this);
+
                     Toast.makeText(runActivity.this, "You've started running", Toast.LENGTH_SHORT).show();
                     startUpdateStatsThread(); //start the thread that receives updates from the service
                 } else {
@@ -110,7 +123,10 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                         RunningHelper.stopActivity();
                     } else {
                         if (!(route == null)) {  //if Route is not null, it means a route was sent was sent by SelectRouteRunning
-                            attempt = RunningHelper.getAttempt();   //build up the attempt from the stats held by the activityHelper. the runningHelper already has an instance of Route, so it can build the attempt and return it.
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmm");
+                            String snapshotURL=route.getStaticAPIURL(runActivity.this, 250, 250);
+                            imageDownload(runActivity.this, snapshotURL);
+                            attempt = new Attempt(route, (int) RunningHelper.getTimeLastsample() / 1000, RunningHelper.getTotalDistance(), sdf.format(new Date()), snapshotURL, totalBPM/counter, (int)totalCaloriesBurnt, imagefilename);
                             Log.d(TAG, "Route is not null. Attempt object built.");
                             SaveAttemptDialog();    //prompt the user if he wants to save the attempt
                         } else {  //else, Route is null and the user selected New Route, so we need to ask the user to give the new route a name
@@ -122,7 +138,7 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                         showStatsDialog(timelastSample, FinalDistance);  //show stats dialog
                         logging = false;
                     }
-                    disconnectClicked();//disconnect from HxM sensor
+                    //disconnectClicked();//disconnect from HxM sensor
                     sensorReconnect.setVisibility(View.INVISIBLE);
                     sensorHelp.setVisibility(View.INVISIBLE);
                 }
@@ -130,7 +146,6 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                 Button  startStopButton= (Button) v;
                 if (startStopButton.getText().equals("stop")){
                     timerHandler.removeCallbacks(timerRunnable);
-                    recordedTextViewL.setText(timerTextViewL.getText());
                     startStopButton.setText("Start");
                 }else if (startStopButton.getText().equals("Start")){
                     startTime = System.currentTimeMillis();
@@ -143,7 +158,16 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
         //handles sensor reconnection
         sensorReconnect.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
-                connectClicked();//try to connect to sensor
+                try{
+                    MainActivity.hrHandler.Connect();
+                    MainActivity.hrHandler.setReciver(runActivity.this);
+                    sensorReconnect.setVisibility(View.INVISIBLE);
+                    sensorHelp.setVisibility(View.INVISIBLE);
+                }catch(RuntimeException e){
+                    hrTextView.setText("error connecting to HxM");
+                    sensorReconnect.setVisibility(View.VISIBLE);
+                    sensorHelp.setVisibility(View.VISIBLE);
+                }
             }
         });
         sensorHelp.setOnClickListener(new View.OnClickListener() {
@@ -162,7 +186,7 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
         //if still logging
         if (logging) {
             RunningHelper.stopActivity();//stop GPS
-            disconnectClicked();//stop heart rate monitor
+            //disconnectClicked();//stop heart rate monitor
         }
     }
 
@@ -180,6 +204,12 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
+                String currentDateandTime = sdf.format(new Date());
+                String snapshotURL=route.getStaticAPIURL(runActivity.this, 250, 250);
+                imageDownload(runActivity.this, snapshotURL);
+                attempt = new Attempt(route, (int) RunningHelper.getTimeLastsample() / 1000, RunningHelper.getTotalDistance(), currentDateandTime, snapshotURL, totalBPM/counter, (int)totalCaloriesBurnt, imagefilename);
+
                 dbHandler.addAttempt(attempt); //save the attempt to the database
                 Log.d(TAG, "Attempt added to the database");
             }
@@ -231,7 +261,10 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                             route = new Route(inputRouteName, activityType, RunningHelper.getTotalDistance(), totaltime, currentDateandTime, RunningHelper.getCoordinatesFileName());
                             dbHandler.addRoute(route);  //add the New Route to the database and get the rowID of the route that was added
                             Log.d(TAG, "Route object added to ROUTE_TABLE");
-                            attempt = new Attempt(route, totaltime, currentDateandTime, route.getSnapshotURL());
+
+                            String snapshotURL=route.getStaticAPIURL(runActivity.this, 250, 250);
+                            imageDownload(runActivity.this, snapshotURL);
+                            attempt = new Attempt(route, totaltime, RunningHelper.getTotalDistance(), currentDateandTime, snapshotURL, totalBPM/counter, (int)totalCaloriesBurnt, imagefilename);
                             dbHandler.addAttempt(attempt); //adding the attempt
                             Log.d(TAG, "Attempt object built and added to database");
                             dialog.dismiss();
@@ -255,22 +288,31 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
 
             public void run() {
                 while (logging == true) {
+                    try {
+                        Thread.sleep(5000);
+                        totalBPM+=MainActivity.heartRate;//so now it's incrementing at every 5 seconds
+                        counter++;
+                        totalCaloriesBurnt+=caloriesCalculator(MainActivity.heartRate);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             totalDistance.setText(String.format("%.2f", RunningHelper.getTotalDistance()));
                             latestPace.setText(RunningHelper.getPaceFormatted());
-
+                            caloriesTextView.setText(String.format("%.2f",totalCaloriesBurnt));
+                            if (MainActivity.heartRate==0){
+                                sensorReconnect.setVisibility(View.VISIBLE);
+                                sensorHelp.setVisibility(View.VISIBLE);
+                            }
+                            else {
+                                sensorReconnect.setVisibility(View.INVISIBLE);
+                                sensorHelp.setVisibility(View.INVISIBLE);
+                            }
                         }
                     });
-                    try {
-                        Thread.sleep(5000);
-                        //TODO compile average heart rate
-                        totalBPM+=heartRate;//so now it's incrementing at every 5 seconds
-                        counter++;
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+
                 }
             }
         });
@@ -285,7 +327,8 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
         alertDialog.setTitle("Run ended");
         alertDialog.setMessage("You have runned " + String.format("%.2f", FinalDistance) + " km in " + (time) + " minutes.\n"
                 + "Average pace: " + RunningHelper.getFinalAveragePaceFormatted() + " min/km.\n"+
-                "Average heart rage: "+totalBPM/counter+" BPM");
+                "Average heart rage: "+totalBPM/counter+" BPM\n"+
+                "Total calories burnt: "+totalCaloriesBurnt+" KCal");
         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
@@ -306,8 +349,8 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
     private void connectClicked(){
         try{
 
-            hrHandler.Connect();
-            hrHandler.setReciver(runActivity.this);
+            //hrHandler.Connect();
+            //hrHandler.setReciver(runActivity.this);
             sensorReconnect.setVisibility(View.INVISIBLE);
             sensorHelp.setVisibility(View.INVISIBLE);
         }catch (RuntimeException e) {
@@ -320,8 +363,8 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
     //disconnect with HxM HR Sensor
     private void disconnectClicked(){
         try{
-            hrHandler.setReciver(null);
-            hrHandler.Disconnect();
+            //hrHandler.setReciver(null);
+            //hrHandler.Disconnect();
             sensorReconnect.setVisibility(View.INVISIBLE);
             sensorHelp.setVisibility(View.INVISIBLE);
         }catch (RuntimeException e){
@@ -331,8 +374,8 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
 
     final Handler newHandler=new Handler(){
         public void handleMessage(Message msg){
-            heartRate=msg.getData().getInt("HeartRate");
-            hrTextView.setText(Integer.toString(heartRate));
+            MainActivity.heartRate=msg.getData().getInt("HeartRate");
+            hrTextView.setText(Integer.toString(MainActivity.heartRate));
         }
     };
 
@@ -352,5 +395,81 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
                     }
                 });
         helpDialog.show();
+    }
+
+    //calculate calories based on heart rate, called inside the thread at every 5 second
+    private double caloriesCalculator(int HR){
+        double age=Double.parseDouble(sharedPref.getProfileAge());
+        String gender=sharedPref.getProfileGender();
+        double weight=Double.parseDouble(sharedPref.getProfileWeight());
+        double LB_to_KG=0.453592;
+        double DURATION = (double)5/60;//in minute
+
+        double calories=0;
+
+        //calories formula for male
+        if (gender.equals("m")||gender.equals("M")){
+            double age_factor=age*0.2017;
+            double weight_factor=weight*LB_to_KG*0.1988;
+            double HR_factor=HR*0.6309;
+            calories = age_factor+weight_factor+HR_factor - 55.0969;
+            calories = calories * DURATION / 4.184;
+            Log.e(TAG, "Weight: "+weight+", Age: "+age+", Gender: "+gender+". With heart rate "+HR+", calories calculated: "+calories);
+        }
+        //calories formula for female
+        else if (gender.equals("f")||gender.equals("F")){
+            double age_factor=age*0.074;
+            double weight_factor=weight*LB_to_KG*0.1263;
+            double HR_factor=HR*0.4472;
+            calories = (age_factor+ weight_factor + HR_factor - 20.4022) * DURATION /4.184;
+            Log.e(TAG, "Weight: "+weight+", Age: "+age+", Gender: "+gender+". With heart rate "+HR+", calories calculated: "+calories);
+        }
+
+        if (calories<0)
+            calories=0;
+
+        return calories;
+    }
+
+    //map snapshot saving
+    public void imageDownload(Context context, String url){
+        Picasso.with(context)
+                .load(url)
+                .into(getTarget(url));
+    }
+    private Target getTarget(final String url){
+        Target target = new Target(){
+            @Override
+            public void onBitmapLoaded(final Bitmap bitmap, Picasso.LoadedFrom from){
+                new Thread(new Runnable(){
+                    @Override
+                    public void run(){
+                        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
+                        final String currentDateandTime = sdf.format(new Date());
+
+                        String path = Trail.getAppContext().getFilesDir() + "/";
+                        String imageName=currentDateandTime+".JPEG";
+                        imagefilename=imageName;
+                        File file=new File(path+imagefilename);
+
+                        try{
+                            file.createNewFile();
+                            FileOutputStream ostream=new FileOutputStream(file);
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, ostream);
+                            ostream.flush();
+                            ostream.close();
+
+                        }catch (Exception e){
+                            Log.e(TAG, e.getMessage());
+                        }
+                    }
+                }).start();
+            }
+            @Override
+            public void onBitmapFailed(Drawable errordrawable){}
+            @Override
+            public void onPrepareLoad(Drawable placeholderdrawable){}
+        };
+        return target;
     }
 }

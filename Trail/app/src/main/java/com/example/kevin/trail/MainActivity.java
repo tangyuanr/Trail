@@ -5,9 +5,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -15,7 +18,7 @@ import com.intentfilter.androidpermissions.PermissionManager;
 
 import static java.util.Collections.singleton;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements IHeartRateReciever{
 
     private sharedPreferenceHelper sharedPreferenceHelper;
     protected Button timerButtonlink = null;
@@ -29,6 +32,9 @@ public class MainActivity extends AppCompatActivity {
     protected Button graphButton = null;
     DBHandler dbhandler;
 
+    public static int heartRate;
+    public static HRSensorHandler hrHandler;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +45,15 @@ public class MainActivity extends AppCompatActivity {
         Trail trail = ((Trail) getApplicationContext());     //used to access global variable to check if permissions are right
         checkAndAskPermissions(trail);
         sharedPreferenceHelper = new sharedPreferenceHelper(MainActivity.this);
+
+        hrHandler=new HRSensorHandler(this);
+        try {
+            hrHandler.Connect();
+            hrHandler.setReciver(MainActivity.this);
+        }
+        catch(RuntimeException e){
+            Log.d("MainActivity", e.getMessage());
+        }
 
         infoButtonlink = (Button) findViewById(R.id.infoB);
             timerButtonlink = (Button) findViewById(R.id.timerButton);
@@ -177,4 +192,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    @Override
+    public void heartRateReceived(int heartRate){
+        Message msg=new Message();
+        msg.getData().putInt("HeartRate", heartRate);
+        newHandler.sendMessage(msg);
+    }
+    final Handler newHandler=new Handler(){
+        public void handleMessage(Message msg){
+            heartRate=msg.getData().getInt("HeartRate");
+        }
+    };
 }

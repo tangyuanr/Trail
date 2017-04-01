@@ -13,16 +13,6 @@
     tools:context="com.example.kevin.trail.runActivity">
 
     <TextView
-        android:id="@+id/recordedTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/StartStop"
-        android:layout_alignRight="@+id/StartStop"
-        android:layout_below="@+id/latestpace"
-        android:layout_marginTop="19dp"
-        android:hint="Last recorded" />
-
-    <TextView
         android:id="@+id/timerTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -53,10 +43,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/WHAT_TOTALDISTANCE"
+        android:layout_marginBottom="11dp"
         android:layout_above="@+id/totalDistance"
-        android:layout_alignLeft="@+id/StartStop"
-        android:layout_alignStart="@+id/StartStop"
-        android:layout_marginBottom="10dp"/>
+        android:layout_alignRight="@+id/WHAT_PACE"
+        android:layout_alignEnd="@+id/WHAT_PACE" />
 
     <TextView
         android:text="Pace (minutes/km)"
@@ -84,19 +74,23 @@
         android:id="@+id/textView5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="35dp"
+        android:text="Heart rate (bmp)"
         android:layout_below="@+id/latestpace"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="31dp"
-        android:text="Heart rate (bmp)" />
+        android:layout_toLeftOf="@+id/timerTextView"
+        android:layout_toStartOf="@+id/timerTextView"
+        android:layout_marginRight="15dp"
+        android:layout_marginEnd="15dp" />
 
     <TextView
         android:id="@+id/hrText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:text="0"
         android:layout_below="@+id/textView5"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="29dp"
-        android:text="0" />
+        android:layout_toLeftOf="@+id/HRreconnect"
+        android:layout_toStartOf="@+id/HRreconnect" />
 
     <Button
         android:id="@+id/HRreconnect"
@@ -122,5 +116,25 @@
         android:visibility="invisible"
         app:fabSize="mini"
         app:srcCompat="@android:drawable/ic_menu_help" />
+
+    <TextView
+        android:id="@+id/textView7"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Calories burnt (KCal)"
+        android:layout_alignBaseline="@+id/textView5"
+        android:layout_alignBottom="@+id/textView5"
+        android:layout_toRightOf="@+id/timerTextView"
+        android:layout_toEndOf="@+id/timerTextView" />
+
+    <TextView
+        android:id="@+id/caloriesText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0"
+        android:layout_alignBaseline="@+id/hrText"
+        android:layout_alignBottom="@+id/hrText"
+        android:layout_toRightOf="@+id/WHAT_TOTALDISTANCE"
+        android:layout_toEndOf="@+id/WHAT_TOTALDISTANCE" />
 
 </RelativeLayout>
