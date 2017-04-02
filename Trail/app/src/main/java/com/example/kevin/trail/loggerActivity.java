@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Handler;
@@ -15,13 +16,16 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.app.NotificationCompat;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -69,7 +73,6 @@ public class loggerActivity extends AppCompatActivity implements
     activityHelper activityhelper;
     private Button startStopButton;
     private Button resetTrailButton;
-    private TextView routeNameTextView;
     private TextView loggingText;
     private TextView totalDistanceTravelledTextView;
     private boolean logging = false;
@@ -131,6 +134,15 @@ public class loggerActivity extends AppCompatActivity implements
         sharedPref = new sharedPreferenceHelper(loggerActivity.this);
         caloriesTxtView=(TextView)findViewById(R.id.caloriesTextView);
 
+
+        //action bar
+        Toolbar loggerToolbar = (Toolbar)findViewById(R.id.loggerActionBar);
+        setSupportActionBar(loggerToolbar);
+        RelativeLayout headerLayout = (RelativeLayout)findViewById(R.id.relativeLayout2);
+
+
+
+
         startStopButton = (Button) findViewById(R.id.startStop);
         resetTrailButton = (Button) findViewById(R.id.resetTrail);
         resetTrailButton.setOnClickListener(new View.OnClickListener() {
@@ -154,14 +166,53 @@ public class loggerActivity extends AppCompatActivity implements
         });
 
         loggingText = (TextView) findViewById(R.id.loggingText);
-        routeNameTextView = (TextView) findViewById(R.id.routeName);
         totalDistanceTravelledTextView = (TextView) findViewById(R.id.distanceTravelled);
         Intent receivedIntent = getIntent();    //retrieve the intent that was sent to check if it has a Route object
         if(receivedIntent.hasExtra("activityType")) {activityType = receivedIntent.getStringExtra("activityType");}
+
+
+
+        /*
+        *
+        * UI related
+        *
+        * */
+
+        //set toolbar color according to activity type
+        if ("Hiking".equals(activityType)){
+            loggerToolbar.setBackgroundColor(Color.parseColor("#66cc66"));//set toolbar color
+            headerLayout.setBackgroundColor(Color.parseColor("#409c5e"));//set background color
+            getSupportActionBar().setTitle("Hiking");//set toolbar title
+        }
+        else if ("Running".equals(activityType)){
+            loggerToolbar.setBackgroundColor(Color.parseColor("#ff6d92"));
+            headerLayout.setBackgroundColor(Color.parseColor("#ffb1c5"));
+            getSupportActionBar().setTitle("Running");
+        }
+        else if ("Biking".equals(activityType)){
+            loggerToolbar.setBackgroundColor(Color.parseColor("#99ccff"));
+            headerLayout.setBackgroundColor(Color.parseColor("#bfdfff"));
+            getSupportActionBar().setTitle("Biking");
+        }
+
+        if (getSupportActionBar()!=null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
+
+
+
+
+
+
+
+
+
+
         if (receivedIntent.hasExtra("route")) {  //if the intent has a route object
             route = (Route) receivedIntent.getSerializableExtra("route");
             routeOrAttempt = "attempt";
-            routeNameTextView.setText(route.getRouteName());
+            getSupportActionBar().setTitle(activityType+" on route: "+route.getRouteName());
             showSelectedRoute = (Switch) findViewById(R.id.showSelectedRoute);
             showSelectedRoute.setVisibility(View.VISIBLE);
             showSelectedRoute.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -688,4 +739,14 @@ public class loggerActivity extends AppCompatActivity implements
         };
         return target;
     }
+
+    //action bar related methods:
+    @Override
+    public boolean onOptionsItemSelected(MenuItem menuItem){
+        if (menuItem.getItemId()==android.R.id.home)
+            finish();
+
+        return super.onOptionsItemSelected(menuItem);
+    }
+
 }
