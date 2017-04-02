@@ -4,6 +4,7 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -71,9 +72,15 @@ public class Attempt {
 
     public int getCaloriesBurnt() { return caloriesBurnt; }
 
-    public float getTotalDistance() { return totalDistance; }
+    public float getTotalDistance() { return round(totalDistance, 1); }
 
     public String getImagefilename(){return imagefilename;}
+
+    public static float round(float d, int decimalPlace) {
+        BigDecimal bd = new BigDecimal(Float.toString(d));
+        bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_DOWN);
+        return bd.floatValue();
+    }
 
 
 }
