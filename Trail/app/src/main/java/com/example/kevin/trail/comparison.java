@@ -58,9 +58,15 @@ public class comparison extends AppCompatActivity {
 
     public void fetching(){
         if(!(db.getAttempts("").isEmpty())) {
-            if((db.getAttempts("").get(db.getAttempts("").size()-1).getActivityType().equals("Running"))||(db.getAttempts("").get(db.getAttempts("").size()-1).getActivityType().equals("Hiking")))   {                 ///checking if latest activity is running
+            if((db.getAttempts("").get(db.getAttempts("").size()-1).getActivityType().equals("Running") ))  {                 ///checking if latest activity is running
 
-                myattempt = db.getAttempts("");
+                myattempt = db.getAttempts("Running");
+
+
+            }
+            if((db.getAttempts("").get(db.getAttempts("").size()-1).getActivityType().equals("Hiking") ))  {                 ///checking if latest activity is running
+
+                myattempt = db.getAttempts("Hiking");
 
 
             }
@@ -130,7 +136,7 @@ public class comparison extends AppCompatActivity {
                         if (recenttimes > previoustimes) {
                             timechange.setText("You spend " + timechanges + " more ");
                         } else if (recenttimes < previoustimes) {
-                            timechange.setText("You spend " + timechangez + " more");
+                            timechange.setText("You spend " + timechangez + " less");
                         } else {
                             timechange.setText("You spend same time as previous session");
                         }
