@@ -656,16 +656,13 @@ public class loggerActivity extends AppCompatActivity implements
                 .load(url)
                 .into(getTarget(filename));
     }
-    private Target getTarget(final String filename){
+    public Target getTarget(final String filename){
         Target target = new Target(){
             @Override
             public void onBitmapLoaded(final Bitmap bitmap, Picasso.LoadedFrom from){
                 new Thread(new Runnable(){
                     @Override
                     public void run(){
-                        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
-                        final String currentDateandTime = sdf.format(new Date());
-
                         String path = Trail.getAppContext().getFilesDir() + "/";
                         File file=new File(path+filename);
 

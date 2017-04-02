@@ -382,4 +382,24 @@ public class DBHandler extends SQLiteOpenHelper {
             return null;
     }
 
+    public String getFilenameCoordinates(String savedDate){
+        SQLiteDatabase db=this.getReadableDatabase();
+        String query="SELECT * FROM "+TABLE_ATTEMPTS + " WHERE "+DATE_OF_ATTEMPT+" = '"+savedDate+"'";
+        Cursor cursor=db.rawQuery(query, null);
+
+        String routeName;
+        if (cursor.moveToFirst())
+            routeName= cursor.getString(cursor.getColumnIndex(ROUTE_NAME));
+        else
+            return null;
+
+        query="SELECT * FROM " + TABLE_ROUTES+" WHERE "+ROUTE_NAME+" = '"+routeName+"'";
+        cursor=db.rawQuery(query, null);
+
+        if (cursor.moveToFirst())
+            return cursor.getString(cursor.getColumnIndex(FILENAME_COORDINATES));
+        else
+            return null;
+    }
+
 }
