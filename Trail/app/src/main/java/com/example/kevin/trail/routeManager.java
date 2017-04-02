@@ -4,8 +4,11 @@ import android.content.Intent;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.ActionMenuView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -28,8 +31,8 @@ public class routeManager extends AppCompatActivity {
     ListView listview;
     private static final String TAG = "routeManager";
     private String activityType;
-    ActionBar actionBar;
-    private Menu menuActionBar;
+    protected Toolbar routeManagerToolbar;
+    private ActionMenuView amvMenu;
     MenuItem deleteButton;
     String routeNameSelected;
 
@@ -59,16 +62,38 @@ public class routeManager extends AppCompatActivity {
 
        // actionBar = getSupportActionBar();
         //actionBar.show();
+        routeManagerToolbar=(Toolbar)findViewById(R.id.routeManagerActionBar);
+        setSupportActionBar(routeManagerToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        amvMenu=(ActionMenuView)routeManagerToolbar.findViewById(R.id.amvMenu);
+        amvMenu.setOnMenuItemClickListener(new ActionMenuView.OnMenuItemClickListener(){
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem){
+                return onOptionsItemSelected(menuItem);
+            }
+        });
 
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_selectroute, menu);
-        menuActionBar = menu;
-        deleteButton = menuActionBar.findItem(R.id.deleteButton);
+        MenuInflater inflater=getMenuInflater();
+        inflater.inflate(R.menu.menu_selectroute, amvMenu.getMenu());
+        //menuActionBar = menu;
+        deleteButton = amvMenu.getMenu().findItem(R.id.deleteButton);
         return true;
 
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        if (android.R.id.home==item.getItemId()){
+            Log.d("routeManager", "home clicked");
+            finish();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public void onDeleteAction(MenuItem mi) {

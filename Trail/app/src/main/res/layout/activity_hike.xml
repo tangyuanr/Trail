@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="fill_parent"
+                android:orientation="vertical"
+                tools:context="com.example.kevin.trail.hikeActivity">
+
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:map="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:id="@+id/map"
+              android:name="com.google.android.gms.maps.SupportMapFragment"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              tools:context=".hikeActivity"
+        android:layout_below="@+id/relativeLayout2" />
+
+    <RelativeLayout
+        android:id="@+id/relativeLayout2"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#CC000000">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/startStopHiking"
+            android:text="Start logging"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:text="Your performance is being logged."
+            android:textSize="25sp"
+            android:id="@+id/loggingText"
+            android:layout_toRightOf="@id/startStopHiking"
+            android:visibility="invisible"
+            android:textColor="#32CD32"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No route selected"
+            android:layout_below="@id/startStopHiking"
+            android:id="@+id/routeNameHiking"
+            android:textColor="#FFF"/>
+
+        <TextView
+            android:id="@+id/timerTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_below="@id/routeNameHiking"
+            android:hint="Time elapsed: 00:00"
+            android:textAlignment="center"
+            android:textSize="18sp"
+            android:textColor="#FFF"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Distance traveled: 0.00 km"
+            android:layout_below="@id/timerTextView"
+            android:id="@+id/distanceTravelled"
+            android:textColor="#FFF"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/distanceTravelled"
+            android:id="@+id/HeartRateLabelText"
+            android:text="Heart rate (BPM):"
+            android:textColor="#FFF"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:id="@+id/heartRateText"
+            android:layout_below="@id/distanceTravelled"
+            android:layout_toRightOf="@id/HeartRateLabelText"
+            android:textColor="#FFF"/>
+
+
+        <ImageView
+            android:id="@+id/imageViewFavorites"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/distanceTravelled"
+            android:visibility="gone"
+            android:src="@mipmap/icon_favorite" />
+
+
+        <Switch
+            android:id="@+id/showSelectedRoute"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/imageViewFavorites"
+            android:layout_marginTop="20dp"
+            android:textOn="Yes"
+            android:checked="true"
+            android:visibility="gone"
+            android:textOff="No"
+            android:textColor="#FFF"
+            android:text="Show selected route" />
+
+        <Switch
+            android:id="@+id/showPreviousRoute"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/showSelectedRoute"
+            android:layout_marginTop="20dp"
+            android:textOn="Yes"
+            android:checked="true"
+            android:textOff="No"
+            android:textColor="#FFF"
+            android:text="Show trail" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/resetTrail"
+            android:layout_marginTop="20dp"
+            android:layout_toRightOf="@id/showPreviousRoute"
+            android:layout_below="@id/showSelectedRoute"
+            android:text="Reset trail"/>
+
+        <TextView
+            android:id="@+id/textView6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Calories burnt (KCal):"
+            android:textColor="@color/common_google_signin_btn_text_dark_default"
+            android:layout_below="@+id/distanceTravelled"
+            android:layout_toRightOf="@+id/resetTrail"
+            android:layout_toEndOf="@+id/resetTrail" />
+
+        <TextView
+            android:id="@+id/caloriesTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/textView6"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignTop="@+id/textView6"
+            android:layout_toRightOf="@+id/textView6"
+            android:text="0"
+            android:textColor="@color/common_google_signin_btn_text_dark_default" />
+
+    </RelativeLayout>
+
+    <Button
+        android:id="@+id/hrReconnectHike"
+        style="@android:style/Widget.Button.Small"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/relativeLayout2"
+        android:text="Reconnect to HxM"
+        android:visibility="invisible" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/hrReconectHelp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/hrReconnectHike"
+        android:layout_marginLeft="12dp"
+        android:layout_marginStart="12dp"
+        android:layout_toEndOf="@+id/hrReconnectHike"
+        android:layout_toRightOf="@+id/hrReconnectHike"
+        android:clickable="true"
+        android:visibility="invisible"
+        app:fabSize="mini"
+        app:srcCompat="@android:drawable/ic_menu_help" />
+
+</RelativeLayout>

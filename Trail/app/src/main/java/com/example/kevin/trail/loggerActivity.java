@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Handler;
@@ -15,13 +16,16 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.app.NotificationCompat;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,6 +44,8 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
+
+import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -69,7 +75,6 @@ public class loggerActivity extends AppCompatActivity implements
     activityHelper activityhelper;
     private Button startStopButton;
     private Button resetTrailButton;
-    private TextView routeNameTextView;
     private TextView loggingText;
     private TextView totalDistanceTravelledTextView;
     private boolean logging = false;
@@ -100,6 +105,11 @@ public class loggerActivity extends AppCompatActivity implements
     private sharedPreferenceHelper sharedPref;
     private double totalCaloriesBurnt=0;
     protected TextView caloriesTxtView=null;
+    protected TextView paceOrSpeedText=null;
+
+
+
+
 
     TextView timerTextViewL;
     long startTime = 0;
@@ -131,6 +141,20 @@ public class loggerActivity extends AppCompatActivity implements
         sharedPref = new sharedPreferenceHelper(loggerActivity.this);
         caloriesTxtView=(TextView)findViewById(R.id.caloriesTextView);
 
+
+        //action bar
+        Toolbar loggerToolbar = (Toolbar)findViewById(R.id.loggerActionBar);
+        setSupportActionBar(loggerToolbar);
+        final RelativeLayout headerLayout = (RelativeLayout)findViewById(R.id.relativeLayout2);
+        final RelativeLayout mapHeadLayout=(RelativeLayout)findViewById(R.id.relativeLayout3);
+        //UI ENHANCEMENT OBJECTS
+        Button toMap=(Button)findViewById(R.id.statsToMapButton);
+        final Button toStats=(Button)findViewById(R.id.backToStats);
+        TextView paceOrSpeedLabel=(TextView)findViewById(R.id.paceOrSpeedLabel);
+        paceOrSpeedText=(TextView)findViewById(R.id.paceOrSpeedText);
+
+
+
         startStopButton = (Button) findViewById(R.id.startStop);
         resetTrailButton = (Button) findViewById(R.id.resetTrail);
         resetTrailButton.setOnClickListener(new View.OnClickListener() {
@@ -145,7 +169,7 @@ public class loggerActivity extends AppCompatActivity implements
         showPreviousRoute = (Switch) findViewById(R.id.showPreviousRoute);
         showPreviousRoute.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
+                if (isChecked && mapHeadLayout.getVisibility()==View.VISIBLE) {
                     previousTrail.setVisible(true);
                 } else {
                     previousTrail.setVisible(false);
@@ -154,15 +178,16 @@ public class loggerActivity extends AppCompatActivity implements
         });
 
         loggingText = (TextView) findViewById(R.id.loggingText);
-        routeNameTextView = (TextView) findViewById(R.id.routeName);
         totalDistanceTravelledTextView = (TextView) findViewById(R.id.distanceTravelled);
         Intent receivedIntent = getIntent();    //retrieve the intent that was sent to check if it has a Route object
         if(receivedIntent.hasExtra("activityType")) {activityType = receivedIntent.getStringExtra("activityType");}
+
+
+        showSelectedRoute = (Switch) findViewById(R.id.showSelectedRoute);
         if (receivedIntent.hasExtra("route")) {  //if the intent has a route object
             route = (Route) receivedIntent.getSerializableExtra("route");
             routeOrAttempt = "attempt";
-            routeNameTextView.setText(route.getRouteName());
-            showSelectedRoute = (Switch) findViewById(R.id.showSelectedRoute);
+            getSupportActionBar().setTitle(activityType+" on route: "+route.getRouteName());
             showSelectedRoute.setVisibility(View.VISIBLE);
             showSelectedRoute.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -177,6 +202,77 @@ public class loggerActivity extends AppCompatActivity implements
         } else {
             routeOrAttempt = "route";
         }
+
+        /*
+        *
+        * UI related
+        *
+        * */
+
+        //set toolbar color according to activity type
+        if ("Hiking".equals(activityType)){
+            loggerToolbar.setBackgroundColor(Color.parseColor("#66cc66"));//set toolbar color
+            headerLayout.setBackgroundColor(Color.parseColor("#409c5e"));//set background color
+            mapHeadLayout.setBackgroundColor(Color.parseColor("#409c5e"));
+            if (!receivedIntent.hasExtra("route"))
+                getSupportActionBar().setTitle("Hiking");//set toolbar title
+        }
+        else if ("Running".equals(activityType)){
+            loggerToolbar.setBackgroundColor(Color.parseColor("#ff6d92"));
+            headerLayout.setBackgroundColor(Color.parseColor("#ffb1c5"));
+            mapHeadLayout.setBackgroundColor(Color.parseColor("#ffb1c5"));
+            if (!receivedIntent.hasExtra("route"))
+                getSupportActionBar().setTitle("Running");
+
+            paceOrSpeedLabel.setText("Pace: ");
+            paceOrSpeedLabel.setVisibility(View.VISIBLE);
+            paceOrSpeedText.setText("0 min/km");
+            paceOrSpeedText.setVisibility(View.VISIBLE);
+        }
+        else if ("Biking".equals(activityType)){
+            loggerToolbar.setBackgroundColor(Color.parseColor("#99ccff"));
+            headerLayout.setBackgroundColor(Color.parseColor("#bfdfff"));
+            mapHeadLayout.setBackgroundColor(Color.parseColor("#bfdfff"));
+            if (!receivedIntent.hasExtra("route"))
+                getSupportActionBar().setTitle("Biking");
+
+            paceOrSpeedLabel.setText("Speed: ");
+            paceOrSpeedLabel.setVisibility(View.VISIBLE);
+            paceOrSpeedText.setText("0 km/min");
+            paceOrSpeedText.setVisibility(View.VISIBLE);
+        }
+
+        if (getSupportActionBar()!=null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
+
+
+        toMap.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                headerLayout.setVisibility(View.INVISIBLE);
+                //display layer 2
+                mapHeadLayout.setVisibility(View.VISIBLE);
+                showSelectedRoute.setVisibility(View.VISIBLE);
+                resetTrailButton.setVisibility(View.VISIBLE);
+                toStats.setVisibility(View.VISIBLE);
+            }
+        });
+
+        toStats.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //hide layer 2, display layer 1
+                mapHeadLayout.setVisibility(View.INVISIBLE);
+                showSelectedRoute.setVisibility(View.INVISIBLE);
+                resetTrailButton.setVisibility(View.INVISIBLE);
+                toStats.setVisibility(View.INVISIBLE);
+
+                headerLayout.setVisibility(View.VISIBLE);
+            }
+        });
+
         mapFrag = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFrag.getMapAsync(this);
 
@@ -194,7 +290,6 @@ public class loggerActivity extends AppCompatActivity implements
                     startStopButton.setText("Stop logging");
                     loggingText.setVisibility(View.VISIBLE);
                     startUpdateStatsThread();
-                    caloriesTxtView.setText(Double.toString(totalCaloriesBurnt));
 
                     if (MainActivity.heartRate==0){
                         sensorReconnect.setVisibility(View.VISIBLE);
@@ -234,6 +329,7 @@ public class loggerActivity extends AppCompatActivity implements
 
     private void confirmDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setCancelable(false);
         builder
                 .setTitle("Stop logging " + routeOrAttempt)
                 .setMessage("Are you sure you want to stop logging your " + routeOrAttempt + "?")
@@ -272,6 +368,7 @@ public class loggerActivity extends AppCompatActivity implements
 
     private void SaveAttemptDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setCancelable(false);
         builder.setTitle("Save attempt?");
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
@@ -280,7 +377,8 @@ public class loggerActivity extends AppCompatActivity implements
                 java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
                 String currentDateandTime = sdf.format(new Date());
                 String snapshotURL=route.getStaticAPIURL(loggerActivity.this, 250, 250);
-                imageDownload(loggerActivity.this, snapshotURL);
+                imagefilename=sdf.format(new Date())+".JPEG";
+                imageDownload(loggerActivity.this, snapshotURL, imagefilename);
                 attempt=new Attempt(route, totaltime, activityhelper.getTotalDistance(), currentDateandTime,snapshotURL , totalBMP/counter, (int)totalCaloriesBurnt, imagefilename);
                 dbHandler.addAttempt(attempt); //save the attempt to the database
                 Log.d(TAG, "Attempt added to the database");
@@ -304,7 +402,7 @@ public class loggerActivity extends AppCompatActivity implements
                 .setPositiveButton("Save", null)
                 .setNegativeButton("Cancel", null)
                 .create();
-
+        dialog.setCancelable(false);//prevent the dialog from being closed by outside touch
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
 
             @Override
@@ -331,7 +429,8 @@ public class loggerActivity extends AppCompatActivity implements
                                 Log.d(TAG, "Route object added to ROUTE_TABLE");
 
                                 String snapshotURL=route.getStaticAPIURL(loggerActivity.this, 250, 250);
-                                imageDownload(loggerActivity.this, snapshotURL);
+                                imagefilename=sdf.format(new Date())+".JPEG";
+                                imageDownload(loggerActivity.this, snapshotURL, imagefilename);
                                 attempt=new Attempt(route, totaltime, activityhelper.getTotalDistance(), currentDateandTime,snapshotURL , totalBMP/counter, (int)totalCaloriesBurnt, imagefilename);
                                 dbHandler.addAttempt(attempt); //adding the attempt
                                 Log.d(TAG, "Attempt object built and added to database");
@@ -553,7 +652,7 @@ public class loggerActivity extends AppCompatActivity implements
     final Handler newHandler=new Handler(){
         public void handleMessage(Message msg){
             MainActivity.heartRate=msg.getData().getInt("HeartRate");
-            hrTextView.setText(Integer.toString(MainActivity.heartRate));
+            hrTextView.setText(Integer.toString(MainActivity.heartRate)+" BPM");
         }
     };
 
@@ -593,8 +692,9 @@ public class loggerActivity extends AppCompatActivity implements
                         @Override
                         public void run() {
                             Log.d(TAG, "TOTAL DISTANCE " + String.valueOf(activityhelper.getTotalDistance()));
-                            totalDistanceTravelledTextView.setText("Distance travelled: " + String.format("%.2f", activityhelper.getTotalDistance()) + " km");
-                            caloriesTxtView.setText(String.format("%.2f",totalCaloriesBurnt));
+                            totalDistanceTravelledTextView.setText(String.format("%.2f", activityhelper.getTotalDistance()) + " km");
+                            paceOrSpeedText.setText(String.format("%.2f",activityhelper.getTotalDistance()/0.14));//0.14minutes=5s
+                            caloriesTxtView.setText(String.format("%.2f",totalCaloriesBurnt)+" KCal");
                             if (MainActivity.heartRate==0){
                                 sensorReconnect.setVisibility(View.VISIBLE);
                                 sensorHelp.setVisibility(View.VISIBLE);
@@ -649,41 +749,49 @@ public class loggerActivity extends AppCompatActivity implements
     }
 
     //map snapshot saving
-    public void imageDownload(Context context, String url){
+    public void imageDownload(Context context, String url, String filename){
         Picasso.with(context)
                 .load(url)
-                .into(new Target(){
+                .into(getTarget(filename));
+    }
+    public Target getTarget(final String filename){
+        Target target = new Target(){
+            @Override
+            public void onBitmapLoaded(final Bitmap bitmap, Picasso.LoadedFrom from){
+                new Thread(new Runnable(){
                     @Override
-                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from){
+                    public void run(){
+                        String path = Trail.getAppContext().getFilesDir() + "/";
+                        File file=new File(path+filename);
+
                         try{
-                            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
-                            final String currentDateandTime = sdf.format(new Date());
-
-                            String path = Trail.getAppContext().getFilesDir() + "/";
-                            File dir=new File(path);
-                            if (!dir.exists())
-                                dir.mkdirs();
-
-                            //TODO save image inside dir
-                            String imageName=currentDateandTime+".jpg";
-                            imagefilename=imageName;
-
-                            dir=new File(dir, imageName);
-                            FileOutputStream out = new FileOutputStream(dir);
-                            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
-
-                            out.flush();
-                            out.close();
+                            file.createNewFile();
+                            FileOutputStream ostream=new FileOutputStream(file);
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, ostream);
+                            ostream.flush();
+                            ostream.close();
 
                         }catch (Exception e){
                             Log.e(TAG, e.getMessage());
                         }
                     }
-                    @Override
-                    public void onBitmapFailed(Drawable errorDrawable){}
-
-                    @Override
-                    public void onPrepareLoad(Drawable placeholderDrawable){}
-                });
+                }).start();
+            }
+            @Override
+            public void onBitmapFailed(Drawable errordrawable){}
+            @Override
+            public void onPrepareLoad(Drawable placeholderdrawable){}
+        };
+        return target;
     }
+
+    //action bar related methods:
+    @Override
+    public boolean onOptionsItemSelected(MenuItem menuItem){
+        if (menuItem.getItemId()==android.R.id.home)
+            finish();
+
+        return super.onOptionsItemSelected(menuItem);
+    }
+
 }

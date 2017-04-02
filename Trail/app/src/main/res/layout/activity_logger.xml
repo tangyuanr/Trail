@@ -2,86 +2,106 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="fill_parent"
-                android:orientation="vertical"
-                tools:context="com.example.kevin.trail.loggerActivity">
+    android:layout_width="match_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    tools:context="com.example.kevin.trail.loggerActivity">
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/loggerActionBar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@android:color/holo_green_light"
+        android:elevation="4dp"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:map="http://schemas.android.com/apk/res-auto"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:id="@+id/map"
-              android:name="com.google.android.gms.maps.SupportMapFragment"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              tools:context=".loggerActivity"
-        android:layout_below="@+id/relativeLayout2" />
+        xmlns:map="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/relativeLayout3"
+        tools:context=".loggerActivity" />
 
     <RelativeLayout
         android:id="@+id/relativeLayout2"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:background="#CC000000">
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/loggerActionBar"
+        android:background="#CC000000"
+        android:visibility="visible">
 
         <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:id="@+id/startStop"
-            android:text="Start logging"/>
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Start logging"
+            android:textSize="24sp" />
 
         <TextView
-            android:layout_width="wrap_content"
-            android:text="Your performance is being logged."
-            android:textSize="25sp"
             android:id="@+id/loggingText"
-            android:layout_toRightOf="@id/startStop"
-            android:visibility="invisible"
-            android:textColor="#32CD32"
-            android:layout_height="wrap_content"/>
-
-        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="No route selected"
-            android:layout_below="@id/startStop"
-            android:id="@+id/routeName"
-            android:textColor="#FFF"/>
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/startStop"
+            android:layout_marginTop="15dp"
+            android:text="Your performance is being logged..."
+            android:textColor="#32CD32"
+            android:textSize="25sp"
+            android:visibility="invisible" />
 
         <TextView
             android:id="@+id/timerTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_below="@id/routeName"
+            android:layout_below="@+id/loggingText"
+            android:layout_toEndOf="@+id/imageViewFavorites"
+            android:layout_toRightOf="@+id/imageViewFavorites"
             android:hint="Time elapsed: 00:00"
             android:textAlignment="center"
-            android:textSize="18sp"
-            android:textColor="#FFF"/>
+            android:textColor="#FFF"
+            android:textSize="36sp" />
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Distance traveled: 0.00 km"
-            android:layout_below="@id/timerTextView"
             android:id="@+id/distanceTravelled"
-            android:textColor="#FFF"/>
-
-        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/distanceTravelled"
+            android:layout_marginLeft="37dp"
+            android:layout_marginStart="37dp"
+            android:text="0.00 km"
+            android:textColor="#FFF"
+            android:textSize="24sp"
+            android:layout_below="@+id/textView7"
+            android:layout_toRightOf="@+id/imageViewFavorites"
+            android:layout_toEndOf="@+id/imageViewFavorites" />
+
+        <TextView
             android:id="@+id/HeartRateLabelText"
-            android:text="Heart rate (BPM):"
-            android:textColor="#FFF"/>
-
-        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="0"
+            android:layout_marginTop="17dp"
+            android:text="Heart rate:"
+            android:textColor="#FFF"
+            android:textSize="24sp"
+            android:layout_below="@+id/caloriesTextView"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginRight="18dp"
+            android:layout_marginEnd="18dp" />
+
+        <TextView
             android:id="@+id/heartRateText"
-            android:layout_below="@id/distanceTravelled"
-            android:layout_toRightOf="@id/HeartRateLabelText"
-            android:textColor="#FFF"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/caloriesTextView"
+            android:layout_alignStart="@+id/caloriesTextView"
+            android:layout_below="@+id/HeartRateLabelText"
+            android:text="0 BPM"
+            android:textColor="#FFF"
+            android:textSize="24sp" />
 
 
         <ImageView
@@ -89,65 +109,82 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/distanceTravelled"
-            android:visibility="gone"
-            android:src="@mipmap/icon_favorite" />
+            android:src="@mipmap/icon_favorite"
+            android:visibility="gone" />
 
-
-        <Switch
-            android:id="@+id/showSelectedRoute"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/imageViewFavorites"
-            android:layout_marginTop="20dp"
-            android:textOn="Yes"
-            android:checked="true"
-            android:visibility="gone"
-            android:textOff="No"
-            android:textColor="#FFF"
-            android:text="Show selected route" />
-
-        <Switch
-            android:id="@+id/showPreviousRoute"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/showSelectedRoute"
-            android:layout_marginTop="20dp"
-            android:textOn="Yes"
-            android:checked="true"
-            android:textOff="No"
-            android:textColor="#FFF"
-            android:text="Show trail" />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/resetTrail"
-            android:layout_marginTop="20dp"
-            android:layout_toRightOf="@id/showPreviousRoute"
-            android:layout_below="@id/showSelectedRoute"
-            android:text="Reset trail"/>
 
         <TextView
             android:id="@+id/textView6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Calories burnt (KCal):"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/timerTextView"
+            android:layout_marginTop="31dp"
+            android:text="Calories burnt:"
             android:textColor="@color/common_google_signin_btn_text_dark_default"
-            android:layout_below="@+id/distanceTravelled"
-            android:layout_toRightOf="@+id/distanceTravelled"
-            android:layout_toEndOf="@+id/distanceTravelled" />
+            android:textSize="24sp" />
 
         <TextView
             android:id="@+id/caloriesTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="0 KCal"
+            android:textColor="@color/common_google_signin_btn_text_dark_default"
+            android:textSize="24sp"
+            android:layout_below="@+id/textView6"
+            android:layout_alignLeft="@+id/HeartRateLabelText"
+            android:layout_alignStart="@+id/HeartRateLabelText"
+            android:layout_marginLeft="20dp"
+            android:layout_marginStart="20dp" />
+
+        <Button
+            android:id="@+id/statsToMapButton"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/mr_controller_volume_group_list_item_height"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginBottom="67dp"
+            android:text="see map"
+            android:textSize="24sp" />
+
+        <TextView
+            android:id="@+id/textView7"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Distance:"
+            android:textColor="@color/common_google_signin_btn_text_dark_default"
+            android:textSize="24sp"
+            android:layout_alignBaseline="@+id/textView6"
             android:layout_alignBottom="@+id/textView6"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignTop="@+id/textView6"
-            android:layout_toRightOf="@+id/textView6"
-            android:text="0"
-            android:textColor="@color/common_google_signin_btn_text_dark_default" />
+            android:layout_alignLeft="@+id/distanceTravelled"
+            android:layout_alignStart="@+id/distanceTravelled" />
+
+        <TextView
+            android:id="@+id/paceOrSpeedLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/HeartRateLabelText"
+            android:layout_alignLeft="@+id/distanceTravelled"
+            android:layout_alignStart="@+id/distanceTravelled"
+            android:layout_marginBottom="164dp"
+            android:text="Pace:"
+            android:textColor="@color/common_google_signin_btn_text_dark_default"
+            android:textSize="24sp"
+            android:visibility="invisible" />
+
+        <TextView
+            android:id="@+id/paceOrSpeedText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TextView"
+            android:textColor="@color/common_google_signin_btn_text_dark_default"
+            android:textSize="24sp"
+            android:visibility="invisible"
+            android:layout_below="@+id/HeartRateLabelText"
+            android:layout_alignRight="@+id/paceOrSpeedLabel"
+            android:layout_alignEnd="@+id/paceOrSpeedLabel" />
 
     </RelativeLayout>
 
@@ -156,11 +193,11 @@
         style="@android:style/Widget.Button.Small"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/relativeLayout2"
         android:text="Reconnect to HxM"
-        android:visibility="invisible" />
+        android:visibility="invisible"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/hrReconectHelp"
@@ -175,5 +212,60 @@
         android:visibility="invisible"
         app:fabSize="mini"
         app:srcCompat="@android:drawable/ic_menu_help" />
+
+    <RelativeLayout
+        android:id="@+id/relativeLayout3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/loggerActionBar"
+        android:background="@color/common_google_signin_btn_text_dark_focused"
+        android:visibility="invisible">
+
+        <Switch
+            android:id="@+id/showPreviousRoute"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:checked="true"
+            android:text="Show trail"
+            android:textColor="#FFF"
+            android:textOff="No"
+            android:textOn="Yes" />
+
+        <Switch
+            android:id="@+id/showSelectedRoute"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/showPreviousRoute"
+            android:checked="true"
+            android:text="Show selected route"
+            android:textColor="#FFF"
+            android:textOff="No"
+            android:textOn="Yes"
+            android:visibility="visible" />
+
+        <Button
+            android:id="@+id/resetTrail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:text="Reset trail" />
+
+        <Button
+            android:id="@+id/backToStats"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/showSelectedRoute"
+            android:text="back to stats" />
+    </RelativeLayout>
+
 
 </RelativeLayout>
