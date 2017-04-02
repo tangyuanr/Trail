@@ -186,7 +186,7 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dbHandler.addAttempt(attempt); //save the attempt to the database
-
+                ComparisonDialog();
                 Log.d(TAG, "Attempt added to the database");
             }
         });
@@ -260,7 +260,7 @@ public class runActivity extends AppCompatActivity implements IHeartRateReciever
 
 
                             Log.d(TAG, "Route object added to ROUTE_TABLE");
-                            attempt = new Attempt(route, totaltime, currentDateandTime, route.getSnapshotURL(),RunningHelper.getTotalDistance());
+                            attempt = new Attempt(route, totaltime, currentDateandTime, route.getSnapshotURL(),route.getTotalDistance());
 
                             dbHandler.addAttempt(attempt); //adding the attempt
                             Log.d(TAG, "Attempt object built and added to database");

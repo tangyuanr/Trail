@@ -151,7 +151,7 @@ public class DBHandler extends SQLiteOpenHelper {
         contentValues.put(DATE_OF_ATTEMPT, attempt.getDateOfAttempt());
         contentValues.put(MAP_SCREENSHOT,attempt.getFileNameStaticMapScreenshot());
         contentValues.put(ROUTE_NAME, attempt.getRoute().getRouteName());
-        contentValues.put(ATTEMPT_DISTANCE, attempt.getRoute().getTotalDistance());
+        contentValues.put(ATTEMPT_DISTANCE, attempt.getTotalDistance());
         db.insert(TABLE_ATTEMPTS, null, contentValues);
         db.close();
         compareBestTime(attempt);

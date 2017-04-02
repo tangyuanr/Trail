@@ -288,6 +288,7 @@ public class hikeActivity extends AppCompatActivity implements
                             dbHandler.addAttempt(attempt); //adding the attempt
                             ComparisonDialog();
 
+
                             Log.d(TAG, "Attempt object built and added to database");
                             dialog.dismiss();
                         } else if (routeNameExists) {
