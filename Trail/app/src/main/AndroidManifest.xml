@@ -37,9 +37,6 @@
             android:label="Trail - Hike tracker"
             android:screenOrientation="portrait"/>
         <activity
-            android:name=".bikeActivity"
-            android:screenOrientation="portrait"/>
-        <activity
             android:name=".timerActivity"
             android:screenOrientation="portrait"/>
 

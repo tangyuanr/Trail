@@ -476,6 +476,9 @@ public class loggerActivity extends AppCompatActivity implements
             case "Hiking":
                 string = "Hike";
                 break;
+            case "Biking":
+                string = "Biking session";
+                break;
         }
         alertDialog.setTitle(string + " ended");
         switch (activityType) {
@@ -484,6 +487,9 @@ public class loggerActivity extends AppCompatActivity implements
                 break;
             case "Hiking":
                 string = "hiked";
+                break;
+            case "Biking":
+                string = "biked";
                 break;
         }
         alertDialog.setMessage("You have " + string + " " + String.format("%.2f", FinalDistance) + " km in " + (time) + " minutes.\n");
