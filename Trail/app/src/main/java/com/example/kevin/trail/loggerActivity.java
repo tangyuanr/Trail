@@ -214,13 +214,15 @@ public class loggerActivity extends AppCompatActivity implements
             loggerToolbar.setBackgroundColor(Color.parseColor("#66cc66"));//set toolbar color
             headerLayout.setBackgroundColor(Color.parseColor("#409c5e"));//set background color
             mapHeadLayout.setBackgroundColor(Color.parseColor("#409c5e"));
-            getSupportActionBar().setTitle("Hiking");//set toolbar title
+            if (!receivedIntent.hasExtra("route"))
+                getSupportActionBar().setTitle("Hiking");//set toolbar title
         }
         else if ("Running".equals(activityType)){
             loggerToolbar.setBackgroundColor(Color.parseColor("#ff6d92"));
             headerLayout.setBackgroundColor(Color.parseColor("#ffb1c5"));
             mapHeadLayout.setBackgroundColor(Color.parseColor("#ffb1c5"));
-            getSupportActionBar().setTitle("Running");
+            if (!receivedIntent.hasExtra("route"))
+                getSupportActionBar().setTitle("Running");
 
             paceOrSpeedLabel.setText("Pace: ");
             paceOrSpeedLabel.setVisibility(View.VISIBLE);
@@ -231,7 +233,8 @@ public class loggerActivity extends AppCompatActivity implements
             loggerToolbar.setBackgroundColor(Color.parseColor("#99ccff"));
             headerLayout.setBackgroundColor(Color.parseColor("#bfdfff"));
             mapHeadLayout.setBackgroundColor(Color.parseColor("#bfdfff"));
-            getSupportActionBar().setTitle("Biking");
+            if (!receivedIntent.hasExtra("route"))
+                getSupportActionBar().setTitle("Biking");
 
             paceOrSpeedLabel.setText("Speed: ");
             paceOrSpeedLabel.setVisibility(View.VISIBLE);
