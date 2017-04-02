@@ -24,6 +24,7 @@ import org.joda.time.Days;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 
@@ -81,26 +82,33 @@ public class graphActivity extends AppCompatActivity {
     }
 
     private void initializeGraph() {
-        DateTime FirstDateAccordingToSpinner = getFirstDateAccordingToSpinner(selectedShowingSpinner);
         DateTime today = new DateTime();
-        ArrayList<Attempt> attemptsList = dbhandler.getAttempts(FirstDateAccordingToSpinner, today, "");
-        ArrayList<dayWhenSomethingWasDone> daysanddistance = calculateKMTravelledInDay(attemptsList);
-        int numberOf = daysanddistance.size();
-        DataPoint[] datapoints = new DataPoint[daysanddistance.size()];
+        DateTime firstDayOfInterval = new DateTime().minusDays(7);
 
-        for (int i = 0; i < daysanddistance.size(); i++) {
-            datapoints[i] = new DataPoint(daysanddistance.get(i).getDateTime().toDate(), daysanddistance.get(i).getDistance());
+
+        ArrayList<Attempt> attemptsList = dbhandler.getAttempts(firstDayOfInterval, today, "");
+        ArrayList<dayWhenSomethingWasDone> daysanddistance = calculateKMTravelledInDay(attemptsList);
+        ArrayList<dayWhenSomethingWasDone> lastweek = format7days(daysanddistance);
+
+
+
+
+        int numberOf = lastweek.size();
+        DataPoint[] datapoints = new DataPoint[lastweek.size()];
+
+        for (int i = 0; i < lastweek.size(); i++) {
+            datapoints[i] = new DataPoint(lastweek.get(i).getDateTime().toDate(), lastweek.get(i).getDistance());
         }
         if (numberOf > 1) {
             LineGraphSeries<DataPoint> series_line = new LineGraphSeries<>(datapoints);
             graph.addSeries(series_line);
-            graph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(this));
+            graph.getGridLabelRenderer().setLabelFormatter(new DateSATformatter(this));
             graph.getGridLabelRenderer().setNumHorizontalLabels(numberOf);
-            graph.getViewport().setMinX(daysanddistance.get(0).getDateTime().toDate().getTime());
-            graph.getViewport().setMaxX(daysanddistance.get(numberOf - 1).getDateTime().toDate().getTime());
+            graph.getViewport().setMinX(lastweek.get(0).getDateTime().toDate().getTime());
+            graph.getViewport().setMaxX(lastweek.get(numberOf - 1).getDateTime().toDate().getTime());
             graph.getViewport().setXAxisBoundsManual(true);
             graph.getGridLabelRenderer().setHumanRounding(false);
-            graph.getGridLabelRenderer().setHorizontalAxisTitle("date");
+            graph.getGridLabelRenderer().setHorizontalAxisTitle("");
             graph.getGridLabelRenderer().setVerticalAxisTitle("distance travelled (km)");
 
             PointsGraphSeries<DataPoint> series_points = new PointsGraphSeries<>(datapoints);
@@ -123,6 +131,35 @@ public class graphActivity extends AppCompatActivity {
             sinceTextView.append("\n\nYou must have at least 2 days worth of data to use Trail's graphing feature.");
         }
     }
+
+    private ArrayList<dayWhenSomethingWasDone> format7days(ArrayList<dayWhenSomethingWasDone> daysdistance) {
+
+        int numberOf = daysdistance.size();
+        DateTime lastDay = daysdistance.get(numberOf - 1).getDateTime(); //last day (today)
+        DateTime firstDay = lastDay.minusDays(6); //first day one week ago)
+
+        ArrayList<dayWhenSomethingWasDone> last7days = new ArrayList<>();
+        for(int i = 0; i < 7; i++) {
+            last7days.add(new dayWhenSomethingWasDone(firstDay.plusDays(i),0));
+        }
+        for(int i =0; i < numberOf; i++) {
+            for(int j = 0; j < 7; j++) {
+                if(daysdistance.get(i).getDateTime().getDayOfWeek() == last7days.get(j).getDateTime().getDayOfWeek()) {
+                    float distance = daysdistance.get(i).getDistance();
+                    last7days.get(j).setDistance(distance);
+                }
+            }
+        }
+        return last7days;
+    }
+
+    public static float round(float d, int decimalPlace) {
+        BigDecimal bd = new BigDecimal(Float.toString(d));
+        bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_DOWN);
+        return bd.floatValue();
+    }
+
+
 
     private ArrayList<dayWhenSomethingWasDone> calculateKMTravelledInDay(ArrayList<Attempt> attemptsList) {
 

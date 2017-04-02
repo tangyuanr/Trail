@@ -80,7 +80,7 @@ public class Route implements Serializable { //needed to be able to pass it betw
     }
 
     public float getTotalDistance() {
-        return totalDistance;
+        return round(totalDistance,1);
     }
 
     public int getBestTime() {
@@ -109,9 +109,15 @@ public class Route implements Serializable { //needed to be able to pass it betw
             return routeName + "\n Best time:\n" + bestTimeString + "\n on " + formatDate(dateBestTime); //we can build up the returned string there.
         }
         else if(activityType.equals("Hiking")) {
-            return routeName + "\n Best time:\n" + bestTimeString + "\n on " + formatDate(dateBestTime) +"\n Distance: " + String.format("%.2f", totalDistance) + " km";
+            return routeName + "\n Best time:\n" + bestTimeString + "\n on " + formatDate(dateBestTime) +"\n Distance: " + String.format("%.1f", totalDistance) + " km";
         }
         else {return null;}
+    }
+
+    public static float round(float d, int decimalPlace) {
+        BigDecimal bd = new BigDecimal(Float.toString(d));
+        bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_DOWN);
+        return bd.floatValue();
     }
 
     private static String formatDate(String YYYYMMDD) {
