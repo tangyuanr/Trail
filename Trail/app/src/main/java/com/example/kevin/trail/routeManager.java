@@ -64,6 +64,8 @@ public class routeManager extends AppCompatActivity {
         //actionBar.show();
         routeManagerToolbar=(Toolbar)findViewById(R.id.routeManagerActionBar);
         setSupportActionBar(routeManagerToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
         amvMenu=(ActionMenuView)routeManagerToolbar.findViewById(R.id.amvMenu);
         amvMenu.setOnMenuItemClickListener(new ActionMenuView.OnMenuItemClickListener(){
             @Override
@@ -84,13 +86,15 @@ public class routeManager extends AppCompatActivity {
 
     }
 
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item){
-//        if (R.id.deleteButton==item.getItemId()){
-//
-//        }
-//        return super.onOptionsItemSelected(item);
-//    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        if (android.R.id.home==item.getItemId()){
+            Log.d("routeManager", "home clicked");
+            finish();
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     public void onDeleteAction(MenuItem mi) {
         if(!(routeNameSelected==null)) {
