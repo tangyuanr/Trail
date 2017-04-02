@@ -45,6 +45,8 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
+import org.w3c.dom.Text;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
@@ -103,6 +105,11 @@ public class loggerActivity extends AppCompatActivity implements
     private sharedPreferenceHelper sharedPref;
     private double totalCaloriesBurnt=0;
     protected TextView caloriesTxtView=null;
+    protected TextView paceOrSpeedText=null;
+
+
+
+
 
     TextView timerTextViewL;
     long startTime = 0;
@@ -138,8 +145,13 @@ public class loggerActivity extends AppCompatActivity implements
         //action bar
         Toolbar loggerToolbar = (Toolbar)findViewById(R.id.loggerActionBar);
         setSupportActionBar(loggerToolbar);
-        RelativeLayout headerLayout = (RelativeLayout)findViewById(R.id.relativeLayout2);
-
+        final RelativeLayout headerLayout = (RelativeLayout)findViewById(R.id.relativeLayout2);
+        final RelativeLayout mapHeadLayout=(RelativeLayout)findViewById(R.id.relativeLayout3);
+        //UI ENHANCEMENT OBJECTS
+        Button toMap=(Button)findViewById(R.id.statsToMapButton);
+        final Button toStats=(Button)findViewById(R.id.backToStats);
+        TextView paceOrSpeedLabel=(TextView)findViewById(R.id.paceOrSpeedLabel);
+        paceOrSpeedText=(TextView)findViewById(R.id.paceOrSpeedText);
 
 
 
@@ -157,7 +169,7 @@ public class loggerActivity extends AppCompatActivity implements
         showPreviousRoute = (Switch) findViewById(R.id.showPreviousRoute);
         showPreviousRoute.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
+                if (isChecked && mapHeadLayout.getVisibility()==View.VISIBLE) {
                     previousTrail.setVisible(true);
                 } else {
                     previousTrail.setVisible(false);
@@ -171,49 +183,11 @@ public class loggerActivity extends AppCompatActivity implements
         if(receivedIntent.hasExtra("activityType")) {activityType = receivedIntent.getStringExtra("activityType");}
 
 
-
-        /*
-        *
-        * UI related
-        *
-        * */
-
-        //set toolbar color according to activity type
-        if ("Hiking".equals(activityType)){
-            loggerToolbar.setBackgroundColor(Color.parseColor("#66cc66"));//set toolbar color
-            headerLayout.setBackgroundColor(Color.parseColor("#409c5e"));//set background color
-            getSupportActionBar().setTitle("Hiking");//set toolbar title
-        }
-        else if ("Running".equals(activityType)){
-            loggerToolbar.setBackgroundColor(Color.parseColor("#ff6d92"));
-            headerLayout.setBackgroundColor(Color.parseColor("#ffb1c5"));
-            getSupportActionBar().setTitle("Running");
-        }
-        else if ("Biking".equals(activityType)){
-            loggerToolbar.setBackgroundColor(Color.parseColor("#99ccff"));
-            headerLayout.setBackgroundColor(Color.parseColor("#bfdfff"));
-            getSupportActionBar().setTitle("Biking");
-        }
-
-        if (getSupportActionBar()!=null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setDisplayShowHomeEnabled(true);
-        }
-
-
-
-
-
-
-
-
-
-
+        showSelectedRoute = (Switch) findViewById(R.id.showSelectedRoute);
         if (receivedIntent.hasExtra("route")) {  //if the intent has a route object
             route = (Route) receivedIntent.getSerializableExtra("route");
             routeOrAttempt = "attempt";
             getSupportActionBar().setTitle(activityType+" on route: "+route.getRouteName());
-            showSelectedRoute = (Switch) findViewById(R.id.showSelectedRoute);
             showSelectedRoute.setVisibility(View.VISIBLE);
             showSelectedRoute.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -228,6 +202,74 @@ public class loggerActivity extends AppCompatActivity implements
         } else {
             routeOrAttempt = "route";
         }
+
+        /*
+        *
+        * UI related
+        *
+        * */
+
+        //set toolbar color according to activity type
+        if ("Hiking".equals(activityType)){
+            loggerToolbar.setBackgroundColor(Color.parseColor("#66cc66"));//set toolbar color
+            headerLayout.setBackgroundColor(Color.parseColor("#409c5e"));//set background color
+            mapHeadLayout.setBackgroundColor(Color.parseColor("#409c5e"));
+            getSupportActionBar().setTitle("Hiking");//set toolbar title
+        }
+        else if ("Running".equals(activityType)){
+            loggerToolbar.setBackgroundColor(Color.parseColor("#ff6d92"));
+            headerLayout.setBackgroundColor(Color.parseColor("#ffb1c5"));
+            mapHeadLayout.setBackgroundColor(Color.parseColor("#ffb1c5"));
+            getSupportActionBar().setTitle("Running");
+
+            paceOrSpeedLabel.setText("Pace: ");
+            paceOrSpeedLabel.setVisibility(View.VISIBLE);
+            paceOrSpeedText.setText("0 min/km");
+            paceOrSpeedText.setVisibility(View.VISIBLE);
+        }
+        else if ("Biking".equals(activityType)){
+            loggerToolbar.setBackgroundColor(Color.parseColor("#99ccff"));
+            headerLayout.setBackgroundColor(Color.parseColor("#bfdfff"));
+            mapHeadLayout.setBackgroundColor(Color.parseColor("#bfdfff"));
+            getSupportActionBar().setTitle("Biking");
+
+            paceOrSpeedLabel.setText("Speed: ");
+            paceOrSpeedLabel.setVisibility(View.VISIBLE);
+            paceOrSpeedText.setText("0 km/min");
+            paceOrSpeedText.setVisibility(View.VISIBLE);
+        }
+
+        if (getSupportActionBar()!=null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
+
+
+        toMap.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                headerLayout.setVisibility(View.INVISIBLE);
+                //display layer 2
+                mapHeadLayout.setVisibility(View.VISIBLE);
+                showSelectedRoute.setVisibility(View.VISIBLE);
+                resetTrailButton.setVisibility(View.VISIBLE);
+                toStats.setVisibility(View.VISIBLE);
+            }
+        });
+
+        toStats.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //hide layer 2, display layer 1
+                mapHeadLayout.setVisibility(View.INVISIBLE);
+                showSelectedRoute.setVisibility(View.INVISIBLE);
+                resetTrailButton.setVisibility(View.INVISIBLE);
+                toStats.setVisibility(View.INVISIBLE);
+
+                headerLayout.setVisibility(View.VISIBLE);
+            }
+        });
+
         mapFrag = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFrag.getMapAsync(this);
 
@@ -245,7 +287,6 @@ public class loggerActivity extends AppCompatActivity implements
                     startStopButton.setText("Stop logging");
                     loggingText.setVisibility(View.VISIBLE);
                     startUpdateStatsThread();
-                    caloriesTxtView.setText(Double.toString(totalCaloriesBurnt));
 
                     if (MainActivity.heartRate==0){
                         sensorReconnect.setVisibility(View.VISIBLE);
@@ -608,7 +649,7 @@ public class loggerActivity extends AppCompatActivity implements
     final Handler newHandler=new Handler(){
         public void handleMessage(Message msg){
             MainActivity.heartRate=msg.getData().getInt("HeartRate");
-            hrTextView.setText(Integer.toString(MainActivity.heartRate));
+            hrTextView.setText(Integer.toString(MainActivity.heartRate)+" BPM");
         }
     };
 
@@ -648,8 +689,9 @@ public class loggerActivity extends AppCompatActivity implements
                         @Override
                         public void run() {
                             Log.d(TAG, "TOTAL DISTANCE " + String.valueOf(activityhelper.getTotalDistance()));
-                            totalDistanceTravelledTextView.setText("Distance travelled: " + String.format("%.2f", activityhelper.getTotalDistance()) + " km");
-                            caloriesTxtView.setText(String.format("%.2f",totalCaloriesBurnt));
+                            totalDistanceTravelledTextView.setText(String.format("%.2f", activityhelper.getTotalDistance()) + " km");
+                            paceOrSpeedText.setText(String.format("%.2f",activityhelper.getTotalDistance()/0.14));//0.14minutes=5s
+                            caloriesTxtView.setText(String.format("%.2f",totalCaloriesBurnt)+" KCal");
                             if (MainActivity.heartRate==0){
                                 sensorReconnect.setVisibility(View.VISIBLE);
                                 sensorHelp.setVisibility(View.VISIBLE);
