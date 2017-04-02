@@ -234,6 +234,7 @@ public class loggerActivity extends AppCompatActivity implements
 
     private void confirmDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setCancelable(false);
         builder
                 .setTitle("Stop logging " + routeOrAttempt)
                 .setMessage("Are you sure you want to stop logging your " + routeOrAttempt + "?")
@@ -272,6 +273,7 @@ public class loggerActivity extends AppCompatActivity implements
 
     private void SaveAttemptDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setCancelable(false);
         builder.setTitle("Save attempt?");
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
@@ -305,7 +307,7 @@ public class loggerActivity extends AppCompatActivity implements
                 .setPositiveButton("Save", null)
                 .setNegativeButton("Cancel", null)
                 .create();
-
+        dialog.setCancelable(false);//prevent the dialog from being closed by outside touch
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
 
             @Override
