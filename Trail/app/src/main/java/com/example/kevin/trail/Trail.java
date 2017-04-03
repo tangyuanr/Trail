@@ -12,6 +12,7 @@ import android.content.Context;
 public class Trail extends Application {
 
     private boolean isGPSEnabled = false;
+    public static int FINELOCATION = 0;
     private static Context context;
 
     @Override

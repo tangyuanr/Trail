@@ -4,6 +4,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -12,6 +13,8 @@ import android.location.Location;
 import android.os.Handler;
 import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -67,6 +70,7 @@ public class loggerActivity extends AppCompatActivity implements
         GoogleMap.OnCameraMoveCanceledListener,
         GoogleMap.OnCameraIdleListener,
         GoogleMap.OnMyLocationButtonClickListener,
+        GoogleMap.OnMapLongClickListener,
         IHeartRateReciever {
 
     private static final String TAG = "loggerActivity";
@@ -301,6 +305,7 @@ public class loggerActivity extends AppCompatActivity implements
             }
         });
 
+
         //handles reconnection to heart rate sensor
         sensorReconnect.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -511,6 +516,12 @@ public class loggerActivity extends AppCompatActivity implements
 //        }
 //    }
 
+
+    @Override
+    public void onMapLongClick(LatLng latLng) {
+
+    }
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
         googleMAP = googleMap;
@@ -522,11 +533,17 @@ public class loggerActivity extends AppCompatActivity implements
         googleMAP.setOnCameraMoveCanceledListener(this);
         googleMAP.setOnMyLocationButtonClickListener(this);
         buildGoogleApiClient();
+        if ( ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED ) {
+
+            ActivityCompat.requestPermissions( this, new String[] {  android.Manifest.permission.ACCESS_FINE_LOCATION  },
+                    ((Trail) getApplicationContext()).FINELOCATION );
+        }
         googleMAP.setMyLocationEnabled(true);
         if (!(route == null)) {
             selectedRoute = addPolyLine(route.buildLocationArray(), "SelectedRoute");
         }
         previousTrail = addPolyLine(locationArray, "PreviousTrail");
+
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -575,6 +592,7 @@ public class loggerActivity extends AppCompatActivity implements
             previousTrail.setPoints(points);
             lastLocation = location;
         }
+        //location.getSpeed();
     }
 
     @Override

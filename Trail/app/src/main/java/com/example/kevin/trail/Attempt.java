@@ -72,15 +72,9 @@ public class Attempt {
 
     public int getCaloriesBurnt() { return caloriesBurnt; }
 
-    public float getTotalDistance() { return round(totalDistance, 1); }
+    public float getTotalDistance() { return totalDistance;}
 
     public String getImagefilename(){return imagefilename;}
-
-    public static float round(float d, int decimalPlace) {
-        BigDecimal bd = new BigDecimal(Float.toString(d));
-        bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_DOWN);
-        return bd.floatValue();
-    }
 
 
 }

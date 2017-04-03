@@ -144,6 +144,49 @@ public class DBHandler extends SQLiteOpenHelper {
         db.close();
         return attemptsList;
     }
+
+    //overload getAttempts. fetches all attempts whose date begin with date YYMMDD
+    public ArrayList<Attempt> getAttemptsByDate(String date, String activity) { //
+        ArrayList<Attempt> attemptsList = new ArrayList<>();
+        String query;
+        if(activity.equals("")) {    //getAttempts("") will select all the routes
+            query = "SELECT * FROM " + TABLE_ATTEMPTS + " WHERE " + DATE_OF_ATTEMPT + " LIKE '" + date + "%'";
+            Log.d(TAG, query);
+        }
+        else {  //ex: when we call getRoutes("Running") to only display a specific type;
+            query = "SELECT * FROM " + TABLE_ATTEMPTS + " WHERE " + ACTIVITY_TYPE + " IN ('" + activity + "')";
+            Log.d(TAG, query);
+        }
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor attemptsCursor = db.rawQuery(query, null);
+        try {
+            while (attemptsCursor.moveToNext()) {
+                String activityType = attemptsCursor.getString(1);
+                int totalTime = attemptsCursor.getInt(attemptsCursor.getColumnIndex(TOTAL_TIME));
+                String dateAttempt = attemptsCursor.getString(attemptsCursor.getColumnIndex(DATE_OF_ATTEMPT)); // yyyyMMdd_HHmm
+                String routeName = attemptsCursor.getString(attemptsCursor.getColumnIndex(ROUTE_NAME));
+                String snapshotURL = attemptsCursor.getString(attemptsCursor.getColumnIndex(MAP_SCREENSHOT));
+                float distance=attemptsCursor.getFloat(attemptsCursor.getColumnIndex(TOTAL_DISTANCE));
+                String avgHR=attemptsCursor.getString(attemptsCursor.getColumnIndex(AVG_HR));
+                String calories=attemptsCursor.getString(attemptsCursor.getColumnIndex(CALORIES));
+                String imageDir=attemptsCursor.getString(attemptsCursor.getColumnIndex(IMAGEFILENAME));
+                Route route = getRoute(routeName);
+                Attempt attempt = new Attempt(route, totalTime, distance, dateAttempt, snapshotURL, Integer.parseInt(avgHR), Integer.parseInt(calories), imageDir);
+                attemptsList.add(attempt);
+            }
+        } finally {
+            attemptsCursor.close();
+        }
+        db.close();
+        return attemptsList;
+    }
+
+
+
+
+
+
+
     //add new Route to Route table
     public void addRoute(Route route) {
         SQLiteDatabase db=this.getWritableDatabase();

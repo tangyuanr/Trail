@@ -27,6 +27,7 @@ import org.joda.time.format.DateTimeFormatter;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import static com.example.kevin.trail.R.id.graph;
 
@@ -63,6 +64,8 @@ public class graphActivity extends AppCompatActivity {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                     selectedShowingSpinner = parent.getItemAtPosition(position).toString();
+                    generateSinceText();
+                    generateGraph();
                 }
 
                 @Override
@@ -70,8 +73,9 @@ public class graphActivity extends AppCompatActivity {
                     //
                 }
             });
-            sinceTextView.setText(initializeSinceText());
-            initializeGraph();
+
+            generateSinceText();
+            generateGraph();
         }
         else {
             graph.setVisibility(View.GONE);
@@ -81,31 +85,79 @@ public class graphActivity extends AppCompatActivity {
         }
     }
 
-    private void initializeGraph() {
-        DateTime today = new DateTime();
-        DateTime firstDayOfInterval = new DateTime().minusDays(7);
-
-
-        ArrayList<Attempt> attemptsList = dbhandler.getAttempts(firstDayOfInterval, today, "");
-        ArrayList<dayWhenSomethingWasDone> daysanddistance = calculateKMTravelledInDay(attemptsList);
-        ArrayList<dayWhenSomethingWasDone> lastweek = format7days(daysanddistance);
-
-
-
-
-        int numberOf = lastweek.size();
-        DataPoint[] datapoints = new DataPoint[lastweek.size()];
-
-        for (int i = 0; i < lastweek.size(); i++) {
-            datapoints[i] = new DataPoint(lastweek.get(i).getDateTime().toDate(), lastweek.get(i).getDistance());
+    private ArrayList<dayWhenSomethingWasDone> ArrayDistancePerDate(int DAYS_BACK) {
+        ArrayList<dayWhenSomethingWasDone> daysanddistance = new ArrayList<>();
+        DateTime firstDayOfInterval = new DateTime().minusDays(DAYS_BACK);
+        for(int i = 0; i < DAYS_BACK + 1; i++) {
+            DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyyMMdd");
+            DateTime date = firstDayOfInterval.plusDays(i);
+            String dateString = date.toString(fmt);
+            ArrayList<Attempt> attemptsforoneday = dbhandler.getAttemptsByDate(dateString, "");
+            float totalDistance = 0;
+            if (!(attemptsforoneday.isEmpty())) {
+                for (int j = 0; j < attemptsforoneday.size(); j++) {
+                    totalDistance += attemptsforoneday.get(j).getTotalDistance();
+                }
+            }
+            daysanddistance.add(new dayWhenSomethingWasDone(date,totalDistance));
         }
+        return daysanddistance;
+    }
+
+    private ArrayList<dayWhenSomethingWasDone> ArrayDistancePerDate() {
+        ArrayList<dayWhenSomethingWasDone> daysanddistance = new ArrayList<>();
+        DateTime firstDayOfInterval = dbhandler.getStartingDate();
+        DateTime today = new DateTime();
+        int difference = Days.daysBetween(firstDayOfInterval.toLocalDate(), today.toLocalDate()).getDays() + 1;
+        for(int i = 0; i < difference; i++) {
+            DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyyMMdd");
+            DateTime date = firstDayOfInterval.plusDays(i);
+            String dateString = date.toString(fmt);
+            ArrayList<Attempt> attemptsforoneday = dbhandler.getAttemptsByDate(dateString, "");
+            float totalDistance = 0;
+            if (!(attemptsforoneday.isEmpty())) {
+                for (int j = 0; j < attemptsforoneday.size(); j++) {
+                    totalDistance += attemptsforoneday.get(j).getTotalDistance();
+                }
+            }
+            daysanddistance.add(new dayWhenSomethingWasDone(date,totalDistance));
+        }
+        return daysanddistance;
+    }
+
+    private void generateGraph() {
+        int DAYS_BACK = 0;
+        switch (selectedShowingSpinner) {
+            case "stats for the last 7 days":
+                DAYS_BACK = 6;
+                break;
+            case "stats for the last month":
+                DAYS_BACK = 30;
+                break;
+            case "stats for the last 3 months":
+                DAYS_BACK = 90;
+                break;
+            case "stats for the last 6 months":
+                DAYS_BACK = 180;
+                break;
+            case "stats for the last year":
+                DAYS_BACK = 365;
+                break;
+        }
+
+        ArrayList<dayWhenSomethingWasDone> daysanddistance = ArrayDistancePerDate(DAYS_BACK);
+        int numberOf = daysanddistance.size();
+
+        DataPoint[] datapoints = new DataPoint[numberOf];
+        for (int i = 0; i < numberOf; i++) {
+            datapoints[i] = new DataPoint(daysanddistance.get(i).getDateTime().toDate(), daysanddistance.get(i).getDistance());
+        }
+
         if (numberOf > 1) {
             LineGraphSeries<DataPoint> series_line = new LineGraphSeries<>(datapoints);
             graph.addSeries(series_line);
             graph.getGridLabelRenderer().setLabelFormatter(new DateSATformatter(this));
             graph.getGridLabelRenderer().setNumHorizontalLabels(numberOf);
-            graph.getViewport().setMinX(lastweek.get(0).getDateTime().toDate().getTime());
-            graph.getViewport().setMaxX(lastweek.get(numberOf - 1).getDateTime().toDate().getTime());
             graph.getViewport().setXAxisBoundsManual(true);
             graph.getGridLabelRenderer().setHumanRounding(false);
             graph.getGridLabelRenderer().setHorizontalAxisTitle("");
@@ -130,58 +182,6 @@ public class graphActivity extends AppCompatActivity {
             graph.setVisibility(View.GONE);
             sinceTextView.append("\n\nYou must have at least 2 days worth of data to use Trail's graphing feature.");
         }
-    }
-
-    private ArrayList<dayWhenSomethingWasDone> format7days(ArrayList<dayWhenSomethingWasDone> daysdistance) {
-
-        int numberOf = daysdistance.size();
-        DateTime lastDay = daysdistance.get(numberOf - 1).getDateTime(); //last day (today)
-        DateTime firstDay = lastDay.minusDays(6); //first day one week ago)
-
-        ArrayList<dayWhenSomethingWasDone> last7days = new ArrayList<>();
-        for(int i = 0; i < 7; i++) {
-            last7days.add(new dayWhenSomethingWasDone(firstDay.plusDays(i),0));
-        }
-        for(int i =0; i < numberOf; i++) {
-            for(int j = 0; j < 7; j++) {
-                if(daysdistance.get(i).getDateTime().getDayOfWeek() == last7days.get(j).getDateTime().getDayOfWeek()) {
-                    float distance = daysdistance.get(i).getDistance();
-                    last7days.get(j).setDistance(distance);
-                }
-            }
-        }
-        return last7days;
-    }
-
-    public static float round(float d, int decimalPlace) {
-        BigDecimal bd = new BigDecimal(Float.toString(d));
-        bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_DOWN);
-        return bd.floatValue();
-    }
-
-
-
-    private ArrayList<dayWhenSomethingWasDone> calculateKMTravelledInDay(ArrayList<Attempt> attemptsList) {
-
-        ArrayList<dayWhenSomethingWasDone> daywhensthdone = new ArrayList<>();
-        float totalDistance = 0;
-        for (int i = 0; i < attemptsList.size(); i++) {
-            if (i == 0) {
-                totalDistance += attemptsList.get(0).getRoute().getTotalDistance();
-            } else {
-                int comparator = DateTimeComparator.getDateOnlyInstance().compare(attemptsList.get(i).getDateofAttemptAsDateTime(), attemptsList.get(i - 1).getDateofAttemptAsDateTime());
-                if (comparator == 0) {
-                    totalDistance += attemptsList.get(i).getRoute().getTotalDistance();
-                } else {
-                    daywhensthdone.add(new dayWhenSomethingWasDone(attemptsList.get(i - 1).getDateofAttemptAsDateTime(), totalDistance));
-                    totalDistance = attemptsList.get(i).getRoute().getTotalDistance();
-                }
-            }
-            if (i == attemptsList.size() - 1) {
-                daywhensthdone.add(new dayWhenSomethingWasDone(attemptsList.get(i).getDateofAttemptAsDateTime(), totalDistance));
-            }
-        }
-        return daywhensthdone;
     }
 
     private class dayWhenSomethingWasDone {
@@ -212,36 +212,56 @@ public class graphActivity extends AppCompatActivity {
     }
 
 
-    private String initializeSinceText() {
+    private void generateSinceText() {
+
+        DateTime date = null;
+        ArrayList<dayWhenSomethingWasDone> DistanceDate = new ArrayList<>();
         String sinceText;
-        String dayString = " days";
-        DateTime FirstDateAccordingToSpinner = getFirstDateAccordingToSpinner(selectedShowingSpinner);
-        DateTime today = new DateTime();
-        int difference = Days.daysBetween(FirstDateAccordingToSpinner.toLocalDate(), today.toLocalDate()).getDays() + 1;
-        if (difference == 1) {
-            dayString = " day";
+        int DAYS_BACK = 0;
+        switch (selectedShowingSpinner) {
+            case "stats for the last 7 days":
+                date = new DateTime().minusDays(6);
+                DAYS_BACK = 6;
+                break;
+            case "stats for the last month":
+                date = new DateTime().minusMonths(1);
+                DAYS_BACK = 30;
+                break;
+            case "stats for the last 3 months":
+                date = new DateTime().minusMonths(3);
+                DAYS_BACK = 90;
+                break;
+            case "stats for the last 6 months":
+                date = new DateTime().minusMonths(6);
+                DAYS_BACK = 180;
+                break;
+            case "stats for the last year":
+                date = new DateTime().minusYears(1);
+                DAYS_BACK = 365;
+                break;
         }
-        ArrayList<Attempt> attemptsList = dbhandler.getAttempts(FirstDateAccordingToSpinner, today, "");
-        float totalDistance = totalKilometersFromAttemptsArray(attemptsList);
-        sinceText = "Since " + DateTimeToString(FirstDateAccordingToSpinner) + ", you have moved " + String.format("%.2f", totalDistance) + " kilometers in "
-                + String.valueOf(difference) + dayString + " spread over " + String.valueOf(attemptsList.size()) + " sessions."
-                + " It means that on average, ever since that time, you have moved " + String.format("%.2f", totalDistance / difference) + " kilometers per day.";
-        return sinceText;
+
+
+        DistanceDate = ArrayDistancePerDate(DAYS_BACK);
+
+        float totalDistanceMoved = totalKilometersFromdaysArray(DistanceDate);
+        sinceText = "Since " + DateTimeToString(date) + ", you have moved " + String.format("%.1f", totalDistanceMoved) + " kilometers in " + String.valueOf(DistanceDate.size()) + " days." +
+        " It means that on average, you have moved " + String.format("%.1f", totalDistanceMoved / DistanceDate.size()) + " kilometers per day.";
+        sinceTextView.setText(sinceText);
     }
+
+
 
     private String DateTimeToString(DateTime dt) {
         DateTimeFormatter fmt = DateTimeFormat.forPattern("d MMMM, yyyy");
         return dt.toString(fmt);
     }
 
-    private float totalKilometersFromAttemptsArray(ArrayList<Attempt> attemptsList) {
-
+    private float totalKilometersFromdaysArray(ArrayList<dayWhenSomethingWasDone> daysSthdone) {
         float totalKM = 0;
-
-        for (int i = 0; i < attemptsList.size(); i++) {
-            totalKM += attemptsList.get(i).getRoute().getTotalDistance();
+        for (int i = 0; i < daysSthdone.size(); i++) {
+            totalKM += daysSthdone.get(i).getDistance();
         }
-
         return totalKM;
     }
 
@@ -270,5 +290,12 @@ public class graphActivity extends AppCompatActivity {
                 break;
         }
         return date;
+    }
+
+
+    public static float round(float d, int decimalPlace) {
+        BigDecimal bd = new BigDecimal(Float.toString(d));
+        bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_DOWN);
+        return bd.floatValue();
     }
 }
