@@ -69,7 +69,8 @@
             android:label="HxM Sensor"
             android:screenOrientation="portrait"/>
         <activity android:name=".infoActivity"/>
-        <activity android:name=".graphActivity">
+        <activity android:name=".graphActivity"
+                  android:screenOrientation="portrait">
         </activity>
     </application>
 
