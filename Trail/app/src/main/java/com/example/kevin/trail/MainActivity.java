@@ -51,49 +51,38 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
             Log.d("MainActivity", e.getMessage());
         }
 
-        infoButtonlink = (Button) findViewById(R.id.infoB);
-            timerButtonlink = (Button) findViewById(R.id.timerButton);
-            hikeButtonlink = (Button) findViewById(R.id.hikeButton);
-            bikeButtonlink = (Button) findViewById(R.id.bikeButton);
-            historyButtonlink = (Button) findViewById(R.id.historyButton);
-            runButtonlink = (Button) findViewById(R.id.runButton);
-            mapButtonlink = (Button) findViewById(R.id.mapButton);
-            graphButton = (Button) findViewById(R.id.graphButton);
-            sensorButtonlink = (Button) findViewById(R.id.sensorButton);
-            dbhandler = new DBHandler(this);
+        infoButtonlink = (Button) findViewById(R.id.profileButton);
+        //timerButtonlink = (Button) findViewById(R.id.timerButton);
+        hikeButtonlink = (Button) findViewById(R.id.hikingButton);
+        bikeButtonlink = (Button) findViewById(R.id.bikingButton);
+        historyButtonlink = (Button) findViewById(R.id.historyButton);
+        runButtonlink = (Button) findViewById(R.id.runningButton);
+        //mapButtonlink = (Button) findViewById(R.id.mapButton);
+        graphButton = (Button) findViewById(R.id.statsButton);
+        //sensorButtonlink = (Button) findViewById(R.id.sensorButton);
+        dbhandler = new DBHandler(this);
 
-            infoButtonlink.setOnClickListener(new View.OnClickListener() {
+        infoButtonlink.setOnClickListener(new View.OnClickListener() {
 
-                public void onClick(View view) {
-                    goToinfoActivity();
+            public void onClick(View view) {
+                goToinfoActivity();
+            }
+        });
+
+        hikeButtonlink.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                if (dbhandler.isRouteTableEmpty("Hiking")) {
+                    Intent intent = new Intent(MainActivity.this, loggerActivity.class);
+                    intent.putExtra("activityType", "Hiking");
+                    startActivity(intent);
+                } else {
+                    Intent intent = new Intent(MainActivity.this, routeManager.class);
+                    intent.putExtra("activityType", "Hiking");
+                    startActivity(intent);
                 }
-            });
+            }
+        });
 
-            timerButtonlink.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View view) {
-                    goToTimerActivity();
-                }
-            });
-
-            hikeButtonlink.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View view) {
-                    if (dbhandler.isRouteTableEmpty("Hiking")) {
-                        Intent intent = new Intent(MainActivity.this, loggerActivity.class);
-                        intent.putExtra("activityType", "Hiking");
-                        startActivity(intent);
-                    } else {
-                        Intent intent = new Intent(MainActivity.this, routeManager.class);
-                        intent.putExtra("activityType", "Hiking");
-                        startActivity(intent);
-                    }
-                }
-            });
-
-            bikeButtonlink.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View view) {
-                    goToBikeActivity();
-                }
-            });
 
         graphButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
@@ -102,47 +91,62 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
             }
         });
 
-            historyButtonlink.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View view) {
-                    goToHistoryActivity();
-                }
-            });
-            mapButtonlink.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View view) {
-                    goToMapActivity();
-                }
-            });
-
-            runButtonlink.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View view) {
-                    if (dbhandler.isRouteTableEmpty("Running")) {
-                        Intent intent = new Intent(MainActivity.this, loggerActivity.class);
-                        intent.putExtra("activityType", "Running");
-                        startActivity(intent);
-                    } else {
-                        Intent intent = new Intent(MainActivity.this, routeManager.class);
-                        intent.putExtra("activityType", "Running");
-                        startActivity(intent);
-                        ;
-                    }
-                }
-            });
-
-            sensorButtonlink.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View view) {
-                    goToSensorActivity();
-                }
-            });
-        }
-
-        protected void onStart() {
-            super.onStart();
-            String gender = sharedPreferenceHelper.getProfileGender();
-            String weight = sharedPreferenceHelper.getProfileWeight();
-            if (gender == "" || weight == "") {
-                goToinfoActivity();
+        historyButtonlink.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                goToHistoryActivity();
             }
+        });
+    /*    mapButtonlink.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                goToMapActivity();
+            }
+        });*/
+
+        runButtonlink.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                if (dbhandler.isRouteTableEmpty("Running")) {
+                    Intent intent = new Intent(MainActivity.this, loggerActivity.class);
+                    intent.putExtra("activityType", "Running");
+                    startActivity(intent);
+                } else {
+                    Intent intent = new Intent(MainActivity.this, routeManager.class);
+                    intent.putExtra("activityType", "Running");
+                    startActivity(intent);
+                    ;
+                }
+            }
+        });
+
+        bikeButtonlink.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                if (dbhandler.isRouteTableEmpty("Biking")) {
+                    Intent intent = new Intent(MainActivity.this, loggerActivity.class);
+                    intent.putExtra("activityType", "Biking");
+                    startActivity(intent);
+                } else {
+                    Intent intent = new Intent(MainActivity.this, routeManager.class);
+                    intent.putExtra("activityType", "Biking");
+                    startActivity(intent);
+                    ;
+                }
+            }
+        });
+
+     /*   sensorButtonlink.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                goToSensorActivity();
+            }
+        });*/
+    }
+
+    protected void onStart() {
+        super.onStart();
+        String gender = sharedPreferenceHelper.getProfileGender();
+        String weight = sharedPreferenceHelper.getProfileWeight();
+        if (gender == "" || weight == "") {
+            goToinfoActivity();
         }
+    }
 
     void goToinfoActivity(){
         Intent intent = new Intent(MainActivity.this, infoActivity.class);
@@ -151,11 +155,6 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
 
     void goToTimerActivity() {
         Intent intent = new Intent(MainActivity.this, timerActivity.class);
-        startActivity(intent);
-    }
-
-    void goToBikeActivity() {
-        Intent intent = new Intent(MainActivity.this, bikeActivity.class);
         startActivity(intent);
     }
 

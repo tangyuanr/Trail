@@ -106,10 +106,13 @@ public class Route implements Serializable { //needed to be able to pass it betw
         String bestTimeString = String.format("%02dh %02dm", hours, minutes);
         Log.d("Best time string: ", bestTimeString);
         if(activityType.equals("Running")) {
-            return routeName + "\n Best time:\n" + bestTimeString + "\n on " + formatDate(dateBestTime); //we can build up the returned string there.
+            return routeName + "\n Best time:\n" + bestTimeString + "\n on " + formatDate(dateBestTime) + "\n Distance: " + String.format("%.1f", totalDistance) + " km";
         }
         else if(activityType.equals("Hiking")) {
             return routeName + "\n Best time:\n" + bestTimeString + "\n on " + formatDate(dateBestTime) +"\n Distance: " + String.format("%.1f", totalDistance) + " km";
+        }
+        else if(activityType.equals("Biking")) {
+            return routeName + "\n Best time:\n" + bestTimeString + "\n on " + formatDate(dateBestTime) + "\n Distance: " + String.format("%.1f", totalDistance) + " km";
         }
         else {return null;}
     }
