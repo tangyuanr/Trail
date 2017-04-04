@@ -366,7 +366,7 @@ public class loggerActivity extends AppCompatActivity implements
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         builder.setSmallIcon(R.mipmap.ic_launcher);
         builder.setContentTitle("Trail : " + activityType);
-        builder.setContentText("Time: " + timerTextViewL.getText() + ", Distance : " + activityhelper.getTotalDistance());
+        builder.setContentText(timerTextViewL.getText() + ", Distance : " + activityhelper.getTotalDistance());
         NotificationManager NM = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         NM.notify(id, builder.build());
     }

@@ -34,10 +34,14 @@ public class infoActivity extends AppCompatActivity {
                 String age = ageEditText.getText().toString();
                 String weight = weightEditNum.getText().toString();
 
+                int lbs = Integer.parseInt(weight);
                 int ageint = Integer.parseInt(age);                                             //Convert string input into integer in order to manipulate with integers and operators.
-                if (ageint < 18 || ageint > 99) {
-                    Toast failtoast = Toast.makeText(getApplicationContext(), "Profile not saved, please try again", Toast.LENGTH_LONG);  //Create a save failed message
+                if (ageint < 12 || ageint > 99) {
+                    Toast failtoast = Toast.makeText(getApplicationContext(), "Profile not saved due to age range 12-99, please try again", Toast.LENGTH_LONG);  //Create a save failed message
                     failtoast.show();                                                                                                     // show the saved toast message
+                } else if(lbs <50 || lbs > 300) {
+                    Toast failtoast = Toast.makeText(getApplicationContext(), "Profile not saved due to lbs range 50-300, please try again", Toast.LENGTH_LONG);
+                    failtoast.show();
                 } else {
                     sharedPreferenceHelper.saveProfileGender(gender);                                                                          //Save the profile information into the localstorage
                     sharedPreferenceHelper.saveProfileAge(age);
