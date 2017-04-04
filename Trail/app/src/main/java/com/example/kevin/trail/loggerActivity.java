@@ -516,6 +516,11 @@ public class loggerActivity extends AppCompatActivity implements
 //        }
 //    }
 
+    public void onBackPressed() {
+        super.onBackPressed();
+        timerHandler.removeCallbacks(timerRunnable);
+        this.finish();
+    }
 
     @Override
     public void onMapLongClick(LatLng latLng) {
