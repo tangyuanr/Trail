@@ -4,13 +4,15 @@ import android.Manifest;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
-import com.intentfilter.androidpermissions.PermissionManager;
+import com.anthonycr.grant.PermissionsManager;
+import com.anthonycr.grant.PermissionsResultAction;
 
 import static java.util.Collections.singleton;
 
@@ -38,8 +40,6 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
         setContentView(R.layout.activity_main);
 
 
-        Trail trail = ((Trail) getApplicationContext());     //used to access global variable to check if permissions are right
-        checkAndAskPermissions(trail);
         sharedPreferenceHelper = new sharedPreferenceHelper(MainActivity.this);
 
         hrHandler=new HRSensorHandler(this);
@@ -137,6 +137,8 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
                 goToSensorActivity();
             }
         });*/
+
+        checkPermissions();
     }
 
     protected void onStart() {
@@ -173,21 +175,26 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
         startActivity(intent);
     }
 
-    //methods that checks and asks for permissions and set the global variable trail.GPSStatus
-    void checkAndAskPermissions(final Trail trail) {
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        PermissionsManager.getInstance().notifyPermissionsChange(permissions, grantResults);
+    }
 
-        PermissionManager permissionManager = PermissionManager.getInstance(this);
-        permissionManager.checkPermissions(singleton(Manifest.permission.ACCESS_FINE_LOCATION), new PermissionManager.PermissionRequestListener() {
-            @Override
-            public void onPermissionGranted() {
-                trail.setGPSStatus(true);
-            }
+    private void checkPermissions() {
+        PermissionsManager.getInstance().requestAllManifestPermissionsIfNecessary(MainActivity.this,
+                new PermissionsResultAction() {
+                    @Override
+                    public void onGranted() {
 
-            @Override
-            public void onPermissionDenied() {
-                trail.setGPSStatus(false);
-            }
-        });
+                    }
+
+                    @Override
+                    public void onDenied(String permission) {
+
+                    }
+                });
     }
 
     @Override

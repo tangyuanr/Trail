@@ -11,6 +11,8 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -37,15 +39,37 @@ public class RouteAdapter extends ArrayAdapter<Route> {
 
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         if (null == convertView) {
             convertView = inflater.inflate(R.layout.listview_item_image, parent, false);
         }
 
 
-        ImageView imageView = (ImageView) convertView.findViewById(R.id.imageViewtest);
+        final ImageView imageView = (ImageView) convertView.findViewById(R.id.imageViewtest);
 
-        Picasso.with(context).load(routes.get(position).getStaticAPIURL(context, 250, 130)).fit().into(imageView);
+        Picasso.with(context).load(routes.get(position).getStaticAPIURL(context, 250, 130)).networkPolicy(NetworkPolicy.OFFLINE).fit().into(imageView, new Callback() {
+
+            @Override
+            public void onSuccess() {
+
+            }
+
+            @Override
+            public void onError() {
+                //Try again online if cache failed
+                Picasso.with(context)
+                        .load(routes.get(position).getStaticAPIURL(context, 250, 130)).error(R.drawable.ic_deletebutton).into(imageView, new Callback() {
+                            @Override
+                            public void onSuccess() {
+
+                            }
+
+                            @Override
+                            public void onError() {
+                            }
+                        });
+            }
+        });
 
         TextView routeName = (TextView) convertView.findViewById(R.id.textViewtest);
         routeName.setText(routes.get(position).toString());
