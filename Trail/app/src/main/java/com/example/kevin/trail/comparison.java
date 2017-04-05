@@ -188,7 +188,7 @@ public class comparison extends AppCompatActivity {
                             pacechange.setText("Your pace was  same as previous session");
                         }
                         currentdistance.setText("Distance :"+recentdistances+" m");
-                        currenttime.setText("Time: "+(int)recenttimes/60+" min "+recenttimes%60 +" s");
+                        currenttime.setText("Time: "+(int)recenttimes/60+" min"+recenttimes%60 +" s");
                         currentpace.setText("Pace: "+recentpaces+" min/km");
                         currentspeed.setText("Speed: "+recentspeeds+" m/s");
 
