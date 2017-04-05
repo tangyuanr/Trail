@@ -261,12 +261,17 @@ public class loggerActivity extends AppCompatActivity implements
         toMap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                headerLayout.setVisibility(View.INVISIBLE);
-                //display layer 2
-                mapHeadLayout.setVisibility(View.VISIBLE);
-                showSelectedRoute.setVisibility(View.VISIBLE);
-                resetTrailButton.setVisibility(View.VISIBLE);
-                toStats.setVisibility(View.VISIBLE);
+                if(isOnline()) {
+                    headerLayout.setVisibility(View.INVISIBLE);
+                    //display layer 2
+                    mapHeadLayout.setVisibility(View.VISIBLE);
+                    showSelectedRoute.setVisibility(View.VISIBLE);
+                    resetTrailButton.setVisibility(View.VISIBLE);
+                    toStats.setVisibility(View.VISIBLE);
+                }
+                else {
+                    Toast.makeText(loggerActivity.this, "Trail needs internet connection to display the map.", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -278,7 +283,6 @@ public class loggerActivity extends AppCompatActivity implements
                 showSelectedRoute.setVisibility(View.INVISIBLE);
                 resetTrailButton.setVisibility(View.INVISIBLE);
                 toStats.setVisibility(View.INVISIBLE);
-
                 headerLayout.setVisibility(View.VISIBLE);
             }
         });
@@ -316,8 +320,7 @@ public class loggerActivity extends AppCompatActivity implements
 
                                 @Override
                                 public void onDenied(String permission) {
-                                    Toast.makeText(loggerActivity.this,
-                                            "Trail must have location permissions.", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(loggerActivity.this, "Trail must have location permissions.", Toast.LENGTH_SHORT).show();
                                 }
                             });
 
@@ -352,10 +355,6 @@ public class loggerActivity extends AppCompatActivity implements
                 sensorHelpDialog();
             }
         });
-
-        if(!isOnline()) {
-            toMap.setVisibility(View.INVISIBLE);
-        }
     }
 
     public boolean isOnline() {
@@ -655,18 +654,13 @@ public class loggerActivity extends AppCompatActivity implements
             }
 
 
-            if(!isOnline()) {
+            if(!isOnline() && (mapHeadLayout.getVisibility() == View.VISIBLE)) {
                 mapHeadLayout.setVisibility(View.INVISIBLE);
                 showSelectedRoute.setVisibility(View.INVISIBLE);
                 resetTrailButton.setVisibility(View.INVISIBLE);
                 toStats.setVisibility(View.INVISIBLE);
                 headerLayout.setVisibility(View.VISIBLE);
-                toMap.setVisibility(View.INVISIBLE);
-                //HERE MAKE VISIBLE A TEXTVIEW THAT SAYS MAP IS NOT AVAILABLE BECAUSE NO INTERNET
-            }
-            else {
-                toMap.setVisibility(View.VISIBLE);
-                //HERE MAKE IT GONE (VIEW.GONE)
+                Toast.makeText(loggerActivity.this, "Trail needs internet connection to display the map.", Toast.LENGTH_SHORT).show();
             }
         }
 
