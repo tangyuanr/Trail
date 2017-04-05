@@ -33,8 +33,8 @@ public class activityHelper {
     private double averageLatitude;
     private double averageLongitude;
     private int sample;
-    float totalDistance = 0;
-    double pace = 0;
+    private float totalDistance = 0;
+    private float speed = 0;
     private long tLastSample = 0;
     boolean mBounded;
     Route route;
@@ -78,23 +78,8 @@ public class activityHelper {
         return totalDistance;
     }
 
+    public float getSpeed() {return speed;}
 
-    //method to return pace formatted properly
-    //version for returning recent pace
-    public String getPaceFormatted() {
-        if((pace > 30) || Double.isNaN(pace) || pace == 0 ) {
-            return "--";
-        }
-        else {return String.format("%.2f", pace);}
-    }
-    //version for the final stats dialog
-    public String getFinalAveragePaceFormatted() {
-        double pace =  tLastSample/(60000*totalDistance); //min per km
-        if((pace > 30) || Double.isNaN(pace) || pace == 0 ) {
-            return "--";
-        }
-        else {return String.format("%.2f", pace);}
-    }
 
     public long getTimeLastsample() {return tLastSample;}   //milliseconds
     public int getCurrentNumberOfSamples() {return sample;}
@@ -123,7 +108,7 @@ public class activityHelper {
 
     private void updateData(Intent intent) {
         totalDistance = intent.getFloatExtra("distance", 1);
-        pace = intent.getDoubleExtra("pace", 0);
+        speed = intent.getFloatExtra("speed", 0);
         tLastSample = intent.getLongExtra("time_of_last_sample",0);
         sample = intent.getIntExtra("number of samples", 0);
         averageLatitude = intent.getDoubleExtra("currentLatitude", 0);
