@@ -9,6 +9,7 @@
         android:id="@+id/dateOfAttempt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:textSize="18sp"
         android:textStyle="bold"
         android:typeface="sans" />
 
@@ -19,7 +20,7 @@
         android:layout_below="@id/dateOfAttempt"
         android:layout_marginTop="5dip"
         android:textColor="#343434"
-        android:textSize="12sp" />
+        android:textSize="16sp" />
 
     <TextView
         android:id="@+id/AverageSpeedOrPace"
@@ -29,5 +30,5 @@
         android:layout_alignBottom="@+id/TotalTime"
         android:layout_alignParentRight="true"
         android:textColor="#343434"
-        android:textSize="12sp" />
+        android:textSize="16sp" />
 </RelativeLayout>

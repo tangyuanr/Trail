@@ -1,5 +1,6 @@
 package com.example.kevin.trail;
 
+import android.graphics.Color;
 import android.support.annotation.IdRes;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -184,7 +185,7 @@ public class graphActivity extends AppCompatActivity {
             }
         });
 
-        //Picasso.with(graphActivity.this).load(attemptsList.get(0).getRoute().getStaticAPIURL(graphActivity.this, 400, 200)).into(imageviewRoute);
+        Picasso.with(graphActivity.this).load(attemptsList.get(0).getRoute().getStaticAPIURL(graphActivity.this, 400, 200)).fit().into(imageviewRoute);
     }
 
     private ArrayList<dayWhenSomethingWasDone> ArrayDistancePerDate() {
@@ -238,6 +239,7 @@ public class graphActivity extends AppCompatActivity {
 
         if (numberOf > 1) {
             LineGraphSeries<DataPoint> series_line = new LineGraphSeries<>(datapoints);
+            //series_line.setColor(Color.GREEN);
             graph.addSeries(series_line);
             graph.getGridLabelRenderer().setLabelFormatter(new DateSATformatter(this));
             graph.getGridLabelRenderer().setNumHorizontalLabels(numberOf);
@@ -248,6 +250,7 @@ public class graphActivity extends AppCompatActivity {
 
             PointsGraphSeries<DataPoint> series_points = new PointsGraphSeries<>(datapoints);
             series_points.setSize(7);
+            //series_points.setColor(Color.GREEN);
             graph.addSeries(series_points);
 
             series_points.setOnDataPointTapListener(new OnDataPointTapListener() {
