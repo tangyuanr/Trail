@@ -56,18 +56,17 @@ public class RouteAdapter extends ArrayAdapter<Route> {
 
             @Override
             public void onError() {
-                //Try again online if cache failed
-                Picasso.with(context)
-                        .load(routes.get(position).getStaticAPIURL(context, 250, 130)).error(R.drawable.ic_deletebutton).into(imageView, new Callback() {
-                            @Override
-                            public void onSuccess() {
+                Picasso.with(context).load(routes.get(position).getStaticAPIURL(context, 250, 130)).fit().into(imageView, new Callback() {
+                    @Override
+                    public void onSuccess() {
 
-                            }
+                    }
 
-                            @Override
-                            public void onError() {
-                            }
-                        });
+                    @Override
+                    public void onError() {
+                        Picasso.with(context).load(routes.get(position).getStaticAPIURL(context, 250, 130)).error(R.drawable.ic_deletebutton).into(imageView);
+                    }
+                });
             }
         });
 

@@ -1,12 +1,18 @@
 package com.example.kevin.trail;
 
+import android.support.annotation.IdRes;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
@@ -17,6 +23,9 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 import com.jjoe64.graphview.series.OnDataPointTapListener;
 import com.jjoe64.graphview.series.PointsGraphSeries;
 import com.jjoe64.graphview.series.Series;
+import com.roughike.bottombar.BottomBar;
+import com.roughike.bottombar.OnTabSelectListener;
+import com.squareup.picasso.Picasso;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeComparator;
@@ -29,7 +38,6 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import static com.example.kevin.trail.R.id.graph;
 
 /**
  * Created by Andre & Jiayin
@@ -40,20 +48,70 @@ public class graphActivity extends AppCompatActivity {
     private String selectedShowingSpinner;
     private TextView sinceTextView;
     private Spinner spinnerShowing;
+    private Spinner selectRouteSpinner;
     private TextView selectedPoint;
     private TextView showingTextView;
     private GraphView graph;
+    private BottomBar mBottomBar;
+    private LinearLayout graphLayout;
+    private LinearLayout spinnerLayout;
+    private LinearLayout progressPane;
+    private SpinnerAdapter selectedroutespinneradapter;
+    private ImageView imageviewRoute;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_graph);
 
+
+        BottomBar bottomBar = (BottomBar) findViewById(R.id.bottomBar);
+        graphLayout = (LinearLayout) findViewById(R.id.graphLayout);
+        spinnerLayout = (LinearLayout) findViewById(R.id.spinnerLayout);
+        progressPane = (LinearLayout) findViewById(R.id.progressPane);
+        imageviewRoute = (ImageView) findViewById(R.id.imageViewRoute);
+        progressPane.setVisibility(View.GONE);
+        bottomBar.setOnTabSelectListener(new OnTabSelectListener() {
+            @Override
+            public void onTabSelected(@IdRes int tabId) {
+                if (tabId == R.id.tab_Graphs) {
+                    graphLayout.setVisibility(View.VISIBLE);
+                    spinnerLayout.setVisibility(View.VISIBLE);
+                    progressPane.setVisibility(View.INVISIBLE);
+                }
+
+                if (tabId == R.id.tab_Progress) {
+                    graphLayout.setVisibility(View.GONE);
+                    spinnerLayout.setVisibility(View.GONE);
+                    progressPane.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
         sinceTextView = (TextView) findViewById(R.id.sinceText);
         showingTextView = (TextView) findViewById(R.id.showing);
         spinnerShowing = (Spinner) findViewById(R.id.showingSpinner);
         graph = (GraphView) findViewById(R.id.graph);
         selectedPoint = (TextView) findViewById(R.id.selectedPoint);
+
+        // selectedRoute spinner dynamic fill
+        selectRouteSpinner = (Spinner) findViewById(R.id.selectRouteSpinner);
+        ArrayList<Route> routes = dbhandler.getRoutes("");
+        selectedroutespinneradapter = new RouteSpinnerArrayAdapter(graphActivity.this, android.R.layout.simple_spinner_dropdown_item, routes);
+        selectRouteSpinner.setAdapter(selectedroutespinneradapter);
+        selectRouteSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
+                Route route = (Route) selectedroutespinneradapter.getItem(position);
+                generateAttemptTableForGivenRoute(route.getRouteName());
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> adapter) {  }
+        });
+
+
+
 
         if(!(dbhandler.isRouteTableEmpty())) {
             ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.showingspinner_array, android.R.layout.simple_spinner_item);
@@ -83,6 +141,8 @@ public class graphActivity extends AppCompatActivity {
             showingTextView.setVisibility(View.GONE);
             sinceTextView.setText("There is no data to display. Get your lazy ass moving.");
         }
+
+        generateAttemptTableForGivenRoute("goud");
     }
 
     private ArrayList<dayWhenSomethingWasDone> ArrayDistancePerDate(int DAYS_BACK) {
@@ -102,6 +162,24 @@ public class graphActivity extends AppCompatActivity {
             daysanddistance.add(new dayWhenSomethingWasDone(date,totalDistance));
         }
         return daysanddistance;
+    }
+
+    private void generateAttemptTableForGivenRoute(String routeName) {
+
+        ArrayList<Attempt> attemptsList = dbhandler.getAttemptsFromRouteName(routeName);
+        final ListView listview1 = (ListView) findViewById(R.id.custom_list);
+        listview1.setAdapter(new AttemptsListAdapter(this, attemptsList));
+        listview1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> a, View v, int position, long id) {
+                Object object = listview1.getItemAtPosition(position);
+                Attempt attempt = (Attempt) object;
+                Toast.makeText(graphActivity.this, "Selected attempt", Toast.LENGTH_LONG).show();
+            }
+        });
+
+        //Picasso.with(graphActivity.this).load(attemptsList.get(0).getRoute().getStaticAPIURL(graphActivity.this, 400, 200)).into(imageviewRoute);
     }
 
     private ArrayList<dayWhenSomethingWasDone> ArrayDistancePerDate() {

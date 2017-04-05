@@ -117,6 +117,10 @@ public class Route implements Serializable { //needed to be able to pass it betw
         else {return null;}
     }
 
+    public String spinnerString() {
+        return "test";
+    }
+
     public static float round(float d, int decimalPlace) {
         BigDecimal bd = new BigDecimal(Float.toString(d));
         bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_DOWN);

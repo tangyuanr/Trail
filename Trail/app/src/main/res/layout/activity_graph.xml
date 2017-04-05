@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:padding="20dp"
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -12,6 +13,7 @@
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="50dp"
+        android:id="@+id/spinnerLayout"
         android:orientation="horizontal"
         >
 
@@ -28,15 +30,10 @@
 
     </LinearLayout>
 
-    <!-- scrolling bottom pane -->
-    <ScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        >
-
         <LinearLayout
+            android:layout_below="@id/spinnerLayout"
             android:layout_width="fill_parent"
+            android:id="@+id/graphLayout"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
@@ -56,5 +53,64 @@
 
         </LinearLayout>
 
-    </ScrollView>
-</LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:id="@+id/progressPane"
+        android:orientation="vertical"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:id="@+id/routePane"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:id="@+id/SelectRouteText"
+                android:layout_height="wrap_content"
+                android:text="Select a route:"
+                />
+
+            <Spinner
+                android:layout_toRightOf="@id/SelectRouteText"
+                android:id="@+id/selectRouteSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <ImageView
+            android:id="@+id/imageViewRoute"
+            android:layout_below="@id/selectRouteSpinner"
+            android:layout_width="400dp"
+            android:layout_height="200dp"
+            android:layout_margin="10dp"/>
+
+        </RelativeLayout>
+
+            <ListView
+                android:id="@+id/custom_list"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:dividerHeight="1dp" />
+
+        </LinearLayout>
+
+
+
+    <FrameLayout
+        android:id="@+id/contentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/bottomBar" />
+
+    <com.roughike.bottombar.BottomBar
+        android:id="@+id/bottomBar"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        app:bb_tabXmlResource="@xml/bottombar_stats" />
+
+
+
+
+
+</RelativeLayout>

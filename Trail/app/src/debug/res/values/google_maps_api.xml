@@ -6,7 +6,7 @@
 
     https://console.developers.google.com/flows/enableapi?apiid=maps_android_backend&keyType=CLIENT_SIDE_ANDROID&r=69:E2:3B:5E:6F:E5:9B:95:25:4B:C2:A6:B1:61:A3:59:92:ED:78:22%3Bcom.example.kevin.trail
 
-    You can also add your credentials to an existing key, using these values:
+    You can also add your credentials to an existing key, using these arrayRoutes:
 
     Package name:
     69:E2:3B:5E:6F:E5:9B:95:25:4B:C2:A6:B1:61:A3:59:92:ED:78:22

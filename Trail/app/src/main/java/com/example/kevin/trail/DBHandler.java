@@ -145,6 +145,35 @@ public class DBHandler extends SQLiteOpenHelper {
         return attemptsList;
     }
 
+    public ArrayList<Attempt> getAttemptsFromRouteName(String routename) {
+        ArrayList<Attempt> attemptsList = new ArrayList<>();
+        String query;
+        query = "SELECT * FROM " + TABLE_ATTEMPTS + " WHERE " + ROUTE_NAME + " IN ('" + routename + "')";
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor attemptsCursor = db.rawQuery(query, null);
+        try {
+            while (attemptsCursor.moveToNext()) {
+                String activityType = attemptsCursor.getString(1);
+                int totalTime = attemptsCursor.getInt(attemptsCursor.getColumnIndex(TOTAL_TIME));
+                String date = attemptsCursor.getString(attemptsCursor.getColumnIndex(DATE_OF_ATTEMPT)); // yyyyMMdd_HHmm
+                String routeName = attemptsCursor.getString(attemptsCursor.getColumnIndex(ROUTE_NAME));
+                String snapshotURL = attemptsCursor.getString(attemptsCursor.getColumnIndex(MAP_SCREENSHOT));
+                String distance=attemptsCursor.getString(attemptsCursor.getColumnIndex(TOTAL_DISTANCE));
+                String avgHR=attemptsCursor.getString(attemptsCursor.getColumnIndex(AVG_HR));
+                String calories=attemptsCursor.getString(attemptsCursor.getColumnIndex(CALORIES));
+                String imageDir=attemptsCursor.getString(attemptsCursor.getColumnIndex(IMAGEFILENAME));
+                Route route = getRoute(routeName);
+                Attempt attempt = new Attempt(route, totalTime, Float.parseFloat(distance), date, snapshotURL, Integer.parseInt(avgHR), Integer.parseInt(calories), imageDir);
+                attemptsList.add(attempt);
+            }
+        } finally {
+            attemptsCursor.close();
+        }
+        db.close();
+        return attemptsList;
+
+    }
+
     //overload getAttempts. fetches all attempts whose date begin with date YYMMDD
     public ArrayList<Attempt> getAttemptsByDate(String date, String activity) { //
         ArrayList<Attempt> attemptsList = new ArrayList<>();
