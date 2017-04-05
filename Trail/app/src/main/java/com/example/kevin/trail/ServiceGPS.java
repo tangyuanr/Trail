@@ -63,7 +63,7 @@ public class ServiceGPS extends Service implements LocationListener, GoogleApiCl
     private float previousDistance = 0;
     private long tStart = 0;
     private long tSample = 0;
-    private double pace = 0;
+    private float speed = 0;
     ArrayList<Location> coordinatesArray = new ArrayList<>();
 
 
@@ -139,14 +139,13 @@ public class ServiceGPS extends Service implements LocationListener, GoogleApiCl
                 float latestDistance = (previousLocation.distanceTo(averageLocation))/1000; //in km
                 Log.d(TAG, "latest distance "+latestDistance);
                 if(latestDistance > 0.0025) {totalDistance += latestDistance;} //if not, user is probably standing still. doing this to prevent accumulation of small errors.
-                pace = calculatePace(previousDistance, totalDistance, EFFECTIVESAMPLINGPERIOD / 1000);
+                speed = calculateSpeed(previousDistance, totalDistance, EFFECTIVESAMPLINGPERIOD / 1000);
                 Log.d(TAG, "totalDistance "+totalDistance);
-                Log.d(TAG, "pace "+pace);
+                Log.d(TAG, "speed"+speed);
             }
 
             tSample = System.currentTimeMillis() - tStart;  //time of last sample
             String string = String.valueOf(round(averageLocation.getLatitude(),5)) + "," + String.valueOf(round(averageLocation.getLongitude(),5));
-            //String string = String.valueOf(averageLocation.getLatitude()) + "," + String.valueOf(averageLocation.getLongitude()) + "," + totalDistance + "," + String.valueOf(pace) + "," + tSample;
             saveText(string);
             coordinatesArray.add(averageLocation);  //building a dynamic arraylist of Location objects so that we can send it out if anything needs it.
             Log.d(TAG, "saved sample"+string);
@@ -188,7 +187,7 @@ public class ServiceGPS extends Service implements LocationListener, GoogleApiCl
     private void packageUpdates() {
 
         intent_sender.putExtra("distance", totalDistance);
-        intent_sender.putExtra("pace", pace);
+        intent_sender.putExtra("speed", speed);
         intent_sender.putExtra("currentLatitude", averageLatitude);
         intent_sender.putExtra("currentLongitude", averageLongitude);
         intent_sender.putExtra("time_of_last_sample", tSample);
@@ -234,8 +233,8 @@ public class ServiceGPS extends Service implements LocationListener, GoogleApiCl
         super.onDestroy();
     }
 
-    private double calculatePace(float previousDist, float totalDist, int samplingPeriod) {
-        return 1/(((totalDist-previousDist)/samplingPeriod)*60); //minutes per km
+    private float calculateSpeed(float previousDist, float totalDist, int samplingPeriod) {
+        return 3600*(totalDist-previousDist)/(samplingPeriod); //km/h
     }
 
     //copied-pasted from http://stackoverflow.com/questions/2808535/round-a-double-to-2-decimal-places

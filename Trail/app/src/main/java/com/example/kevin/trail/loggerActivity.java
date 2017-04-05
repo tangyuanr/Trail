@@ -237,7 +237,7 @@ public class loggerActivity extends AppCompatActivity implements
 
             paceOrSpeedLabel.setText("Pace: ");
             paceOrSpeedLabel.setVisibility(View.VISIBLE);
-            paceOrSpeedText.setText("0 min/km");
+            paceOrSpeedText.setText("--");
             paceOrSpeedText.setVisibility(View.VISIBLE);
         } else if ("Biking".equals(activityType)) {
             loggerToolbar.setBackgroundColor(Color.parseColor("#99ccff"));
@@ -248,7 +248,7 @@ public class loggerActivity extends AppCompatActivity implements
 
             paceOrSpeedLabel.setText("Speed: ");
             paceOrSpeedLabel.setVisibility(View.VISIBLE);
-            paceOrSpeedText.setText("0 km/min");
+            paceOrSpeedText.setText("0 km/h");
             paceOrSpeedText.setVisibility(View.VISIBLE);
         }
 
@@ -787,8 +787,28 @@ public class loggerActivity extends AppCompatActivity implements
                         @Override
                         public void run() {
                             Log.d(TAG, "TOTAL DISTANCE " + String.valueOf(activityhelper.getTotalDistance()));
-                            totalDistanceTravelledTextView.setText(String.format("%.2f", activityhelper.getTotalDistance()) + " km");
-                            paceOrSpeedText.setText(String.format("%.2f", activityhelper.getTotalDistance() / 0.14));//0.14minutes=5s
+                            totalDistanceTravelledTextView.setText(String.format("%.1f", activityhelper.getTotalDistance()) + " km");
+
+                            float speed = activityhelper.getSpeed();
+                            if(activityType.equals("Biking")) {
+                                if(speed > 1) { //km/h
+                                    paceOrSpeedText.setText(String.format("%.1f", speed) + " km/h");
+                                }
+                                else {
+                                    paceOrSpeedText.setText("0 km/h");
+                                }
+                            }
+                            else if(activityType.equals("Running")) {
+                                if(speed > 1) { //km/h
+                                    float pace = 60/speed; //min/km
+                                    paceOrSpeedText.setText(String.format("%.1f", pace) + " min/km");
+                                }
+                                else {
+                                    paceOrSpeedText.setText("--");
+                                }
+                            }
+
+                            //paceOrSpeedText.setText(String.format("%.2f", activityhelper.getTotalDistance() / 0.14));//0.14minutes=5s
                             caloriesTxtView.setText(String.format("%.2f", totalCaloriesBurnt) + " KCal");
                             if (MainActivity.heartRate == 0) {
                                 sensorReconnect.setVisibility(View.VISIBLE);
