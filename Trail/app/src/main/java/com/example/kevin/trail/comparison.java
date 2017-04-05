@@ -8,7 +8,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 public class comparison extends AppCompatActivity {
-    EditText    distancechange , timechange, speedchange , pacechange,title;
+    EditText    distancechange , timechange, speedchange , pacechange,title,currentdistance,currenttime,currentpace,currentspeed;
     double previouspaces;
     double recentspeeds;
     double previousspeeds;
@@ -28,12 +28,15 @@ public class comparison extends AppCompatActivity {
     }
 
     public void initializer(){
-        title = (EditText) findViewById(R.id.title);
-        title.setFocusable(false);
+  //      title = (EditText) findViewById(R.id.titles);
+  //      title.setFocusable(false);
        // recentdistance = (EditText) findViewById(R.id.recentdistance);
        // recentdistance.setFocusable(false);
        // previousdistance = (EditText) findViewById(R.id.previousdistance);
        // previousdistance.setFocusable(false);
+        currentdistance = (EditText) findViewById((R.id.currentdistance));
+        currenttime = (EditText) findViewById(R.id.currenttime);
+        currentpace = (EditText) findViewById(R.id.currentpace);
         distancechange = (EditText) findViewById(R.id.distancechange);
         distancechange.setFocusable(false);
        // recenttime = (EditText) findViewById(R.id.recenttime);
@@ -44,6 +47,11 @@ public class comparison extends AppCompatActivity {
         timechange.setFocusable(false);
         speedchange = (EditText) findViewById(R.id.speedchange);
         speedchange.setFocusable(false);
+        currentspeed = (EditText)findViewById(R.id.currentspeed);
+        currentspeed.setFocusable(false);
+        currentdistance.setFocusable(false);
+        currenttime.setFocusable(false);
+        currentpace.setFocusable(false);
        // recentspeed = (EditText) findViewById(R.id.recentspeed);
        // recentspeed.setFocusable(false);
        // speedchange = (EditText) findViewById(R.id.speedchange);
@@ -87,14 +95,25 @@ public class comparison extends AppCompatActivity {
                         double recentdistances = ((recentattempt.getTotalDistance()) * (1000));
                         double previousdistances =((previousattempt.getTotalDistance()) * (1000));
                         double distancechanges = recentdistances - previousdistances;
-                        distancechanges=distancechanges*1000000;           ////rounding off to 6 decimal places
+                        recentdistances=recentdistances*1000;           ////rounding off to 6 decimal places
+                        recentdistances = Math.round(recentdistances);
+                        recentdistances = recentdistances/1000;
+
+
+                        distancechanges=distancechanges*1000;           ////rounding off to 6 decimal places
                         distancechanges = Math.round(distancechanges);
-                        distancechanges = distancechanges/1000000;
+                        distancechanges = distancechanges/1000;
+                        distancechanges=distancechanges*1000;           ////rounding off to 6 decimal places
+                        distancechanges = Math.round(distancechanges);
+                        distancechanges = distancechanges/1000;
                         // distancechange.setText("" + ((myroute.get(myroute.size() - 1).getTotalDistance()) - (myroute.get(myroute.size() - 2).getTotalDistance())));
                         float recenttimes = (recentattempt.getTotalTimeTaken())  ;
+                        recenttimes=recenttimes*1000;           ////rounding off to 6 decimal places
+                        recenttimes = Math.round(recenttimes);
+                        recenttimes = recenttimes/1000;
                         float previoustimes = (previousattempt.getTotalTimeTaken()) ;
-                        String timechanges = ((recentattempt.getTotalTimeTaken()) - (previousattempt.getTotalTimeTaken()))  + " sec";
-                        String timechangez = (-1 * ((recentattempt.getTotalTimeTaken()) - (previousattempt.getTotalTimeTaken())) ) + " sec";
+                        float timechanges = ((recentattempt.getTotalTimeTaken()) - (previousattempt.getTotalTimeTaken()))  ;
+                        float timechangez = (-1 * ((recentattempt.getTotalTimeTaken()) - (previousattempt.getTotalTimeTaken())) );
                         if(recentattempt.getTotalTimeTaken()!=0){
                          recentspeeds = ((recentattempt.getTotalDistance()) * (1000)) / ((recentattempt.getTotalTimeTaken()));
                         }else{
@@ -105,10 +124,13 @@ public class comparison extends AppCompatActivity {
                         }else{
                             previousspeeds=0;
                         }
+                        recentspeeds=recentspeeds*1000;           ////rounding off to 6 decimal places
+                        recentspeeds = Math.round(recentspeeds);
+                        recentspeeds = recentspeeds/1000;
                         double speedchanges = recentspeeds - previousspeeds;
-                        speedchanges=speedchanges*1000000;////rounding off to 6 decimal places
+                        speedchanges=speedchanges*1000;////rounding off to 6 decimal places
                         speedchanges = Math.round(speedchanges);
-                        speedchanges = speedchanges/1000000;////rounding off to 6 decimal places
+                        speedchanges = speedchanges/1000;////rounding off to 6 decimal places
                         if(previousattempt.getTotalDistance()!=0) {
                              previouspaces = (previousattempt.getTotalTimeTaken()) / ((60) * previousattempt.getTotalDistance());
                         }  else{
@@ -120,11 +142,14 @@ public class comparison extends AppCompatActivity {
                              recentpaces = 0;
                         }
                         double pacechanges = recentpaces - previouspaces;
-                        pacechanges=pacechanges*100000;      ////rounding off to 6 decimal places
+                        pacechanges=pacechanges*100;      ////rounding off to 6 decimal places
                         pacechanges = Math.round(pacechanges);
-                        pacechanges = pacechanges/1000000;////rounding off to 6 decimal places
+                        pacechanges = pacechanges/100;////rounding off to 6 decimal places
+                        recentpaces=recentpaces*1000;           ////rounding off to 6 decimal places
+                        recentpaces = Math.round(recentpaces);
+                        recentpaces = recentpaces/1000;
 
-                        title.setText("Comparing at date :"+myattempt.get(myattempt.size() - 1).getDate().substring(0,4) +"-"+myattempt.get(myattempt.size() - 1).getDate().substring(4,6)+"-"+myattempt.get(myattempt.size() - 1).getDate().substring(6,8) );
+                     //   title.setText("Comparing at date :"+myattempt.get(myattempt.size() - 1).getDate().substring(0,4) +"-"+myattempt.get(myattempt.size() - 1).getDate().substring(4,6)+"-"+myattempt.get(myattempt.size() - 1).getDate().substring(6,8) );
                         if (distancechanges>0) {
                             distancechange.setText("You covered " +distancechanges  + " m more distance");
                         } else if (distancechanges<0) {
@@ -134,9 +159,9 @@ public class comparison extends AppCompatActivity {
                         }
 
                         if (recenttimes > previoustimes) {
-                            timechange.setText("You spend " + timechanges + " more ");
+                            timechange.setText("You spend " + (int)timechanges/60+" min "+ timechanges%60+" s more ");
                         } else if (recenttimes < previoustimes) {
-                            timechange.setText("You spend " + timechangez + " less");
+                            timechange.setText("You spend "+ (int)timechanges/60+" min "+ timechanges%60+" s less");
                         } else {
                             timechange.setText("You spend same time as previous session");
                         }
@@ -162,7 +187,10 @@ public class comparison extends AppCompatActivity {
                         }else {
                             pacechange.setText("Your pace was  same as previous session");
                         }
-
+                        currentdistance.setText("Distance :"+recentdistances+" m");
+                        currenttime.setText("Time: "+(int)recenttimes/60+" min "+recenttimes%60 +" s");
+                        currentpace.setText("Pace: "+recentpaces+" min/km");
+                        currentspeed.setText("Speed: "+recentspeeds+" m/s");
 
                     }
                 }
