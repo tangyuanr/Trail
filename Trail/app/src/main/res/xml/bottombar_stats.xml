@@ -1,10 +1,10 @@
 <tabs>
     <tab
         id="@+id/tab_Graphs"
-        icon="@drawable/ic_deletebutton"
+        icon="@drawable/ic_linechart"
         title="Graphs" />
     <tab
         id="@+id/tab_Progress"
-        icon="@drawable/ic_deletebutton"
+        icon="@drawable/ic_progress"
         title="Progress" />
 </tabs>

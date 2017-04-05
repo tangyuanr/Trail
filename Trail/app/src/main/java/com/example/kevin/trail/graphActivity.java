@@ -134,15 +134,17 @@ public class graphActivity extends AppCompatActivity {
 
             generateSinceText();
             generateGraph();
+            generateAttemptTableForGivenRoute("");
         }
         else {
             graph.setVisibility(View.GONE);
             spinnerShowing.setVisibility(View.GONE);
             showingTextView.setVisibility(View.GONE);
             sinceTextView.setText("There is no data to display. Get your lazy ass moving.");
+            bottomBar.setVisibility(View.GONE);
         }
 
-        generateAttemptTableForGivenRoute("goud");
+
     }
 
     private ArrayList<dayWhenSomethingWasDone> ArrayDistancePerDate(int DAYS_BACK) {
@@ -166,6 +168,9 @@ public class graphActivity extends AppCompatActivity {
 
     private void generateAttemptTableForGivenRoute(String routeName) {
 
+        if(routeName.equals("")) {
+            routeName = dbhandler.getRoutes("").get(0).getRouteName();
+        }
         ArrayList<Attempt> attemptsList = dbhandler.getAttemptsFromRouteName(routeName);
         final ListView listview1 = (ListView) findViewById(R.id.custom_list);
         listview1.setAdapter(new AttemptsListAdapter(this, attemptsList));
