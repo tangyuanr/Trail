@@ -440,6 +440,7 @@ public class loggerActivity extends AppCompatActivity implements
                 attempt = new Attempt(route, totaltime, activityhelper.getTotalDistance(), currentDateandTime, snapshotURL, totalBMP / counter, (int) totalCaloriesBurnt, imagefilename);
                 dbHandler.addAttempt(attempt); //save the attempt to the database
                 Log.d(TAG, "Attempt added to the database");
+                Toast.makeText(loggerActivity.this, "Attempt saved to existing route.", Toast.LENGTH_SHORT).show();
             }
         });
         builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -494,6 +495,7 @@ public class loggerActivity extends AppCompatActivity implements
                                 attempt = new Attempt(route, totaltime, activityhelper.getTotalDistance(), currentDateandTime, snapshotURL, totalBMP / counter, (int) totalCaloriesBurnt, imagefilename);
                                 dbHandler.addAttempt(attempt); //adding the attempt
                                 Log.d(TAG, "Attempt object built and added to database");
+                                Toast.makeText(loggerActivity.this, "New route saved", Toast.LENGTH_SHORT).show();
                                 dialog.dismiss();
                             } else if (routeNameExists) {
                                 Toast.makeText(loggerActivity.this, "Route name already exists", Toast.LENGTH_SHORT).show();
