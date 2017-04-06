@@ -7,6 +7,10 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.WindowManager;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -44,13 +48,13 @@ public class Route implements Serializable { //needed to be able to pass it betw
     private String routeName;
     private String activityType;
     private float totalDistance; //in KM
-    private int bestTime; //in seconds
+    private long bestTime; //in seconds
     private String dateBestTime; //YYMMDD
     private String filename_coordinates;
     private String snapshotURL;
 
     //constructor called when row ID is not known yet. typically before adding it to the database.
-    public Route(String routeName, String activityType, float totalDistance, int bestTime, String dateBestTime, String filename_coordinates) {
+    public Route(String routeName, String activityType, float totalDistance, long bestTime, String dateBestTime, String filename_coordinates) {
         this.routeName = routeName;
         this.activityType = activityType;
         this.totalDistance = totalDistance;
@@ -83,7 +87,7 @@ public class Route implements Serializable { //needed to be able to pass it betw
         return round(totalDistance,1);
     }
 
-    public int getBestTime() {
+    public long getBestTime() {
         return bestTime;
     }
 
@@ -101,8 +105,8 @@ public class Route implements Serializable { //needed to be able to pass it betw
     @Override
     public String toString() {
         //converting seconds to hours,minutes string. copied-pasted from http://stackoverflow.com/questions/6118922/convert-seconds-value-to-hours-minutes-seconds
-        int hours = bestTime / 3600;
-        int minutes = (bestTime % 3600) / 60;
+        long hours = bestTime / 3600;
+        long minutes = (bestTime % 3600) / 60;
         String bestTimeString = String.format("%02dh %02dm", hours, minutes);
         Log.d("Best time string: ", bestTimeString);
         if(activityType.equals("Running")) {
@@ -117,10 +121,20 @@ public class Route implements Serializable { //needed to be able to pass it betw
         else {return null;}
     }
 
+    public String spinnerString() {
+        return "test";
+    }
+
     public static float round(float d, int decimalPlace) {
         BigDecimal bd = new BigDecimal(Float.toString(d));
         bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_DOWN);
         return bd.floatValue();
+    }
+
+    public DateTime getDateBestTimeAsDateTIme() {
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMdd_HHmm");
+        DateTime dt = formatter.parseDateTime(dateBestTime);
+        return dt;
     }
 
     private static String formatDate(String YYYYMMDD) {
