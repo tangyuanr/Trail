@@ -112,7 +112,7 @@
             android:drawableTop="@drawable/stats"
             android:gravity="center"
             android:padding="5dp"
-            android:text="Statistics"
+            android:text="Progress"
             android:textColor="#FFFFFF"/>
 
         <Button
