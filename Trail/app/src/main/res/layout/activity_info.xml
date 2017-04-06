@@ -23,7 +23,7 @@
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:inputType="number"
+        android:inputType="textNoSuggestions"
         android:ems="10"
         android:maxLength="2"
         android:digits="0123456789 "
@@ -38,14 +38,15 @@
         android:id="@+id/weightEditNum"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/saveButton"
+        android:layout_alignStart="@+id/saveButton"
+        android:layout_centerVertical="true"
         android:editable="true"
         android:ems="10"
         android:hint="Lbs"
-        android:inputType="number"
-        android:maxLength="3"
-        android:layout_centerVertical="true"
-        android:layout_alignLeft="@+id/saveButton"
-        android:layout_alignStart="@+id/saveButton" />
+        android:inputType="textNoSuggestions"
+        android:maxLength="7"
+        android:textAlignment="viewStart" />
 
     <TextView
         android:id="@+id/gender"
@@ -96,5 +97,16 @@
         android:layout_above="@+id/ageEditText"
         android:layout_alignLeft="@+id/ageEditText"
         android:layout_alignStart="@+id/ageEditText" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/weightEditNum"
+        android:layout_alignRight="@+id/weightEditNum"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="10dp"
+        android:layout_marginRight="10dp"
+        android:text="Lbs" />
 
 </RelativeLayout>
