@@ -1,6 +1,7 @@
 package com.example.kevin.trail;
 
 import android.content.Context;
+import android.database.DataSetObserver;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -43,6 +44,16 @@ public class RouteAdapter extends BaseAdapter {
         this.routeArray = routeArray;
         this.context = context;
         layoutInflater = LayoutInflater.from(context);
+    }
+
+    @Override
+    public void registerDataSetObserver(DataSetObserver observer) {
+        super.registerDataSetObserver(observer);
+    }
+
+    @Override
+    public void unregisterDataSetObserver(DataSetObserver observer) {
+        super.unregisterDataSetObserver(observer);
     }
 
     @Override

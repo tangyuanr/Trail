@@ -375,6 +375,9 @@ public class DBHandler extends SQLiteOpenHelper {
         }
     }
 
+
+
+
     //get general info of all attempts from ATTEMPTS table
     //data will be read in descending order, so that the display order goes from most recent to oldest
     public HashMap<String, List<String>> getContent(){

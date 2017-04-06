@@ -17,7 +17,7 @@
               android:orientation="vertical"
               android:id="@+id/linearlayoutListViewRoutes"
               android:layout_width="match_parent"
-              android:layout_height="wrap_content">
+              android:layout_height="match_parent">
 
     <ListView
         android:layout_marginTop="60dp"
@@ -53,18 +53,19 @@
 
 
 
-    <Button
+    <FrameLayout
+        android:id="@+id/contentContainer"
         android:layout_width="match_parent"
-        android:id="@+id/newRouteButton"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/bottomBarRouteManager" />
+
+    <com.roughike.bottombar.BottomBar
+        android:id="@+id/bottomBarRouteManager"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        app:bb_behavior="shifting"
         android:layout_alignParentBottom="true"
-        android:text="New Route"
-        android:background="@color/colorPrimary"
-        android:textColor="#FFFFFF"
-        android:padding="10dp"
-        android:textSize="20sp"
-        android:layout_gravity="center"
-        android:drawableLeft="@drawable/ic_add"
-        android:layout_height="60dp"/>
+        app:bb_tabXmlResource="@xml/bottombar_routemanager" />
 
 
 </RelativeLayout>

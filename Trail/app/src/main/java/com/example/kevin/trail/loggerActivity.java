@@ -143,6 +143,8 @@ public class loggerActivity extends AppCompatActivity implements
         }
     };
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -728,6 +730,7 @@ public class loggerActivity extends AppCompatActivity implements
 
         @Override
         protected void onDestroy () {
+            googleAPIclient.disconnect();
             super.onDestroy();
             if (logging)// if logging is still true
             {
@@ -736,7 +739,13 @@ public class loggerActivity extends AppCompatActivity implements
             }
         }
 
-        @Override
+    @Override
+    protected void onStop() {
+        googleAPIclient.disconnect();
+        super.onStop();
+    }
+
+    @Override
         public void heartRateReceived ( int heartRate){
             Message msg = new Message();
             msg.getData().putInt("HeartRate", heartRate);
