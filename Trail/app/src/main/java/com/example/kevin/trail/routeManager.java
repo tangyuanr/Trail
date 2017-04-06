@@ -1,6 +1,10 @@
 package com.example.kevin.trail;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,6 +18,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 
 import java.util.ArrayList;
 
@@ -34,24 +39,23 @@ public class routeManager extends AppCompatActivity {
     protected Toolbar routeManagerToolbar;
     private ActionMenuView amvMenu;
     MenuItem deleteButton;
+    private Button newroutebutton;
     String routeNameSelected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_usage_example_listview);
-        listview = (ListView) findViewById(R.id.usage_example_listview);
+        setContentView(R.layout.activity_routemanager);
+        listview = (ListView) findViewById(R.id.listviewroutes);
+        newroutebutton = (Button) findViewById(R.id.newRouteButton);
 
         Intent receivedIntent = getIntent();
         if(receivedIntent.hasExtra("activityType")) {
             activityType = (String) receivedIntent.getSerializableExtra("activityType");
         }
 
-        //this inflates the "New Route" button at the end of the list
-        Button newRouteButton = new Button(this);
-        newRouteButton.setText("New Route");
-        listview.addFooterView(newRouteButton);
-        newRouteButton.setOnClickListener(new View.OnClickListener() {
+
+        newroutebutton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Log.d(TAG, "User selects new route");
                 Intent intent = new Intent(routeManager.this, loggerActivity.class);
@@ -60,8 +64,11 @@ public class routeManager extends AppCompatActivity {
             }
         });
 
-       // actionBar = getSupportActionBar();
-        //actionBar.show();
+
+
+
+
+        //actionbar
         routeManagerToolbar=(Toolbar)findViewById(R.id.routeManagerActionBar);
         setSupportActionBar(routeManagerToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -73,8 +80,14 @@ public class routeManager extends AppCompatActivity {
                 return onOptionsItemSelected(menuItem);
             }
         });
+        routeManagerToolbar.setTitleTextColor(Color.parseColor("#FFFFFF"));
 
+        final Drawable upArrow = ContextCompat.getDrawable(this, R.drawable.abc_ic_ab_back_material);
+        upArrow.setColorFilter(Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_ATOP);
+
+        getSupportActionBar().setHomeAsUpIndicator(upArrow);
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -104,6 +117,8 @@ public class routeManager extends AppCompatActivity {
             onStart();
         }
     }
+
+
 
     @Override
     protected void onStart() {
@@ -137,13 +152,6 @@ public class routeManager extends AppCompatActivity {
         });
 
     }
-
-
-//    private Class<?> getClassIntent(String activity) {
-//        if(activity.equals("Running")) {return runActivity.class;}
-//        else if(activity.equals("Hiking")) {return loggerActivity.class;}
-//        else {return null;}
-//    }
 
 
 }

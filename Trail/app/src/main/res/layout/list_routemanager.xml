@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="horizontal"
+              android:layout_width="match_parent"
+              android:paddingRight="10dp"
+              android:paddingLeft="3dp"
+              android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/routeSnapShot"
+        android:layout_width="195dp"
+        android:layout_height="140dp"/>
+
+   <RelativeLayout
+       android:id="@+id/routeManagerRouteInfo"
+       android:layout_width="wrap_content"
+       android:layout_alignParentRight="true"
+       android:layout_height="wrap_content">
+
+       <TextView
+           android:layout_width="wrap_content"
+           android:id="@+id/routeNamerouteManager"
+           android:textColor="@color/colorPrimaryDark"
+           android:layout_alignParentRight="true"
+           android:textSize="20sp"
+           android:textStyle="bold"
+           android:layout_height="wrap_content"/>
+
+       <TextView
+           android:layout_width="wrap_content"
+           android:id="@+id/routeDistancerouteManager"
+           android:layout_alignParentRight="true"
+           android:textSize="30sp"
+           android:fontFamily="sans-serif-medium"
+           android:textStyle="bold"
+           android:layout_below="@id/routeNamerouteManager"
+           android:layout_height="wrap_content"/>
+
+       <TextView
+           android:layout_width="wrap_content"
+           android:id="@+id/BestTimeText"
+           android:text="Best time:"
+           android:layout_alignParentRight="true"
+           android:layout_below="@id/routeDistancerouteManager"
+           android:layout_height="wrap_content"/>
+
+       <TextView
+           android:layout_width="wrap_content"
+           android:id="@+id/CityOrBestTimeRouteManager"
+           android:layout_alignParentRight="true"
+           android:layout_below="@id/BestTimeText"
+           android:textSize="16sp"
+           android:layout_height="wrap_content"/>
+
+   </RelativeLayout>
+
+
+
+</LinearLayout>

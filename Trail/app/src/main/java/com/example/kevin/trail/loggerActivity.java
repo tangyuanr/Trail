@@ -10,6 +10,8 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -58,9 +60,11 @@ import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by Andre & Jiayin
@@ -389,15 +393,20 @@ public class loggerActivity extends AppCompatActivity implements
                         timerHandler.removeCallbacks(timerRunnable);
                         startStopButton.setText("Start logging");
                         loggingText.setVisibility(View.INVISIBLE);
-                        if (!(route == null)) {
-                            SaveAttemptDialog();
+                        if(activityhelper.getCurrentNumberOfSamples() > 0) {
+                            if (!(route == null)) {
+                                SaveAttemptDialog();
 
-                        } else {
-                            NewRouteDialog();
+                            } else {
+                                NewRouteDialog();
+                            }
+                            long timelastSample = activityhelper.getTimeLastsample();    //get final stats for display
+                            float FinalDistance = activityhelper.getTotalDistance();    //get final stats for display
+                            showStatsDialog(timelastSample, FinalDistance);
                         }
-                        long timelastSample = activityhelper.getTimeLastsample();    //get final stats for display
-                        float FinalDistance = activityhelper.getTotalDistance();    //get final stats for display
-                        showStatsDialog(timelastSample, FinalDistance);
+                        else {
+                            Toast.makeText(loggerActivity.this, "Logging cancelled", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 })
                 .setNegativeButton("No", null)
@@ -470,8 +479,10 @@ public class loggerActivity extends AppCompatActivity implements
                                 int totaltime = (int) activityhelper.getTimeLastsample() / 1000;
                                 java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
                                 String currentDateandTime = sdf.format(new Date());
+                                String locality = getLocality();
+
                                 //instantiating a new route object with the constructor for the case in which we have no rowID yet
-                                route = new Route(inputRouteName, activityType, activityhelper.getTotalDistance(), totaltime, currentDateandTime, activityhelper.getCoordinatesFileName());
+                                route = new Route(inputRouteName, activityType, activityhelper.getTotalDistance(), totaltime, currentDateandTime, activityhelper.getCoordinatesFileName(), locality);
                                 dbHandler.addRoute(route);
                                 Log.d(TAG, "Route object added to ROUTE_TABLE");
 
@@ -508,6 +519,24 @@ public class loggerActivity extends AppCompatActivity implements
         } else {
             return null;
         }
+    }
+
+    private String getLocality() {
+        Geocoder geocoder;
+        List<Address> addresses;
+        String city;
+        String province;
+        String locality = "";
+        geocoder = new Geocoder(this, Locale.getDefault());
+        try {
+            addresses = geocoder.getFromLocation(lastLocation.getLatitude(), lastLocation.getLongitude(), 1);
+            city = addresses.get(0).getLocality();
+            province = addresses.get(0).getAdminArea();
+            locality = city + ", " + province;
+        }
+        catch(IOException ex) {
+        }
+        return locality;
     }
 
 

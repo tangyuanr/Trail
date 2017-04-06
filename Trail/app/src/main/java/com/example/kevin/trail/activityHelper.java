@@ -32,7 +32,7 @@ public class activityHelper {
     private Intent intent;
     private double averageLatitude;
     private double averageLongitude;
-    private int sample;
+    private int sample = 0;
     private float totalDistance = 0;
     private float speed = 0;
     private long tLastSample = 0;
