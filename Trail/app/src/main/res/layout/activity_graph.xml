@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:padding="20dp"
+    android:padding="0dp"
     xmlns:android="http://schemas.android.com/apk/res/android"
     tools:context="com.example.kevin.trail.graphActivity"
     xmlns:tools="http://schemas.android.com/tools">
@@ -11,7 +12,9 @@
     <!-- non-scrolling top pane -->
     <LinearLayout
         android:layout_width="fill_parent"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
+        android:padding="20dp"
+        android:id="@+id/spinnerLayout"
         android:orientation="horizontal"
         >
 
@@ -28,15 +31,11 @@
 
     </LinearLayout>
 
-    <!-- scrolling bottom pane -->
-    <ScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        >
-
         <LinearLayout
+            android:layout_below="@id/spinnerLayout"
             android:layout_width="fill_parent"
+            android:id="@+id/graphLayout"
+            android:padding="20dp"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
@@ -56,5 +55,92 @@
 
         </LinearLayout>
 
-    </ScrollView>
-</LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:id="@+id/progressPane"
+        android:orientation="vertical"
+        android:layout_height="fill_parent">
+
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:id="@+id/routePane"
+                android:layout_height="wrap_content">
+
+                <TextView
+
+                    android:layout_width="wrap_content"
+                    android:id="@+id/SelectRouteText"
+                    android:textSize="20sp"
+                    android:layout_margin="10dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_height="wrap_content"
+                    android:text="Select a route:"
+                    />
+
+                <Spinner
+                    android:layout_toRightOf="@id/SelectRouteText"
+                    android:id="@+id/selectRouteSpinner"
+                    android:layout_width="wrap_content"
+                    android:layout_alignBaseline="@id/SelectRouteText"
+                    android:layout_height="wrap_content" />
+
+                <ImageView
+                    android:id="@+id/imageViewRoute"
+                    android:layout_below="@id/selectRouteSpinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="150dp"
+                    android:layout_margin="10dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_below="@id/imageViewRoute"
+                    android:padding="5dp"
+                    android:layout_height="wrap_content"
+                    android:textSize="18sp"
+                    android:id="@+id/totaldistanceRoute"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:layout_below="@id/totaldistanceRoute"
+                    android:textSize="18sp"
+                    android:id="@+id/besttime"/>
+
+
+
+            </RelativeLayout>
+
+        <ListView
+            android:id="@+id/custom_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingTop="0dp"
+            android:paddingBottom="60dp"
+            android:layout_weight="1"
+            android:dividerHeight="1dp" />
+
+        </LinearLayout>
+
+
+
+
+    <FrameLayout
+        android:id="@+id/contentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/bottomBar" />
+
+    <com.roughike.bottombar.BottomBar
+        android:id="@+id/bottomBar"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        app:bb_tabXmlResource="@xml/bottombar_stats" />
+
+
+
+
+
+</RelativeLayout>

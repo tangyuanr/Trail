@@ -1,12 +1,21 @@
 package com.example.kevin.trail;
 
+import android.graphics.Color;
+import android.support.annotation.IdRes;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
+import android.view.Display;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
@@ -17,6 +26,9 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 import com.jjoe64.graphview.series.OnDataPointTapListener;
 import com.jjoe64.graphview.series.PointsGraphSeries;
 import com.jjoe64.graphview.series.Series;
+import com.roughike.bottombar.BottomBar;
+import com.roughike.bottombar.OnTabSelectListener;
+import com.squareup.picasso.Picasso;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeComparator;
@@ -26,10 +38,11 @@ import org.joda.time.format.DateTimeFormatter;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.TimeZone;
 
-import static com.example.kevin.trail.R.id.graph;
 
 /**
  * Created by Andre & Jiayin
@@ -40,20 +53,74 @@ public class graphActivity extends AppCompatActivity {
     private String selectedShowingSpinner;
     private TextView sinceTextView;
     private Spinner spinnerShowing;
+    private Spinner selectRouteSpinner;
     private TextView selectedPoint;
     private TextView showingTextView;
     private GraphView graph;
+    private BottomBar mBottomBar;
+    private LinearLayout graphLayout;
+    private LinearLayout spinnerLayout;
+    private LinearLayout progressPane;
+    private SpinnerAdapter selectedroutespinneradapter;
+    private ImageView imageviewRoute;
+    private TextView totalDistance;
+    private TextView bestTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_graph);
 
+
+        BottomBar bottomBar = (BottomBar) findViewById(R.id.bottomBar);
+        graphLayout = (LinearLayout) findViewById(R.id.graphLayout);
+        spinnerLayout = (LinearLayout) findViewById(R.id.spinnerLayout);
+        progressPane = (LinearLayout) findViewById(R.id.progressPane);
+        imageviewRoute = (ImageView) findViewById(R.id.imageViewRoute);
+        totalDistance = (TextView) findViewById(R.id.totaldistanceRoute);
+        bestTime = (TextView) findViewById(R.id.besttime);
+        progressPane.setVisibility(View.GONE);
+        bottomBar.setOnTabSelectListener(new OnTabSelectListener() {
+            @Override
+            public void onTabSelected(@IdRes int tabId) {
+                if (tabId == R.id.tab_Graphs) {
+                    graphLayout.setVisibility(View.VISIBLE);
+                    spinnerLayout.setVisibility(View.VISIBLE);
+                    progressPane.setVisibility(View.INVISIBLE);
+                }
+
+                if (tabId == R.id.tab_Progress) {
+                    graphLayout.setVisibility(View.GONE);
+                    spinnerLayout.setVisibility(View.GONE);
+                    progressPane.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
         sinceTextView = (TextView) findViewById(R.id.sinceText);
         showingTextView = (TextView) findViewById(R.id.showing);
         spinnerShowing = (Spinner) findViewById(R.id.showingSpinner);
         graph = (GraphView) findViewById(R.id.graph);
         selectedPoint = (TextView) findViewById(R.id.selectedPoint);
+
+        // selectedRoute spinner dynamic fill
+        selectRouteSpinner = (Spinner) findViewById(R.id.selectRouteSpinner);
+        ArrayList<Route> routes = dbhandler.getRoutes("");
+        selectedroutespinneradapter = new RouteSpinnerArrayAdapter(graphActivity.this, android.R.layout.simple_spinner_dropdown_item, routes);
+        selectRouteSpinner.setAdapter(selectedroutespinneradapter);
+        selectRouteSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
+                Route route = (Route) selectedroutespinneradapter.getItem(position);
+                generateAttemptTableForGivenRoute(route.getRouteName());
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> adapter) {  }
+        });
+
+
+
 
         if(!(dbhandler.isRouteTableEmpty())) {
             ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.showingspinner_array, android.R.layout.simple_spinner_item);
@@ -76,13 +143,17 @@ public class graphActivity extends AppCompatActivity {
 
             generateSinceText();
             generateGraph();
+            generateAttemptTableForGivenRoute("");
         }
         else {
             graph.setVisibility(View.GONE);
             spinnerShowing.setVisibility(View.GONE);
             showingTextView.setVisibility(View.GONE);
             sinceTextView.setText("There is no data to display. Get your lazy ass moving.");
+            bottomBar.setVisibility(View.GONE);
         }
+
+
     }
 
     private ArrayList<dayWhenSomethingWasDone> ArrayDistancePerDate(int DAYS_BACK) {
@@ -103,6 +174,55 @@ public class graphActivity extends AppCompatActivity {
         }
         return daysanddistance;
     }
+
+    private void generateAttemptTableForGivenRoute(String routeName) {
+
+        if(routeName.equals("")) {
+            routeName = dbhandler.getRoutes("").get(0).getRouteName();
+        }
+        ArrayList<Attempt> attemptsList = dbhandler.getAttemptsFromRouteName(routeName);
+        final ListView listview1 = (ListView) findViewById(R.id.custom_list);
+        Route route = attemptsList.get(0).getRoute();
+        long bt = route.getBestTime();
+
+        listview1.setAdapter(new AttemptsListAdapter(this, attemptsList, bt));
+        listview1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> a, View v, int position, long id) {
+                Object object = listview1.getItemAtPosition(position);
+                Attempt attempt = (Attempt) object;
+                Toast.makeText(graphActivity.this, "Selected attempt", Toast.LENGTH_LONG).show();
+            }
+        });
+
+
+        Display display = getWindowManager().getDefaultDisplay();
+        DisplayMetrics outMetrics = new DisplayMetrics ();
+        display.getMetrics(outMetrics);
+
+        float density  = getResources().getDisplayMetrics().density;
+        float dpHeight = outMetrics.heightPixels / density;
+        float dpWidth  = outMetrics.widthPixels / density;
+
+
+        Picasso.with(graphActivity.this).load(route.getStaticAPIURL(graphActivity.this, (int)dpWidth, 150)).fit().into(imageviewRoute);
+        float distance = route.getTotalDistance();
+        totalDistance.setText("Distance: " + String.format("%.2f", distance) + " km");
+        String activityType = route.getActivityType();
+        if(activityType.equals("Running") || activityType.equals("Biking")) {
+            TimeZone tz = TimeZone.getTimeZone("UTC");
+            SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
+            df.setTimeZone(tz);
+            String time = df.format(new Date(bt*1000));
+            DateTime datebesttime = route.getDateBestTimeAsDateTIme();
+            DateTimeFormatter fmt1 = DateTimeFormat.forPattern("MMMM d, yyyy");
+            bestTime.setText("Best time: " + time + " on " + fmt1.print(datebesttime));
+        }
+    }
+
+
+
 
     private ArrayList<dayWhenSomethingWasDone> ArrayDistancePerDate() {
         ArrayList<dayWhenSomethingWasDone> daysanddistance = new ArrayList<>();
@@ -155,6 +275,7 @@ public class graphActivity extends AppCompatActivity {
 
         if (numberOf > 1) {
             LineGraphSeries<DataPoint> series_line = new LineGraphSeries<>(datapoints);
+            //series_line.setColor(Color.GREEN);
             graph.addSeries(series_line);
             graph.getGridLabelRenderer().setLabelFormatter(new DateSATformatter(this));
             graph.getGridLabelRenderer().setNumHorizontalLabels(numberOf);
@@ -165,6 +286,7 @@ public class graphActivity extends AppCompatActivity {
 
             PointsGraphSeries<DataPoint> series_points = new PointsGraphSeries<>(datapoints);
             series_points.setSize(7);
+            //series_points.setColor(Color.GREEN);
             graph.addSeries(series_points);
 
             series_points.setOnDataPointTapListener(new OnDataPointTapListener() {

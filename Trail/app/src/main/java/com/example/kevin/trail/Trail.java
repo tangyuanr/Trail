@@ -19,12 +19,6 @@ public class Trail extends Application {
     public void onCreate() {
         super.onCreate();
         Trail.context = getApplicationContext();
-        Picasso.Builder picassoBUILDER = new Picasso.Builder(this);
-        picassoBUILDER.downloader(new OkHttpDownloader(this,Integer.MAX_VALUE));
-        Picasso build = picassoBUILDER.build();
-        build.setIndicatorsEnabled(true);
-        build.setLoggingEnabled(true);
-        Picasso.setSingletonInstance(build);
 
     }
 
