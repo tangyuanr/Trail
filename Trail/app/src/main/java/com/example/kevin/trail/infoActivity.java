@@ -1,5 +1,6 @@
 package com.example.kevin.trail;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -39,10 +40,10 @@ public class infoActivity extends AppCompatActivity {
                     int ageint = Integer.parseInt(age);
                     int lbs = Integer.parseInt(weight);
                     if (ageint < 12 || ageint > 99) {
-                        Toast failtoast = Toast.makeText(getApplicationContext(), "Profile not saved due to age range 12-99 not met, please try again", Toast.LENGTH_LONG);  //Create a save failed message
+                        Toast failtoast = Toast.makeText(getApplicationContext(), "Profile not saved due to invalid input in the age field, please try again", Toast.LENGTH_LONG);  //Create a save failed message
                         failtoast.show();                                                                                                     // show the saved toast message
                     } else if (lbs < 50 || lbs > 300) {
-                        Toast failtoast = Toast.makeText(getApplicationContext(), "Profile not saved due to lbs range 50-300 not met, please try again", Toast.LENGTH_LONG);
+                        Toast failtoast = Toast.makeText(getApplicationContext(), "Profile not saved due to invalid input int the weight field, please try again", Toast.LENGTH_LONG);
                         failtoast.show();
                     } else {
                         sharedPreferenceHelper.saveProfileGender(gender);                                                                          //Save the profile information into the localstorage
@@ -50,7 +51,10 @@ public class infoActivity extends AppCompatActivity {
                         sharedPreferenceHelper.saveProfileWeight(weight);
 
                         Toast savetoast = Toast.makeText(getApplicationContext(), "Profile Saved", Toast.LENGTH_LONG);                         //create successful save message
-                        savetoast.show();                                                                                                      //show the saved toast message
+                        savetoast.show();
+
+                        goTomainActivity();
+                        //show the saved toast message
                     }
                 } else {
                     Toast failtoast = Toast.makeText(getApplicationContext(), "Please fill in missing field(s) to proceed", Toast.LENGTH_LONG);
@@ -76,5 +80,10 @@ public class infoActivity extends AppCompatActivity {
             weightEditNum.setText(sharedPreferenceHelper.getProfileWeight());
         }
     }
-}
 
+
+    void goTomainActivity() {
+        Intent intent = new Intent(infoActivity.this, MainActivity.class);
+        startActivity(intent);
+    }
+}

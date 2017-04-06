@@ -396,6 +396,8 @@ public class loggerActivity extends AppCompatActivity implements
             }
         });
         builder.show();
+        NotificationManager NM = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+        NM.cancelAll();
     }
 
 
@@ -452,6 +454,8 @@ public class loggerActivity extends AppCompatActivity implements
             }
         });
         dialog.show();
+        NotificationManager NM = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+        NM.cancelAll();
     }
 
     private Polyline addPolyLine(ArrayList<Location> routeCoordinates, String typeOfPolyLine) {
@@ -520,6 +524,8 @@ public class loggerActivity extends AppCompatActivity implements
         super.onBackPressed();
         timerHandler.removeCallbacks(timerRunnable);
         this.finish();
+        NotificationManager NM = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+        NM.cancelAll();
     }
 
     @Override
@@ -639,6 +645,10 @@ public class loggerActivity extends AppCompatActivity implements
         if (logging)// if logging is still true
         {
             activityhelper.stopActivity();
+            timerHandler.removeCallbacks(timerRunnable);
+            this.finish();
+            NotificationManager NM = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+            NM.cancelAll();
             //disconnectClicked();//disconnect from HxM
         }
     }

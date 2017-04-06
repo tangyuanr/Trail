@@ -21,18 +21,18 @@
         android:layout_marginTop="48dp" />
 
     <EditText
+        android:id="@+id/ageEditText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:inputType="textNoSuggestions"
-        android:ems="10"
-        android:maxLength="2"
-        android:digits="0123456789 "
-        android:id="@+id/ageEditText"
-        android:hint="Age"
-        android:editable="true"
         android:layout_above="@+id/weightEditNum"
         android:layout_alignLeft="@+id/weightEditNum"
-        android:layout_alignStart="@+id/weightEditNum" />
+        android:layout_alignStart="@+id/weightEditNum"
+        android:digits="0123456789 "
+        android:editable="true"
+        android:ems="10"
+        android:hint="12 to 99"
+        android:inputType="number"
+        android:maxLength="2" />
 
     <EditText
         android:id="@+id/weightEditNum"
@@ -43,8 +43,8 @@
         android:layout_centerVertical="true"
         android:editable="true"
         android:ems="10"
-        android:hint="Lbs"
-        android:inputType="textNoSuggestions"
+        android:hint="50 to 300"
+        android:inputType="number"
         android:maxLength="7"
         android:textAlignment="viewStart" />
 
