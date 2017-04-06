@@ -4,6 +4,8 @@ import android.graphics.Color;
 import android.support.annotation.IdRes;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
+import android.view.Display;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -36,8 +38,10 @@ import org.joda.time.format.DateTimeFormatter;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.TimeZone;
 
 
 /**
@@ -59,6 +63,8 @@ public class graphActivity extends AppCompatActivity {
     private LinearLayout progressPane;
     private SpinnerAdapter selectedroutespinneradapter;
     private ImageView imageviewRoute;
+    private TextView totalDistance;
+    private TextView bestTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +77,8 @@ public class graphActivity extends AppCompatActivity {
         spinnerLayout = (LinearLayout) findViewById(R.id.spinnerLayout);
         progressPane = (LinearLayout) findViewById(R.id.progressPane);
         imageviewRoute = (ImageView) findViewById(R.id.imageViewRoute);
+        totalDistance = (TextView) findViewById(R.id.totaldistanceRoute);
+        bestTime = (TextView) findViewById(R.id.besttime);
         progressPane.setVisibility(View.GONE);
         bottomBar.setOnTabSelectListener(new OnTabSelectListener() {
             @Override
@@ -174,7 +182,10 @@ public class graphActivity extends AppCompatActivity {
         }
         ArrayList<Attempt> attemptsList = dbhandler.getAttemptsFromRouteName(routeName);
         final ListView listview1 = (ListView) findViewById(R.id.custom_list);
-        listview1.setAdapter(new AttemptsListAdapter(this, attemptsList));
+        Route route = attemptsList.get(0).getRoute();
+        long bt = route.getBestTime();
+
+        listview1.setAdapter(new AttemptsListAdapter(this, attemptsList, bt));
         listview1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
@@ -185,8 +196,33 @@ public class graphActivity extends AppCompatActivity {
             }
         });
 
-        Picasso.with(graphActivity.this).load(attemptsList.get(0).getRoute().getStaticAPIURL(graphActivity.this, 400, 200)).fit().into(imageviewRoute);
+
+        Display display = getWindowManager().getDefaultDisplay();
+        DisplayMetrics outMetrics = new DisplayMetrics ();
+        display.getMetrics(outMetrics);
+
+        float density  = getResources().getDisplayMetrics().density;
+        float dpHeight = outMetrics.heightPixels / density;
+        float dpWidth  = outMetrics.widthPixels / density;
+
+
+        Picasso.with(graphActivity.this).load(route.getStaticAPIURL(graphActivity.this, (int)dpWidth, 150)).fit().into(imageviewRoute);
+        float distance = route.getTotalDistance();
+        totalDistance.setText("Distance: " + String.format("%.2f", distance) + " km");
+        String activityType = route.getActivityType();
+        if(activityType.equals("Running") || activityType.equals("Biking")) {
+            TimeZone tz = TimeZone.getTimeZone("UTC");
+            SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
+            df.setTimeZone(tz);
+            String time = df.format(new Date(bt*1000));
+            DateTime datebesttime = route.getDateBestTimeAsDateTIme();
+            DateTimeFormatter fmt1 = DateTimeFormat.forPattern("MMMM d, yyyy");
+            bestTime.setText("Best time: " + time + " on " + fmt1.print(datebesttime));
+        }
     }
+
+
+
 
     private ArrayList<dayWhenSomethingWasDone> ArrayDistancePerDate() {
         ArrayList<dayWhenSomethingWasDone> daysanddistance = new ArrayList<>();

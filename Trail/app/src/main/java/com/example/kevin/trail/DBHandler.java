@@ -95,7 +95,7 @@ public class DBHandler extends SQLiteOpenHelper {
                 String nameOfRoute = routesCursor.getString(1);
                 String activityType = routesCursor.getString(2);
                 float totalDistance = routesCursor.getFloat(3);
-                int bestTime = routesCursor.getInt(4);
+                long bestTime = routesCursor.getLong(4);
                 String dateBestTime = routesCursor.getString(5);
                 String filename_coordinates = routesCursor.getString(6);
                 Route route = new Route(nameOfRoute, activityType, totalDistance, bestTime, dateBestTime, filename_coordinates);
