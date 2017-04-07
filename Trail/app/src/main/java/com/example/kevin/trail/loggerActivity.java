@@ -718,17 +718,7 @@ public class loggerActivity extends AppCompatActivity implements
             //Log.d(TAG, "ONCAMERAIDLE");
         }
 
-        @Override
-        protected void onDestroy () {
-            super.onDestroy();
-            if (logging)// if logging is still true
-            {
-                activityhelper.stopActivity();
-                //disconnectClicked();//disconnect from HxM
-            }
-        }
 
-<<<<<<< HEAD
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -739,15 +729,18 @@ public class loggerActivity extends AppCompatActivity implements
             this.finish();
             NotificationManager NM = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
             NM.cancelAll();
-            //disconnectClicked();//disconnect from HxM
-=======
-        @Override
-        public void heartRateReceived ( int heartRate){
-            Message msg = new Message();
-            msg.getData().putInt("HeartRate", heartRate);
-            newHandler.sendMessage(msg);
->>>>>>> b7b2c09ea2d7a64696a9c00d38e011c9ce7b0a8c
         }
+    }
+        //disconnectClicked();//disconnect from HxM
+
+
+    public void heartRateReceived(int heartRate) {
+        Message msg = new Message();
+        msg.getData().putInt("HeartRate", heartRate);
+        newHandler.sendMessage(msg);
+
+    }
+
 
         //connect with HxM HR Sensor
 
