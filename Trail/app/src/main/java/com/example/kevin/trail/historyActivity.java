@@ -107,7 +107,7 @@ public class historyActivity extends AppCompatActivity {
                         else{
                             String coordinatesFile=dbHandler.getFilenameCoordinates(attemptDate);
                             //build url by first building a dummy Route object to use getStaticAPIURL method
-                            Route route = new Route("dummy route name", "dummy activity type", 0, 0, "dummy time", coordinatesFile);
+                            Route route = new Route("dummy route name", "dummy activity type", 0, 0, "dummy time", coordinatesFile, "dummy locality");
                             Log.d("historyActivity", "dummy route created, with coordinates filename: "+coordinatesFile);
                             String url=route.getStaticAPIURL(historyActivity.this, 250, 250);
                             //download the image to internal storage

@@ -1,0 +1,15 @@
+<tabs>
+    <tab
+        id="@+id/tab_AllRoutes"
+        icon="@drawable/ic_allroutes"
+        title="All routes" />
+    <tab
+        id="@+id/tab_Nearby"
+        icon="@drawable/ic_nearby"
+        title="Nearby" />
+
+    <tab
+        id="@+id/tab_NewRoute"
+        icon="@drawable/ic_newroute"
+        title="New route" />
+</tabs>

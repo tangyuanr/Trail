@@ -2,6 +2,7 @@ package com.example.kevin.trail;
 
 
 import android.content.Context;
+import android.location.Geocoder;
 import android.location.Location;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -52,15 +53,17 @@ public class Route implements Serializable { //needed to be able to pass it betw
     private String dateBestTime; //YYMMDD
     private String filename_coordinates;
     private String snapshotURL;
+    private String locality = "";
 
     //constructor called when row ID is not known yet. typically before adding it to the database.
-    public Route(String routeName, String activityType, float totalDistance, long bestTime, String dateBestTime, String filename_coordinates) {
+    public Route(String routeName, String activityType, float totalDistance, long bestTime, String dateBestTime, String filename_coordinates, String routelocality) {
         this.routeName = routeName;
         this.activityType = activityType;
         this.totalDistance = totalDistance;
         this.bestTime = bestTime;
         this.dateBestTime = dateBestTime;
         this.filename_coordinates = filename_coordinates;
+        this.locality = routelocality;
     }
 
     //constructor called when rowID is known. typically when it already exists in the database and user has selected it.
@@ -93,6 +96,10 @@ public class Route implements Serializable { //needed to be able to pass it betw
 
     public String getDateBestTime() {
         return dateBestTime;
+    }
+
+    public String getLocality() {
+        return locality;
     }
 
     public String getFilename_coordinates() {
@@ -203,5 +210,4 @@ public class Route implements Serializable { //needed to be able to pass it betw
         // this URL can get quite large so we need to look into ways to reduce it. For the moment I am taking every other element to half the number of points.
         // downloading the image and storing its filename in the SQLite database is probably better.
     }
-
 }
