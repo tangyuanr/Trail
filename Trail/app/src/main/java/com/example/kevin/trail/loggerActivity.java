@@ -483,15 +483,14 @@ public class loggerActivity extends AppCompatActivity implements
                                 java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
                                 String currentDateandTime = sdf.format(new Date());
                                 String locality = getLocality();
-
-                                //instantiating a new route object with the constructor for the case in which we have no rowID yet
-                                route = new Route(inputRouteName, activityType, activityhelper.getTotalDistance(), totaltime, currentDateandTime, activityhelper.getCoordinatesFileName(), locality);
-                                dbHandler.addRoute(route);
-                                Log.d(TAG, "Route object added to ROUTE_TABLE");
-
-                                String snapshotURL = route.getStaticAPIURL(loggerActivity.this, 250, 250);
+                                Route route_dummy = new Route("dummy route name", "dummy activity type", 0, 0, "dummy time", activityhelper.getCoordinatesFileName(), "dummy locality", "dummy filename");
+                                String snapshotURL = route_dummy.getStaticAPIURL(loggerActivity.this, 250, 250);
                                 imagefilename = sdf.format(new Date()) + ".JPEG";
                                 imageDownload(loggerActivity.this, snapshotURL, imagefilename);
+                                //instantiating a new route object with the constructor for the case in which we have no rowID yet
+                                route = new Route(inputRouteName, activityType, activityhelper.getTotalDistance(), totaltime, currentDateandTime, activityhelper.getCoordinatesFileName(), locality, imagefilename);
+                                dbHandler.addRoute(route);
+                                Log.d(TAG, "Route object added to ROUTE_TABLE");
                                 attempt = new Attempt(route, totaltime, activityhelper.getTotalDistance(), currentDateandTime, snapshotURL, totalBMP / counter, (int) totalCaloriesBurnt, imagefilename);
                                 dbHandler.addAttempt(attempt); //adding the attempt
                                 Log.d(TAG, "Attempt object built and added to database");

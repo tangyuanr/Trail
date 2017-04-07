@@ -54,9 +54,10 @@ public class Route implements Serializable { //needed to be able to pass it betw
     private String filename_coordinates;
     private String snapshotURL;
     private String locality = "";
+    private String imagefilename;
 
     //constructor called when row ID is not known yet. typically before adding it to the database.
-    public Route(String routeName, String activityType, float totalDistance, long bestTime, String dateBestTime, String filename_coordinates, String routelocality) {
+    public Route(String routeName, String activityType, float totalDistance, long bestTime, String dateBestTime, String filename_coordinates, String routelocality, String imagefilename) {
         this.routeName = routeName;
         this.activityType = activityType;
         this.totalDistance = totalDistance;
@@ -64,6 +65,11 @@ public class Route implements Serializable { //needed to be able to pass it betw
         this.dateBestTime = dateBestTime;
         this.filename_coordinates = filename_coordinates;
         this.locality = routelocality;
+        this.imagefilename = imagefilename;
+    }
+
+    public String getImagefilename() {
+        return imagefilename;
     }
 
     //constructor called when rowID is known. typically when it already exists in the database and user has selected it.
