@@ -60,7 +60,7 @@ public class DBHandler extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db){
 
         String CREATE_ROUTE_TABLE="CREATE TABLE "+TABLE_ROUTES + " ("+ROUTE_ID+" INTEGER PRIMARY KEY AUTOINCREMENT, "+ROUTE_NAME+" TEXT, "
-                + ACTIVITY_TYPE + " TEXT, " + ROUTE_DISTANCE + " REAL, " + BEST_TIME + " INT, " + DATE_OF_BEST_TIME + " TEXT, " + FILENAME_COORDINATES + " TEXT, " + ROUTELOCALITY + " TEXT)";
+                + ACTIVITY_TYPE + " TEXT, " + ROUTE_DISTANCE + " REAL, " + BEST_TIME + " INT, " + DATE_OF_BEST_TIME + " TEXT, " + FILENAME_COORDINATES + " TEXT, " + ROUTELOCALITY + " TEXT, " + IMAGEFILENAME + " TEXT)";
         Log.e(TAG, CREATE_ROUTE_TABLE);
         db.execSQL(CREATE_ROUTE_TABLE);
         String CREATE_ATTEMPTS_TABLE="CREATE TABLE "+TABLE_ATTEMPTS+" ("+ATTEMPT_ID+" INTEGER PRIMARY KEY AUTOINCREMENT, "+ACTIVITY_TYPE+" TEXT, "+TOTAL_DISTANCE+" TEXT, "+TOTAL_TIME + " INT, "
@@ -100,7 +100,8 @@ public class DBHandler extends SQLiteOpenHelper {
                 String dateBestTime = routesCursor.getString(5);
                 String filename_coordinates = routesCursor.getString(6);
                 String routelocality = routesCursor.getString(7);
-                Route route = new Route(nameOfRoute, activityType, totalDistance, bestTime, dateBestTime, filename_coordinates, routelocality);
+                String imagefilename = routesCursor.getString(8);
+                Route route = new Route(nameOfRoute, activityType, totalDistance, bestTime, dateBestTime, filename_coordinates, routelocality, imagefilename);
                 routesList.add(route);
             }
         } finally {
@@ -255,7 +256,8 @@ public class DBHandler extends SQLiteOpenHelper {
                 String dateBestTime = routeCursor.getString(5);
                 String filename_coordinates = routeCursor.getString(6);
                 String locality = routeCursor.getString(7);
-                route = new Route(nameOfRoute, activityType, totalDistance, bestTime, dateBestTime, filename_coordinates, locality);
+                String imagefilename = routeCursor.getString(8);
+                route = new Route(nameOfRoute, activityType, totalDistance, bestTime, dateBestTime, filename_coordinates, locality, imagefilename);
             }
         } finally {
             routeCursor.close();
