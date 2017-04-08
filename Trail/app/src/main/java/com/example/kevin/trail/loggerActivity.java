@@ -786,7 +786,8 @@ public class loggerActivity extends AppCompatActivity implements
     final Handler newHandler = new Handler() {
         public void handleMessage(Message msg) {
             MainActivity.heartRate = msg.getData().getInt("HeartRate");
-            hrTextView.setText(Integer.toString(MainActivity.heartRate) + " BPM");
+            String holder=MainActivity.heartRate + " BPM";
+            hrTextView.setText(holder);
         }
     };
 
@@ -881,18 +882,18 @@ public class loggerActivity extends AppCompatActivity implements
             double age_factor = age * 0.2017;
             double weight_factor = weight * LB_to_KG * 0.1988;
             double HR_factor = HR * 0.6309;
-            calories = age_factor + weight_factor + HR_factor - 55.0969;
+            calories = age_factor - weight_factor + HR_factor - 55.0969;
             calories = calories * DURATION / 4.184;
             Log.e(TAG, "Weight: " + weight + ", Age: " + age + ", Gender: " + gender + ". With heart rate " + HR + ", calories calculated: " + calories);
         } else if (gender.equals("f") || gender.equals("F")) {
             double age_factor = age * 0.074;
             double weight_factor = weight * LB_to_KG * 0.1263;
             double HR_factor = HR * 0.4472;
-            calories = (age_factor + weight_factor + HR_factor - 20.4022) * DURATION / 4.184;
+            calories = (age_factor - weight_factor + HR_factor - 20.4022) * DURATION / 4.184;
             Log.e(TAG, "Weight: " + weight + ", Age: " + age + ", Gender: " + gender + ". With heart rate " + HR + ", calories calculated: " + calories);
         }
 
-        if (calories < 0)
+        if (calories < 0 || MainActivity.heartRate<40)
             calories = 0;
 
 

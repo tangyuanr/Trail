@@ -13,6 +13,7 @@ import org.joda.time.format.DateTimeFormatter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -382,8 +383,8 @@ public class DBHandler extends SQLiteOpenHelper {
 
     //get general info of all attempts from ATTEMPTS table
     //data will be read in descending order, so that the display order goes from most recent to oldest
-    public HashMap<String, List<String>> getContent(){
-        HashMap<String, List<String>> expandList = new HashMap<String, List<String>>();
+    public LinkedHashMap<String, List<String>> getContent(){
+        LinkedHashMap<String, List<String>> expandList = new LinkedHashMap<String, List<String>>();
         String placeholder;
 
         SQLiteDatabase db=this.getReadableDatabase();
@@ -399,33 +400,38 @@ public class DBHandler extends SQLiteOpenHelper {
 
                 placeholder = cursor.getString(cursor.getColumnIndex(ACTIVITY_TYPE));
                 Log.d(TAG, "read ACTIVITY TYPE from TABLE ATTEMPTS: " + placeholder);
-                dataHolder.add("ACTIVITY: " + placeholder);
+                dataHolder.add("Activity: " + placeholder);
 
                 placeholder = cursor.getString(cursor.getColumnIndex(ROUTE_NAME));
                 Log.d(TAG, "read ROUTE NAME from TABLE ATTEMPTS: " + placeholder);
-                dataHolder.add("ROUTE:      " + placeholder);
+                dataHolder.add("Route name: " + placeholder);
 
                 placeholder = cursor.getString(cursor.getColumnIndex(TOTAL_TIME));
                 Log.d(TAG, "read TOTAL TIME from TABLE ATTEMPTS: " + timeReformat(placeholder));
-                dataHolder.add("TOTAL TIME: " + timeReformat(placeholder));
+                dataHolder.add("Total time: " + timeReformat(placeholder));
 
                 placeholder = cursor.getString(cursor.getColumnIndex(TOTAL_DISTANCE));
                 Log.d(TAG, "read TOTAL DISTANCE from TABLE ATTEMPTS: " + placeholder);
-                dataHolder.add("TOTAL DISTANCE: " + placeholder+"KM");
+                dataHolder.add("Total distance: " + placeholder+"KM");
 
                 placeholder = cursor.getString(cursor.getColumnIndex(AVG_HR));
                 Log.d(TAG, "read AVERAGE HEART RATE from TABLE ATTEMPTS: " + placeholder);
-                dataHolder.add("AVERAGE HEART RAGE:      " + placeholder + "BMP");
+                dataHolder.add("Average heart rate: " + placeholder + "BMP");
 
                 placeholder = cursor.getString(cursor.getColumnIndex(CALORIES));
                 Log.d(TAG, "read CALORIES BURNT from TABLE ATTEMPTS: " + placeholder);
-                dataHolder.add("CALORIES BURNT:      " + placeholder+"KCAL");
+                dataHolder.add("Calories burnt: " + placeholder+"KCAL");
 
-                dataHolder.add("See map snapshot");//click on this item to see the snapshot of map
+                placeholder=cursor.getString(cursor.getColumnIndex(IMAGEFILENAME));
+                Log.d(TAG, "read IMAGEFILENAME from TABLE ATTEMPTS: "+placeholder);
+                dataHolder.add(placeholder);//click on this item to see the snapshot of map
 
                 //when adding row data is finished, name hashmap key with date
                 placeholder = cursor.getString(cursor.getColumnIndex(DATE_OF_ATTEMPT));
                 Log.d(TAG, "read DATE OF ATTEMPT from TABLE ATTEMPTS");
+
+                String coordinates=getFilenameCoordinates(placeholder);
+                dataHolder.add(coordinates);
                 expandList.put("DATE: "+placeholder, dataHolder);
 
                 if (cursor.isFirst()) {
@@ -449,7 +455,7 @@ public class DBHandler extends SQLiteOpenHelper {
         minutes=minutes%60;
         int hours=time/3600;
 
-        String formatted=hours+" Hour "+minutes+" Min "+seconds+" Sec";
+        String formatted=hours+"hour "+minutes+"min "+seconds+"s";
         return formatted;
     }
 
