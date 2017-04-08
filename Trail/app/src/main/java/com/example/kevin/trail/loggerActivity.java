@@ -138,7 +138,7 @@ public class loggerActivity extends AppCompatActivity implements
             int minutes = seconds / 60;
             seconds = seconds % 60;
             timerTextViewL.setText("Time elapsed: " + String.format("%d:%02d", minutes, seconds));
-            notificationOp(noti_id, String.format("%d:%02d", minutes, seconds), Integer.toString(MainActivity.heartRate) + " BPM", String.format("%.2f", activityhelper.getTotalDistance()) + " km");
+            notificationOp(noti_id, String.format("%d:%02d", minutes, seconds), String.format("%.2f", activityhelper.getTotalDistance()));
             timerHandler.postDelayed(this, 500);
         }
     };
@@ -415,11 +415,11 @@ public class loggerActivity extends AppCompatActivity implements
                 .show();
     }
 
-    public void notificationOp(int id, String time, String heartrate, String distance) {
+    public void notificationOp(int id, String time, String distance) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         builder.setSmallIcon(R.mipmap.ic_launcher);
         builder.setContentTitle("Trail : " + activityType);
-        builder.setContentText("Time: " + time + ", HR: " + heartrate + ", Distance: " + distance);
+        builder.setContentText("Time: " + timerTextViewL.getText() + ", Distance : " + activityhelper.getTotalDistance());
         NotificationManager NM = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         NM.notify(id, builder.build());
     }
@@ -450,8 +450,6 @@ public class loggerActivity extends AppCompatActivity implements
             }
         });
         builder.show();
-        NotificationManager NM = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
-        NM.cancelAll();
     }
 
 
@@ -510,8 +508,6 @@ public class loggerActivity extends AppCompatActivity implements
             }
         });
         dialog.show();
-        NotificationManager NM = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
-        NM.cancelAll();
     }
 
     private Polyline addPolyLine(ArrayList<Location> routeCoordinates, String typeOfPolyLine) {
@@ -585,23 +581,6 @@ public class loggerActivity extends AppCompatActivity implements
         alertDialog.show();
     }
 
-
-
-//    @Override
-//    public void onPause() {
-//        super.onPause();
-//        if (googleAPIclient != null) {
-//            LocationServices.FusedLocationApi.removeLocationUpdates(googleAPIclient, this);
-//        }
-//    }
-
-    public void onBackPressed() {
-        super.onBackPressed();
-        timerHandler.removeCallbacks(timerRunnable);
-        this.finish();
-        NotificationManager NM = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
-        NM.cancelAll();
-    }
 
     @Override
     public void onMapLongClick(LatLng latLng) {
@@ -750,7 +729,6 @@ public class loggerActivity extends AppCompatActivity implements
             //Log.d(TAG, "ONCAMERAIDLE");
         }
 
-
         @Override
         protected void onDestroy () {
             googleAPIclient.disconnect();
@@ -759,10 +737,6 @@ public class loggerActivity extends AppCompatActivity implements
             {
                 activityhelper.stopActivity();
                 //disconnectClicked();//disconnect from HxM
-            timerHandler.removeCallbacks(timerRunnable);
-            this.finish();
-            NotificationManager NM = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
-            NM.cancelAll();
             }
         }
 
@@ -778,17 +752,6 @@ public class loggerActivity extends AppCompatActivity implements
             msg.getData().putInt("HeartRate", heartRate);
             newHandler.sendMessage(msg);
         }
-    
-        //disconnectClicked();//disconnect from HxM
-
-
-    public void heartRateReceived(int heartRate) {
-        Message msg = new Message();
-        msg.getData().putInt("HeartRate", heartRate);
-        newHandler.sendMessage(msg);
-
-    }
-
 
         //connect with HxM HR Sensor
 
