@@ -31,30 +31,56 @@
 
     </LinearLayout>
 
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/bottomBar"
+        android:layout_below="@+id/spinnerLayout">
+
         <LinearLayout
-            android:layout_below="@id/spinnerLayout"
-            android:layout_width="fill_parent"
             android:id="@+id/graphLayout"
-            android:padding="20dp"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_below="@id/spinnerLayout"
+            android:orientation="vertical"
+            android:padding="20dp">
 
             <TextView
-                android:layout_width="match_parent"
                 android:id="@+id/sinceText"
-                android:layout_height="wrap_content"/>
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
 
             <com.jjoe64.graphview.GraphView
+                android:id="@+id/graph"
                 android:layout_width="match_parent"
-                android:layout_height="200dip"
-                android:id="@+id/graph" />
+                android:layout_height="200dip" />
+
             <TextView
+                android:id="@+id/selectedPoint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/hrGraphInfo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/selectedPoint"/>
+                android:layout_marginTop="26dp"
+                android:text="Average Heart Rate (BMP)"
+                android:textAlignment="center"
+                android:textColor="@color/heartrategraphtitle"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <com.jjoe64.graphview.GraphView
+                android:id="@+id/hrGraph"
+                android:layout_width="match_parent"
+                android:layout_height="200dip"
+                android:layout_marginTop="6dp"
+                app:seriesColor="#3CA508"
+                app:seriesType="line" />
 
         </LinearLayout>
-
+    </ScrollView>
     <LinearLayout
         android:layout_width="match_parent"
         android:id="@+id/progressPane"

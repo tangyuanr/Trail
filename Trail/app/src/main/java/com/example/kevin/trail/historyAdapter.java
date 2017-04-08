@@ -151,7 +151,7 @@ public class historyAdapter extends BaseAdapter {
             Log.d("historyActivity-ImgView", e.getMessage());
         }
         //TODO do something when image is still not loaded
-        if (null!=setter.snapshot.getDrawable()) {
+        if (null==setter.snapshot.getDrawable()) {
             try {
                 setter.snapshot.setImageBitmap(BitmapFactory.decodeFile(fulldirectory));
             }catch (RuntimeException e){

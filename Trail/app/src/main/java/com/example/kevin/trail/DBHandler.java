@@ -412,6 +412,7 @@ public class DBHandler extends SQLiteOpenHelper {
 
                 placeholder = cursor.getString(cursor.getColumnIndex(TOTAL_DISTANCE));
                 Log.d(TAG, "read TOTAL DISTANCE from TABLE ATTEMPTS: " + placeholder);
+                placeholder=String.format("%.2f", Float.parseFloat(placeholder));
                 dataHolder.add("Total distance: " + placeholder+"KM");
 
                 placeholder = cursor.getString(cursor.getColumnIndex(AVG_HR));

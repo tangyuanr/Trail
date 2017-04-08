@@ -5,6 +5,7 @@ import android.support.annotation.IdRes;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.widget.AdapterView;
@@ -57,6 +58,8 @@ public class graphActivity extends AppCompatActivity {
     private TextView selectedPoint;
     private TextView showingTextView;
     private GraphView graph;
+    private GraphView HRgraph;
+    private TextView hrGraphText;
     private BottomBar mBottomBar;
     private LinearLayout graphLayout;
     private LinearLayout spinnerLayout;
@@ -101,6 +104,8 @@ public class graphActivity extends AppCompatActivity {
         showingTextView = (TextView) findViewById(R.id.showing);
         spinnerShowing = (Spinner) findViewById(R.id.showingSpinner);
         graph = (GraphView) findViewById(R.id.graph);
+        HRgraph=(GraphView)findViewById(R.id.hrGraph);
+        hrGraphText=(TextView)findViewById(R.id.hrGraphInfo);
         selectedPoint = (TextView) findViewById(R.id.selectedPoint);
 
         // selectedRoute spinner dynamic fill
@@ -149,7 +154,9 @@ public class graphActivity extends AppCompatActivity {
             graph.setVisibility(View.GONE);
             spinnerShowing.setVisibility(View.GONE);
             showingTextView.setVisibility(View.GONE);
-            sinceTextView.setText("There is no data to display. Get your lazy ass moving.");
+            HRgraph.setVisibility(View.GONE);
+            hrGraphText.setVisibility(View.GONE);
+            sinceTextView.setText("There is no data to display.");
             bottomBar.setVisibility(View.GONE);
         }
 
@@ -272,6 +279,17 @@ public class graphActivity extends AppCompatActivity {
         for (int i = 0; i < numberOf; i++) {
             datapoints[i] = new DataPoint(daysanddistance.get(i).getDateTime().toDate(), daysanddistance.get(i).getDistance());
         }
+        /**************************HR GRAPH*******************************************/
+        //compute data points: all HR information for all attempts
+        ArrayList<Attempt> allAttempts=dbhandler.getAttempts("");
+        DataPoint[] hrDataPoints=new DataPoint[allAttempts.size()];
+        for (int i=0;i<allAttempts.size();i++){
+            int HR=allAttempts.get(i).getAverageHeartRate();
+            DateTime attemptDate=allAttempts.get(i).getDateofAttemptAsDateTime();
+            Date date=attemptDate.toDate();
+            Log.d("graphActivity", "Adding data points to HR graph, date: "+date.toString());
+            hrDataPoints[i]=new DataPoint(date, HR);
+        }
 
         if (numberOf > 1) {
             LineGraphSeries<DataPoint> series_line = new LineGraphSeries<>(datapoints);
@@ -298,6 +316,17 @@ public class graphActivity extends AppCompatActivity {
                     selectedPoint.setText(str);
                 }
             });
+
+            /********************HR GRAPH*******************************/
+            LineGraphSeries<DataPoint> hr_series=new LineGraphSeries<>(hrDataPoints);
+            hr_series.setColor(Color.parseColor("#3CA508"));
+            HRgraph.addSeries(hr_series);
+            HRgraph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(graphActivity.this));
+            HRgraph.getGridLabelRenderer().setHumanRounding(false);
+
+
+
+
 
 
         } else {
