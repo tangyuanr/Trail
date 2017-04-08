@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="0dp"
+    android:id="@+id/rlRouteManager"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    tools:context="com.example.kevin.trail.routeManager"
+    xmlns:tools="http://schemas.android.com/tools">
+
+
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:id="@+id/linearlayoutListViewRoutes"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <ListView
+        android:layout_marginTop="60dp"
+        android:layout_marginBottom="60dp"
+        android:id="@+id/listviewroutes"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:divider="#0e5b29"
+        android:dividerHeight="2px">
+
+    </ListView>
+
+
+
+
+</LinearLayout>
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/routeManagerActionBar"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="@android:color/holo_green_dark"
+        android:elevation="4dp"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+
+        <android.support.v7.widget.ActionMenuView
+            android:id="@+id/amvMenu"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:gravity="right" />
+    </android.support.v7.widget.Toolbar>
+
+
+
+
+    <FrameLayout
+        android:id="@+id/contentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/bottomBarRouteManager" />
+
+    <com.roughike.bottombar.BottomBar
+        android:id="@+id/bottomBarRouteManager"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        app:bb_behavior="shifting"
+        android:layout_alignParentBottom="true"
+        app:bb_tabXmlResource="@xml/bottombar_routemanager" />
+
+
+</RelativeLayout>

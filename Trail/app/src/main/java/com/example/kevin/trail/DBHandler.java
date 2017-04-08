@@ -54,12 +54,13 @@ public class DBHandler extends SQLiteOpenHelper {
     private static final String CALORIES="CaloriesBurnt";//in KCal
     private static final String TOTAL_DISTANCE="TotalDistance";//in km
     private static final String IMAGEFILENAME="ImageFileName";//ending in .jpg
+    private static final String ROUTELOCALITY="RouteLocality";
 
     @Override
     public void onCreate(SQLiteDatabase db){
 
         String CREATE_ROUTE_TABLE="CREATE TABLE "+TABLE_ROUTES + " ("+ROUTE_ID+" INTEGER PRIMARY KEY AUTOINCREMENT, "+ROUTE_NAME+" TEXT, "
-                + ACTIVITY_TYPE + " TEXT, " + ROUTE_DISTANCE + " REAL, " + BEST_TIME + " INT, " + DATE_OF_BEST_TIME + " TEXT, " + FILENAME_COORDINATES + " TEXT)";
+                + ACTIVITY_TYPE + " TEXT, " + ROUTE_DISTANCE + " REAL, " + BEST_TIME + " INT, " + DATE_OF_BEST_TIME + " TEXT, " + FILENAME_COORDINATES + " TEXT, " + ROUTELOCALITY + " TEXT, " + IMAGEFILENAME + " TEXT)";
         Log.e(TAG, CREATE_ROUTE_TABLE);
         db.execSQL(CREATE_ROUTE_TABLE);
         String CREATE_ATTEMPTS_TABLE="CREATE TABLE "+TABLE_ATTEMPTS+" ("+ATTEMPT_ID+" INTEGER PRIMARY KEY AUTOINCREMENT, "+ACTIVITY_TYPE+" TEXT, "+TOTAL_DISTANCE+" TEXT, "+TOTAL_TIME + " INT, "
@@ -98,7 +99,9 @@ public class DBHandler extends SQLiteOpenHelper {
                 long bestTime = routesCursor.getLong(4);
                 String dateBestTime = routesCursor.getString(5);
                 String filename_coordinates = routesCursor.getString(6);
-                Route route = new Route(nameOfRoute, activityType, totalDistance, bestTime, dateBestTime, filename_coordinates);
+                String routelocality = routesCursor.getString(7);
+                String imagefilename = routesCursor.getString(8);
+                Route route = new Route(nameOfRoute, activityType, totalDistance, bestTime, dateBestTime, filename_coordinates, routelocality, imagefilename);
                 routesList.add(route);
             }
         } finally {
@@ -226,6 +229,7 @@ public class DBHandler extends SQLiteOpenHelper {
         contentValues.put(BEST_TIME, route.getBestTime());
         contentValues.put(DATE_OF_BEST_TIME, route.getDateBestTime());
         contentValues.put(FILENAME_COORDINATES, route.getFilename_coordinates());
+        contentValues.put(ROUTELOCALITY, route.getLocality());
         db.insert(TABLE_ROUTES, null, contentValues);  //keeping track of the addedID so that we can call addAttempt for the correct RouteID
         db.close();
     }
@@ -251,7 +255,9 @@ public class DBHandler extends SQLiteOpenHelper {
                 int bestTime = routeCursor.getInt(4);
                 String dateBestTime = routeCursor.getString(5);
                 String filename_coordinates = routeCursor.getString(6);
-                route = new Route(nameOfRoute, activityType, totalDistance, bestTime, dateBestTime, filename_coordinates);
+                String locality = routeCursor.getString(7);
+                String imagefilename = routeCursor.getString(8);
+                route = new Route(nameOfRoute, activityType, totalDistance, bestTime, dateBestTime, filename_coordinates, locality, imagefilename);
             }
         } finally {
             routeCursor.close();
@@ -370,6 +376,9 @@ public class DBHandler extends SQLiteOpenHelper {
             return false; //no, it does not exist
         }
     }
+
+
+
 
     //get general info of all attempts from ATTEMPTS table
     //data will be read in descending order, so that the display order goes from most recent to oldest

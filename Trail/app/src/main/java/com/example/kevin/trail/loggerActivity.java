@@ -10,6 +10,8 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -58,9 +60,11 @@ import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by Andre & Jiayin
@@ -138,6 +142,8 @@ public class loggerActivity extends AppCompatActivity implements
             timerHandler.postDelayed(this, 500);
         }
     };
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -389,15 +395,20 @@ public class loggerActivity extends AppCompatActivity implements
                         timerHandler.removeCallbacks(timerRunnable);
                         startStopButton.setText("Start logging");
                         loggingText.setVisibility(View.INVISIBLE);
-                        if (!(route == null)) {
-                            SaveAttemptDialog();
+                        if(activityhelper.getCurrentNumberOfSamples() > 0) {
+                            if (!(route == null)) {
+                                SaveAttemptDialog();
 
-                        } else {
-                            NewRouteDialog();
+                            } else {
+                                NewRouteDialog();
+                            }
+                            long timelastSample = activityhelper.getTimeLastsample();    //get final stats for display
+                            float FinalDistance = activityhelper.getTotalDistance();    //get final stats for display
+                            showStatsDialog(timelastSample, FinalDistance);
                         }
-                        long timelastSample = activityhelper.getTimeLastsample();    //get final stats for display
-                        float FinalDistance = activityhelper.getTotalDistance();    //get final stats for display
-                        showStatsDialog(timelastSample, FinalDistance);
+                        else {
+                            Toast.makeText(loggerActivity.this, "Logging cancelled", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 })
                 .setNegativeButton("No", null)
@@ -429,6 +440,7 @@ public class loggerActivity extends AppCompatActivity implements
                 attempt = new Attempt(route, totaltime, activityhelper.getTotalDistance(), currentDateandTime, snapshotURL, totalBMP / counter, (int) totalCaloriesBurnt, imagefilename);
                 dbHandler.addAttempt(attempt); //save the attempt to the database
                 Log.d(TAG, "Attempt added to the database");
+                Toast.makeText(loggerActivity.this, "Attempt saved to existing route.", Toast.LENGTH_SHORT).show();
             }
         });
         builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -472,17 +484,19 @@ public class loggerActivity extends AppCompatActivity implements
                                 int totaltime = (int) activityhelper.getTimeLastsample() / 1000;
                                 java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
                                 String currentDateandTime = sdf.format(new Date());
-                                //instantiating a new route object with the constructor for the case in which we have no rowID yet
-                                route = new Route(inputRouteName, activityType, activityhelper.getTotalDistance(), totaltime, currentDateandTime, activityhelper.getCoordinatesFileName());
-                                dbHandler.addRoute(route);
-                                Log.d(TAG, "Route object added to ROUTE_TABLE");
-
-                                String snapshotURL = route.getStaticAPIURL(loggerActivity.this, 250, 250);
+                                String locality = getLocality();
+                                Route route_dummy = new Route("dummy route name", "dummy activity type", 0, 0, "dummy time", activityhelper.getCoordinatesFileName(), "dummy locality", "dummy filename");
+                                String snapshotURL = route_dummy.getStaticAPIURL(loggerActivity.this, 250, 250);
                                 imagefilename = sdf.format(new Date()) + ".JPEG";
                                 imageDownload(loggerActivity.this, snapshotURL, imagefilename);
+                                //instantiating a new route object with the constructor for the case in which we have no rowID yet
+                                route = new Route(inputRouteName, activityType, activityhelper.getTotalDistance(), totaltime, currentDateandTime, activityhelper.getCoordinatesFileName(), locality, imagefilename);
+                                dbHandler.addRoute(route);
+                                Log.d(TAG, "Route object added to ROUTE_TABLE");
                                 attempt = new Attempt(route, totaltime, activityhelper.getTotalDistance(), currentDateandTime, snapshotURL, totalBMP / counter, (int) totalCaloriesBurnt, imagefilename);
                                 dbHandler.addAttempt(attempt); //adding the attempt
                                 Log.d(TAG, "Attempt object built and added to database");
+                                Toast.makeText(loggerActivity.this, "New route saved", Toast.LENGTH_SHORT).show();
                                 dialog.dismiss();
                             } else if (routeNameExists) {
                                 Toast.makeText(loggerActivity.this, "Route name already exists", Toast.LENGTH_SHORT).show();
@@ -512,6 +526,24 @@ public class loggerActivity extends AppCompatActivity implements
         } else {
             return null;
         }
+    }
+
+    private String getLocality() {
+        Geocoder geocoder;
+        List<Address> addresses;
+        String city;
+        String province;
+        String locality = "";
+        geocoder = new Geocoder(this, Locale.getDefault());
+        try {
+            addresses = geocoder.getFromLocation(lastLocation.getLatitude(), lastLocation.getLongitude(), 1);
+            city = addresses.get(0).getLocality();
+            province = addresses.get(0).getAdminArea();
+            locality = city + ", " + province;
+        }
+        catch(IOException ex) {
+        }
+        return locality;
     }
 
 
@@ -719,18 +751,34 @@ public class loggerActivity extends AppCompatActivity implements
         }
 
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (logging)// if logging is still true
-        {
-            activityhelper.stopActivity();
+        @Override
+        protected void onDestroy () {
+            googleAPIclient.disconnect();
+            super.onDestroy();
+            if (logging)// if logging is still true
+            {
+                activityhelper.stopActivity();
+                //disconnectClicked();//disconnect from HxM
             timerHandler.removeCallbacks(timerRunnable);
             this.finish();
             NotificationManager NM = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
             NM.cancelAll();
+            }
         }
+
+    @Override
+    protected void onStop() {
+        googleAPIclient.disconnect();
+        super.onStop();
     }
+
+    @Override
+        public void heartRateReceived ( int heartRate){
+            Message msg = new Message();
+            msg.getData().putInt("HeartRate", heartRate);
+            newHandler.sendMessage(msg);
+        }
+    
         //disconnectClicked();//disconnect from HxM
 
 
