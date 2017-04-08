@@ -65,6 +65,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Andre & Jiayin
@@ -108,10 +109,11 @@ public class loggerActivity extends AppCompatActivity implements
     Location lastLocation;
     ArrayList<Location> locationArray = new ArrayList<Location>();
     private String imagefilename;
-
-
+    private float totalDistanceGoogleAPI = 0;
+    private long lastTimeForSpeed = 0;
     private int totalBMP = 0;
     private int counter = 0;
+    private float speedGoogleApi;
     protected TextView hrTextView = null;
     //private HRSensorHandler hrHandler;
     protected Button sensorReconnect = null;
@@ -124,7 +126,9 @@ public class loggerActivity extends AppCompatActivity implements
     private RelativeLayout mapHeadLayout;
     private Button toStats;
     private RelativeLayout headerLayout;
-
+    private long millis;
+    private long oldTimeForSpeed = 0;
+    private long newTimeForSpeed = 0;
 
     TextView timerTextViewL;
     long startTime = 0;
@@ -133,12 +137,12 @@ public class loggerActivity extends AppCompatActivity implements
     Runnable timerRunnable = new Runnable() {
         @Override
         public void run() {
-            long millis = System.currentTimeMillis() - startTime;
+            millis = System.currentTimeMillis() - startTime;
             int seconds = (int) (millis / 1000);
             int minutes = seconds / 60;
             seconds = seconds % 60;
             timerTextViewL.setText("Time elapsed: " + String.format("%d:%02d", minutes, seconds));
-            notificationOp(noti_id, String.format("%d:%02d", minutes, seconds), String.format("%.2f", activityhelper.getTotalDistance()));
+            notificationOp(noti_id, String.format("%d:%02d", minutes, seconds), String.format("%.2f", totalDistanceGoogleAPI));
             timerHandler.postDelayed(this, 500);
         }
     };
@@ -309,6 +313,11 @@ public class loggerActivity extends AppCompatActivity implements
                                 public void onGranted() {
 
                                     logging = true;
+                                    totalDistanceGoogleAPI = 0;
+                                    totalDistanceTravelledTextView.setText("0.00 km");
+                                    oldTimeForSpeed = System.currentTimeMillis();
+                                    newTimeForSpeed = 0;
+                                    speedGoogleApi = 0;
                                     activityhelper = new activityHelper(loggerActivity.this, activityType);
                                     activityhelper.startActivity(null); //start logging samples
                                     connectClicked();
@@ -402,9 +411,7 @@ public class loggerActivity extends AppCompatActivity implements
                             } else {
                                 NewRouteDialog();
                             }
-                            long timelastSample = activityhelper.getTimeLastsample();    //get final stats for display
-                            float FinalDistance = activityhelper.getTotalDistance();    //get final stats for display
-                            showStatsDialog(timelastSample, FinalDistance);
+                            showStatsDialog(millis, totalDistanceGoogleAPI);
                         }
                         else {
                             Toast.makeText(loggerActivity.this, "Logging cancelled", Toast.LENGTH_SHORT).show();
@@ -419,7 +426,7 @@ public class loggerActivity extends AppCompatActivity implements
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         builder.setSmallIcon(R.mipmap.ic_launcher);
         builder.setContentTitle("Trail : " + activityType);
-        builder.setContentText("Time: " + timerTextViewL.getText() + ", Distance : " + activityhelper.getTotalDistance());
+        builder.setContentText("Time: " + timerTextViewL.getText() + ", Distance : " + totalDistanceGoogleAPI);
         NotificationManager NM = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         NM.notify(id, builder.build());
     }
@@ -437,7 +444,7 @@ public class loggerActivity extends AppCompatActivity implements
                 String snapshotURL = route.getStaticAPIURL(loggerActivity.this, 250, 250);
                 imagefilename = sdf.format(new Date()) + ".JPEG";
                 imageDownload(loggerActivity.this, snapshotURL, imagefilename);
-                attempt = new Attempt(route, totaltime, activityhelper.getTotalDistance(), currentDateandTime, snapshotURL, totalBMP / counter, (int) totalCaloriesBurnt, imagefilename);
+                attempt = new Attempt(route, totaltime, totalDistanceGoogleAPI, currentDateandTime, snapshotURL, totalBMP / counter, (int) totalCaloriesBurnt, imagefilename);
                 dbHandler.addAttempt(attempt); //save the attempt to the database
                 Log.d(TAG, "Attempt added to the database");
                 Toast.makeText(loggerActivity.this, "Attempt saved to existing route.", Toast.LENGTH_SHORT).show();
@@ -488,10 +495,10 @@ public class loggerActivity extends AppCompatActivity implements
                                 imagefilename = sdf.format(new Date()) + ".JPEG";
                                 imageDownload(loggerActivity.this, snapshotURL, imagefilename);
                                 //instantiating a new route object with the constructor for the case in which we have no rowID yet
-                                route = new Route(inputRouteName, activityType, activityhelper.getTotalDistance(), totaltime, currentDateandTime, activityhelper.getCoordinatesFileName(), locality, imagefilename);
+                                route = new Route(inputRouteName, activityType, totalDistanceGoogleAPI, totaltime, currentDateandTime, activityhelper.getCoordinatesFileName(), locality, imagefilename);
                                 dbHandler.addRoute(route);
                                 Log.d(TAG, "Route object added to ROUTE_TABLE");
-                                attempt = new Attempt(route, totaltime, activityhelper.getTotalDistance(), currentDateandTime, snapshotURL, totalBMP / counter, (int) totalCaloriesBurnt, imagefilename);
+                                attempt = new Attempt(route, totaltime, totalDistanceGoogleAPI, currentDateandTime, snapshotURL, totalBMP / counter, (int) totalCaloriesBurnt, imagefilename);
                                 dbHandler.addAttempt(attempt); //adding the attempt
                                 Log.d(TAG, "Attempt object built and added to database");
                                 Toast.makeText(loggerActivity.this, "New route saved", Toast.LENGTH_SHORT).show();
@@ -545,7 +552,9 @@ public class loggerActivity extends AppCompatActivity implements
 
     private void showStatsDialog(long timeLastSample, double FinalDistance) {
 
-        long time = timeLastSample / (60000); //in minutes
+        String time = String.format("%2d minutes and %2d seconds", TimeUnit.MILLISECONDS.toMinutes(millis), TimeUnit.MILLISECONDS.toSeconds(millis) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis))
+        );
+
         AlertDialog alertDialog = new AlertDialog.Builder(this).create();
         String string = null;
         switch (activityType) {
@@ -571,7 +580,7 @@ public class loggerActivity extends AppCompatActivity implements
                 string = "biked";
                 break;
         }
-        alertDialog.setMessage("You have " + string + " " + String.format("%.2f", FinalDistance) + " km in " + (time) + " minutes.\n");
+        alertDialog.setMessage("You have " + string + " " + String.format("%.2f", FinalDistance) + " km in " + time);
         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
@@ -678,10 +687,19 @@ public class loggerActivity extends AppCompatActivity implements
                 googleMAP.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
             }
             Log.d(TAG, String.valueOf(location.getAccuracy()));
-            if (location.getAccuracy() < 15 && lastLocation.distanceTo(location) > 10) {
+            if (location.getAccuracy() < 20 && lastLocation.distanceTo(location) > 20) {
                 List<LatLng> points = previousTrail.getPoints();
                 points.add(latLng);
                 previousTrail.setPoints(points);
+                float distance = (lastLocation.distanceTo(location))/1000;
+                newTimeForSpeed = System.currentTimeMillis();
+                speedGoogleApi = (float) 3600*(distance / ((newTimeForSpeed/1000) - (oldTimeForSpeed/1000)));
+                totalDistanceGoogleAPI += distance;
+                lastLocation = location;
+                oldTimeForSpeed = newTimeForSpeed;
+            }
+            else if(lastLocation.distanceTo(location) < 0.5) {
+                speedGoogleApi = 0;
                 lastLocation = location;
             }
 
@@ -816,7 +834,7 @@ public class loggerActivity extends AppCompatActivity implements
             public void run() {
                 while (logging == true) {
                     try {
-                        Thread.sleep(5000);
+                        Thread.sleep(2000);
                         totalBMP += MainActivity.heartRate;
                         counter++;
                         totalCaloriesBurnt += caloriesCalculator(MainActivity.heartRate);
@@ -826,10 +844,10 @@ public class loggerActivity extends AppCompatActivity implements
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Log.d(TAG, "TOTAL DISTANCE " + String.valueOf(activityhelper.getTotalDistance()));
-                            totalDistanceTravelledTextView.setText(String.format("%.1f", activityhelper.getTotalDistance()) + " km");
+                            //Log.d(TAG, "TOTAL DISTANCE " + String.valueOf(activityhelper.getTotalDistance()));
+                            totalDistanceTravelledTextView.setText(String.format("%.2f", totalDistanceGoogleAPI) + " km");
 
-                            float speed = activityhelper.getSpeed();
+                            float speed = speedGoogleApi;
                             if(activityType.equals("Biking")) {
                                 if(speed > 1) { //km/h
                                     paceOrSpeedText.setText(String.format("%.1f", speed) + " km/h");
