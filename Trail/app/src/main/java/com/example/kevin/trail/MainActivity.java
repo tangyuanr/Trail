@@ -164,6 +164,15 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
         }
     }
 
+    protected void onResume(){
+        super.onResume();
+        String gender = sharedPreferenceHelper.getProfileGender();
+        String weight = sharedPreferenceHelper.getProfileWeight();
+        if (gender == "" || weight == "") {
+            goToinfoActivity();
+        }
+    }
+
     public void onBackPressed(){
         super.onBackPressed();
         String gender = sharedPreferenceHelper.getProfileGender();
