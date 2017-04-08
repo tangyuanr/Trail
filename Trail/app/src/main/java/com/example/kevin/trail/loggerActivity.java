@@ -782,14 +782,6 @@ public class loggerActivity extends AppCompatActivity implements
         //disconnectClicked();//disconnect from HxM
 
 
-    public void heartRateReceived(int heartRate) {
-        Message msg = new Message();
-        msg.getData().putInt("HeartRate", heartRate);
-        newHandler.sendMessage(msg);
-
-    }
-
-
         //connect with HxM HR Sensor
 
     private void connectClicked() {

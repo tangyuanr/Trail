@@ -42,8 +42,8 @@ public class infoActivity extends AppCompatActivity {
                     if (ageint < 12 || ageint > 99) {
                         Toast failtoast = Toast.makeText(getApplicationContext(), "Profile not saved due to invalid input in the age field, please try again", Toast.LENGTH_LONG);  //Create a save failed message
                         failtoast.show();                                                                                                     // show the saved toast message
-                    } else if (lbs < 50 || lbs > 300) {
-                        Toast failtoast = Toast.makeText(getApplicationContext(), "Profile not saved due to invalid input int the weight field, please try again", Toast.LENGTH_LONG);
+                    } else if (lbs < 50 || lbs > 450) {
+                        Toast failtoast = Toast.makeText(getApplicationContext(), "Profile not saved due to invalid input in the weight field, please try again", Toast.LENGTH_LONG);
                         failtoast.show();
                     } else {
                         sharedPreferenceHelper.saveProfileGender(gender);                                                                          //Save the profile information into the localstorage
@@ -81,6 +81,14 @@ public class infoActivity extends AppCompatActivity {
         }
     }
 
+    public void onBackPressed(){
+        super.onBackPressed();
+        String gender = sharedPreferenceHelper.getProfileGender();
+        String weight = sharedPreferenceHelper.getProfileWeight();
+        String age = sharedPreferenceHelper.getProfileAge();
+        if (gender.length()<0 || weight.length() < 0 || age.length()<0){
+        }
+    }
 
     void goTomainActivity() {
         Intent intent = new Intent(infoActivity.this, MainActivity.class);

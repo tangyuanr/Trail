@@ -41,7 +41,9 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
 
 
         sharedPreferenceHelper = new sharedPreferenceHelper(MainActivity.this);
-
+        final String gender = sharedPreferenceHelper.getProfileGender();
+        final String weight = sharedPreferenceHelper.getProfileWeight();
+        final String age = sharedPreferenceHelper.getProfileAge();
         hrHandler=new HRSensorHandler(this);
         try {
             hrHandler.Connect();
@@ -71,14 +73,18 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
 
         hikeButtonlink.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                if (dbhandler.isRouteTableEmpty("Hiking")) {
-                    Intent intent = new Intent(MainActivity.this, loggerActivity.class);
-                    intent.putExtra("activityType", "Hiking");
-                    startActivity(intent);
+                if (gender.equals("") || age.equals("") || weight.equals("")) {
+                    goToinfoActivity();
                 } else {
-                    Intent intent = new Intent(MainActivity.this, routeManager.class);
-                    intent.putExtra("activityType", "Hiking");
-                    startActivity(intent);
+                    if (dbhandler.isRouteTableEmpty("Hiking")) {
+                        Intent intent = new Intent(MainActivity.this, loggerActivity.class);
+                        intent.putExtra("activityType", "Hiking");
+                        startActivity(intent);
+                    } else {
+                        Intent intent = new Intent(MainActivity.this, routeManager.class);
+                        intent.putExtra("activityType", "Hiking");
+                        startActivity(intent);
+                    }
                 }
             }
         });
@@ -104,30 +110,38 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
 
         runButtonlink.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                if (dbhandler.isRouteTableEmpty("Running")) {
-                    Intent intent = new Intent(MainActivity.this, loggerActivity.class);
-                    intent.putExtra("activityType", "Running");
-                    startActivity(intent);
+                if (gender.equals("") || age.equals("") || weight.equals("")) {
+                    goToinfoActivity();
                 } else {
-                    Intent intent = new Intent(MainActivity.this, routeManager.class);
-                    intent.putExtra("activityType", "Running");
-                    startActivity(intent);
-                    ;
+                    if (dbhandler.isRouteTableEmpty("Running")) {
+                        Intent intent = new Intent(MainActivity.this, loggerActivity.class);
+                        intent.putExtra("activityType", "Running");
+                        startActivity(intent);
+                    } else {
+                        Intent intent = new Intent(MainActivity.this, routeManager.class);
+                        intent.putExtra("activityType", "Running");
+                        startActivity(intent);
+                        ;
+                    }
                 }
             }
         });
 
         bikeButtonlink.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                if (dbhandler.isRouteTableEmpty("Biking")) {
-                    Intent intent = new Intent(MainActivity.this, loggerActivity.class);
-                    intent.putExtra("activityType", "Biking");
-                    startActivity(intent);
+                if (gender.equals("") || age.equals("") || weight.equals("")) {
+                    goToinfoActivity();
                 } else {
-                    Intent intent = new Intent(MainActivity.this, routeManager.class);
-                    intent.putExtra("activityType", "Biking");
-                    startActivity(intent);
-                    ;
+                    if (dbhandler.isRouteTableEmpty("Biking")) {
+                        Intent intent = new Intent(MainActivity.this, loggerActivity.class);
+                        intent.putExtra("activityType", "Biking");
+                        startActivity(intent);
+                    } else {
+                        Intent intent = new Intent(MainActivity.this, routeManager.class);
+                        intent.putExtra("activityType", "Biking");
+                        startActivity(intent);
+                        ;
+                    }
                 }
             }
         });
@@ -147,6 +161,15 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
         String weight = sharedPreferenceHelper.getProfileWeight();
         if (gender == "" || weight == "") {
             goToinfoActivity();
+        }
+    }
+
+    public void onBackPressed(){
+        super.onBackPressed();
+        String gender = sharedPreferenceHelper.getProfileGender();
+        String weight = sharedPreferenceHelper.getProfileWeight();
+        String age = sharedPreferenceHelper.getProfileAge();
+        if (gender.length()<0 || weight.length() < 0 || age.length()<0){
         }
     }
 
