@@ -786,7 +786,8 @@ public class loggerActivity extends AppCompatActivity implements
     final Handler newHandler = new Handler() {
         public void handleMessage(Message msg) {
             MainActivity.heartRate = msg.getData().getInt("HeartRate");
-            hrTextView.setText(Integer.toString(MainActivity.heartRate) + " BPM");
+            String holder=MainActivity.heartRate + " BPM";
+            hrTextView.setText(holder);
         }
     };
 
