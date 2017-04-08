@@ -25,7 +25,7 @@
         android:id="@+id/listviewroutes"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:divider="#0e5b29"
+        android:divider="@color/dividerColor"
         android:dividerHeight="2px">
 
     </ListView>

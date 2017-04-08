@@ -8,7 +8,7 @@
 
     <ImageView
         android:id="@+id/routeSnapShot"
-        android:layout_width="195dp"
+        android:layout_width="225dp"
         android:layout_height="140dp"/>
 
    <RelativeLayout

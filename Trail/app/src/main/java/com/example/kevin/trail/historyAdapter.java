@@ -139,6 +139,7 @@ public class historyAdapter extends BaseAdapter {
 
                 try {
                     setter.snapshot.setImageBitmap(BitmapFactory.decodeFile(fulldirectory));
+                    setter.snapshot.setScaleType(ImageView.ScaleType.FIT_XY);
                 }catch (RuntimeException e){
                     Log.d("historyActivity-ImgView", e.getMessage());
                 }
@@ -154,6 +155,7 @@ public class historyAdapter extends BaseAdapter {
         if (null!=setter.snapshot.getDrawable()) {
             try {
                 setter.snapshot.setImageBitmap(BitmapFactory.decodeFile(fulldirectory));
+                setter.snapshot.setScaleType(ImageView.ScaleType.FIT_XY);
             }catch (RuntimeException e){
                 Log.d("historyActivity-ImgView", e.getMessage());
             }

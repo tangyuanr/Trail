@@ -484,7 +484,7 @@ public class loggerActivity extends AppCompatActivity implements
                                 String currentDateandTime = sdf.format(new Date());
                                 String locality = getLocality();
                                 Route route_dummy = new Route("dummy route name", "dummy activity type", 0, 0, "dummy time", activityhelper.getCoordinatesFileName(), "dummy locality", "dummy filename");
-                                String snapshotURL = route_dummy.getStaticAPIURL(loggerActivity.this, 250, 250);
+                                String snapshotURL = route_dummy.getStaticAPIURL(loggerActivity.this, 225, 140);
                                 imagefilename = sdf.format(new Date()) + ".JPEG";
                                 imageDownload(loggerActivity.this, snapshotURL, imagefilename);
                                 //instantiating a new route object with the constructor for the case in which we have no rowID yet
