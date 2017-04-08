@@ -704,6 +704,7 @@ public class loggerActivity extends AppCompatActivity implements
             else if(lastLocation.distanceTo(location) < 0.5) {
                 speedGoogleApi = 0;
                 lastLocation = location;
+                oldTimeForSpeed = System.currentTimeMillis();
             }
 
 
