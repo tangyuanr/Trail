@@ -34,8 +34,9 @@
             android:id="@+id/activityTypeText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/dateText"
             android:layout_alignParentLeft="true"
+            android:layout_below="@id/dateText"
+            android:fontFamily="sans-serif-smallcaps"
             android:textColor="@color/bb_darkBackgroundColor"
             android:visibility="visible" />
 
@@ -43,8 +44,9 @@
             android:id="@+id/routeNameText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/activityTypeText"
             android:layout_alignParentLeft="true"
+            android:layout_below="@id/activityTypeText"
+            android:fontFamily="sans-serif-smallcaps"
             android:textColor="@color/bb_darkBackgroundColor"
             android:visibility="visible" />
 
@@ -52,8 +54,9 @@
             android:id="@+id/totalTimeText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/routeNameText"
             android:layout_alignParentLeft="true"
+            android:layout_below="@id/routeNameText"
+            android:fontFamily="sans-serif-smallcaps"
             android:textColor="@color/bb_darkBackgroundColor"
             android:visibility="visible" />
 
@@ -61,8 +64,9 @@
             android:id="@+id/totalDistanceText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/totalTimeText"
             android:layout_alignParentLeft="true"
+            android:layout_below="@id/totalTimeText"
+            android:fontFamily="sans-serif-smallcaps"
             android:textColor="@color/bb_darkBackgroundColor"
             android:visibility="visible" />
 
@@ -70,8 +74,9 @@
             android:id="@+id/avgHRText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/totalDistanceText"
             android:layout_alignParentLeft="true"
+            android:layout_below="@id/totalDistanceText"
+            android:fontFamily="sans-serif-smallcaps"
             android:textColor="@color/bb_darkBackgroundColor"
             android:visibility="visible" />
 
@@ -79,8 +84,9 @@
             android:id="@+id/caloriesText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/avgHRText"
             android:layout_alignParentLeft="true"
+            android:layout_below="@id/avgHRText"
+            android:fontFamily="sans-serif-smallcaps"
             android:textColor="@color/bb_darkBackgroundColor"
             android:visibility="visible" />
 
