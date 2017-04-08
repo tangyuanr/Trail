@@ -13,6 +13,7 @@ import org.joda.time.format.DateTimeFormatter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -382,8 +383,8 @@ public class DBHandler extends SQLiteOpenHelper {
 
     //get general info of all attempts from ATTEMPTS table
     //data will be read in descending order, so that the display order goes from most recent to oldest
-    public HashMap<String, List<String>> getContent(){
-        HashMap<String, List<String>> expandList = new HashMap<String, List<String>>();
+    public LinkedHashMap<String, List<String>> getContent(){
+        LinkedHashMap<String, List<String>> expandList = new LinkedHashMap<String, List<String>>();
         String placeholder;
 
         SQLiteDatabase db=this.getReadableDatabase();
