@@ -541,6 +541,9 @@ public class loggerActivity extends AppCompatActivity implements
         try {
             addresses = geocoder.getFromLocation(lastLocation.getLatitude(), lastLocation.getLongitude(), 1);
             city = addresses.get(0).getLocality();
+            if(city==null) {
+                city = "Montreal";
+            }
             province = addresses.get(0).getAdminArea();
             locality = city + ", " + province;
         }
