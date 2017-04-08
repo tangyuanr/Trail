@@ -183,8 +183,8 @@
             android:textSize="24sp"
             android:visibility="invisible"
             android:layout_below="@+id/HeartRateLabelText"
-            android:layout_alignLeft="@+id/paceOrSpeedLabel"
-            android:layout_alignStart="@+id/paceOrSpeedLabel" />
+            android:layout_alignRight="@+id/paceOrSpeedLabel"
+            android:layout_alignEnd="@+id/paceOrSpeedLabel" />
 
     </RelativeLayout>
 

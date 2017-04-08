@@ -1,6 +1,5 @@
 package com.example.kevin.trail;
 
-import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -35,33 +34,19 @@ public class infoActivity extends AppCompatActivity {
                 String age = ageEditText.getText().toString();
                 String weight = weightEditNum.getText().toString();
 
-                //Convert string input into integer in order to manipulate with integers and operators.
-                if (age.length() > 0 && weight.length() > 0 && gender.length() > 0) {
-                    int ageint = Integer.parseInt(age);
-                    int lbs = Integer.parseInt(weight);
-                    if (ageint < 12 || ageint > 99) {
-                        Toast failtoast = Toast.makeText(getApplicationContext(), "Profile not saved due to invalid input in the age field, please try again", Toast.LENGTH_LONG);  //Create a save failed message
-                        failtoast.show();                                                                                                     // show the saved toast message
-                    } else if (lbs < 50 || lbs > 300) {
-                        Toast failtoast = Toast.makeText(getApplicationContext(), "Profile not saved due to invalid input int the weight field, please try again", Toast.LENGTH_LONG);
-                        failtoast.show();
-                    } else {
-                        sharedPreferenceHelper.saveProfileGender(gender);                                                                          //Save the profile information into the localstorage
-                        sharedPreferenceHelper.saveProfileAge(age);
-                        sharedPreferenceHelper.saveProfileWeight(weight);
-
-                        Toast savetoast = Toast.makeText(getApplicationContext(), "Profile Saved", Toast.LENGTH_LONG);                         //create successful save message
-                        savetoast.show();
-
-                        goTomainActivity();
-                        //show the saved toast message
-                    }
+                int ageint = Integer.parseInt(age);                                             //Convert string input into integer in order to manipulate with integers and operators.
+                if (ageint < 18 || ageint > 99) {
+                    Toast failtoast = Toast.makeText(getApplicationContext(), "Profile not saved, please try again", Toast.LENGTH_LONG);  //Create a save failed message
+                    failtoast.show();                                                                                                     // show the saved toast message
                 } else {
-                    Toast failtoast = Toast.makeText(getApplicationContext(), "Please fill in missing field(s) to proceed", Toast.LENGTH_LONG);
-                    failtoast.show();
+                    sharedPreferenceHelper.saveProfileGender(gender);                                                                          //Save the profile information into the localstorage
+                    sharedPreferenceHelper.saveProfileAge(age);
+                    sharedPreferenceHelper.saveProfileWeight(weight);
+
+                    Toast savetoast = Toast.makeText(getApplicationContext(), "Profile Saved", Toast.LENGTH_LONG);                         //create successful save message
+                    savetoast.show();                                                                                                      //show the saved toast message
                 }
             }
-
 
         });
 
@@ -80,10 +65,5 @@ public class infoActivity extends AppCompatActivity {
             weightEditNum.setText(sharedPreferenceHelper.getProfileWeight());
         }
     }
-
-
-    void goTomainActivity() {
-        Intent intent = new Intent(infoActivity.this, MainActivity.class);
-        startActivity(intent);
-    }
 }
+
