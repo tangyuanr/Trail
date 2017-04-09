@@ -9,11 +9,23 @@
     tools:context="com.example.kevin.trail.graphActivity"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/graphToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="@android:color/holo_green_dark"
+        android:elevation="4dp"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+
+    </android.support.v7.widget.Toolbar>
+
+
     <!-- non-scrolling top pane -->
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:padding="20dp"
+        android:layout_marginTop="60dp"
         android:id="@+id/spinnerLayout"
         android:orientation="horizontal"
         >
@@ -84,6 +96,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:id="@+id/progressPane"
+        android:layout_marginTop="60dp"
         android:orientation="vertical"
         android:layout_height="fill_parent">
 

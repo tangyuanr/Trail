@@ -64,6 +64,7 @@ public class AttemptsListAdapter extends BaseAdapter {
             holder.totalTimeView = (TextView) convertView.findViewById(R.id.TotalTime);
             holder.AverageSpeedOrPaceView = (TextView) convertView.findViewById(R.id.AverageSpeedOrPace);
             holder.trophyIV = (ImageView) convertView.findViewById(R.id.trophyImageView);
+            holder.averageHR = (TextView) convertView.findViewById(R.id.HRAvg);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -101,6 +102,8 @@ public class AttemptsListAdapter extends BaseAdapter {
             holder.trophyIV.setImageDrawable(myDrawable);
         }
 
+        long averageHR = attemptArray.get(position).getAverageHeartRate();
+        holder.averageHR.setText("Avg. HR\n" + Long.toString(averageHR) + " BPM");
 
 
         return convertView;
@@ -110,6 +113,7 @@ public class AttemptsListAdapter extends BaseAdapter {
         TextView dateView;
         TextView totalTimeView;
         TextView AverageSpeedOrPaceView;
+        TextView averageHR;
         ImageView trophyIV;
     }
 }

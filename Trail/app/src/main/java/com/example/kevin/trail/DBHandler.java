@@ -231,6 +231,7 @@ public class DBHandler extends SQLiteOpenHelper {
         contentValues.put(DATE_OF_BEST_TIME, route.getDateBestTime());
         contentValues.put(FILENAME_COORDINATES, route.getFilename_coordinates());
         contentValues.put(ROUTELOCALITY, route.getLocality());
+        contentValues.put(IMAGEFILENAME, route.getImagefilename());
         db.insert(TABLE_ROUTES, null, contentValues);  //keeping track of the addedID so that we can call addAttempt for the correct RouteID
         db.close();
     }

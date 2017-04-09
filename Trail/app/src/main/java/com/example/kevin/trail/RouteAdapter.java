@@ -49,6 +49,7 @@ public class RouteAdapter extends BaseAdapter {
     private ArrayList<Route> routeArray;
     private LayoutInflater layoutInflater;
     private Context context;
+    private boolean noInternetDialog = false;
 
     private boolean isNetworkAvailable(){
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -97,6 +98,7 @@ public class RouteAdapter extends BaseAdapter {
     }
 
     private void noNetworkDialog() {
+        noInternetDialog = true;
         AlertDialog helpDialog = new AlertDialog.Builder(context).create();
         helpDialog.setTitle("Snapshot has not been saved");
         helpDialog.setMessage("Uh oh! Looks like this snapshot has not been saved :/\n"+
@@ -190,7 +192,7 @@ public class RouteAdapter extends BaseAdapter {
         //if there was no internet when the attempt was created,
         File imagefile=new File(fulldirectory);
         if (!imagefile.exists()){
-            if (!isNetworkAvailable()){
+            if (!isNetworkAvailable() && !noInternetDialog){
                 noNetworkDialog();
             }
             //if there is indeed internet connection, download the snapshot image
@@ -198,7 +200,7 @@ public class RouteAdapter extends BaseAdapter {
                 String coordinatesFile=routeArray.get(position).getFilename_coordinates();
                 //build url by first building a dummy Route object to use getStaticAPIURL method
                 Route route = new Route("dummy route name", "dummy activity type", 0, 0, "dummy time", coordinatesFile, "dummy locality", "dummy filename");
-                String url=route.getStaticAPIURL(context, 195, 140);
+                String url=route.getStaticAPIURL(context, 225, 140);
                 //download the image to internal storage
                 imageDownload(context, url, imageFileName);
             }
@@ -206,9 +208,12 @@ public class RouteAdapter extends BaseAdapter {
 
         try {
             holder.routeSnapshotView.setImageBitmap(BitmapFactory.decodeFile(fulldirectory));
+            holder.routeSnapshotView.setScaleType(ImageView.ScaleType.FIT_XY);
         }catch (RuntimeException e){
             Log.d("routeadapter-ImgView", e.getMessage());
-            noNetworkDialog();
+            if(!noInternetDialog) {
+                noNetworkDialog();
+            }
         }
 
         return convertView;

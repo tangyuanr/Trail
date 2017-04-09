@@ -1,12 +1,18 @@
 package com.example.kevin.trail;
 
 import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.IdRes;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.ActionMenuView;
+import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -61,6 +67,7 @@ public class graphActivity extends AppCompatActivity {
     private GraphView HRgraph;
     private TextView hrGraphText;
     private BottomBar mBottomBar;
+    protected Toolbar graphToolbar;
     private LinearLayout graphLayout;
     private LinearLayout spinnerLayout;
     private LinearLayout progressPane;
@@ -161,6 +168,28 @@ public class graphActivity extends AppCompatActivity {
         }
 
 
+
+        //actionbar
+        graphToolbar=(Toolbar)findViewById(R.id.graphToolbar);
+        setSupportActionBar(graphToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        graphToolbar.setTitleTextColor(Color.parseColor("#FFFFFF"));
+
+        final Drawable upArrow = ContextCompat.getDrawable(this, R.drawable.abc_ic_ab_back_material);
+        upArrow.setColorFilter(Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_ATOP);
+        getSupportActionBar().setHomeAsUpIndicator(upArrow);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     private ArrayList<dayWhenSomethingWasDone> ArrayDistancePerDate(int DAYS_BACK) {
