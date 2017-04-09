@@ -380,7 +380,7 @@ public class graphActivity extends AppCompatActivity {
             LineGraphSeries<DataPoint> hr_series=new LineGraphSeries<>(hrDataPoints);
             hr_series.setColor(Color.parseColor("#3CA508"));
             HRgraph.addSeries(hr_series);
-            HRgraph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(graphActivity.this));
+            HRgraph.getGridLabelRenderer().setLabelFormatter(new DateSATformatter(graphActivity.this));
             HRgraph.getGridLabelRenderer().setHumanRounding(false);
             HRgraph.getGridLabelRenderer().setVerticalAxisTitle("Average heart rate (bpm)");
             HRgraph.getGridLabelRenderer().setTextSize(25);
@@ -398,9 +398,10 @@ public class graphActivity extends AppCompatActivity {
                     return Color.parseColor("#FF9966");
                 }
             });
-            //cal_series.setSpacing(50);
+            cal_series.setValuesOnTopSize(50);
+
             CALgraph.addSeries(cal_series);
-            CALgraph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(graphActivity.this));
+            CALgraph.getGridLabelRenderer().setLabelFormatter(new DateSATformatter(graphActivity.this));
             CALgraph.getGridLabelRenderer().setHumanRounding(false);
             CALgraph.getGridLabelRenderer().setVerticalAxisTitle("Calories burnt (Cal)");
             CALgraph.getGridLabelRenderer().setTextSize(25);
