@@ -48,6 +48,7 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.TimeZone;
 
 
@@ -201,12 +202,21 @@ public class graphActivity extends AppCompatActivity {
             String dateString = date.toString(fmt);
             ArrayList<Attempt> attemptsforoneday = dbhandler.getAttemptsByDate(dateString, "");
             float totalDistance = 0;
+            int HR=0;
+            int count=0;
             if (!(attemptsforoneday.isEmpty())) {
                 for (int j = 0; j < attemptsforoneday.size(); j++) {
                     totalDistance += attemptsforoneday.get(j).getTotalDistance();
+                    int hr=(int)attemptsforoneday.get(j).getAverageHeartRate();
+                    if (hr!=0){
+                        HR+=hr;
+                        count++;
+                    }
                 }
             }
-            daysanddistance.add(new dayWhenSomethingWasDone(date,totalDistance));
+            if (count!=0)
+                HR=HR/count;
+            daysanddistance.add(new dayWhenSomethingWasDone(date,totalDistance, HR));
         }
         return daysanddistance;
     }
@@ -271,12 +281,21 @@ public class graphActivity extends AppCompatActivity {
             String dateString = date.toString(fmt);
             ArrayList<Attempt> attemptsforoneday = dbhandler.getAttemptsByDate(dateString, "");
             float totalDistance = 0;
+            int HR=0;
+            int count=0;
             if (!(attemptsforoneday.isEmpty())) {
                 for (int j = 0; j < attemptsforoneday.size(); j++) {
                     totalDistance += attemptsforoneday.get(j).getTotalDistance();
+                    int hr=(int)attemptsforoneday.get(j).getAverageHeartRate();
+                    if (hr!=0){
+                        HR+=hr;
+                        count++;
+                    }
                 }
             }
-            daysanddistance.add(new dayWhenSomethingWasDone(date,totalDistance));
+            if (count!=0)
+                HR=HR/count;
+            daysanddistance.add(new dayWhenSomethingWasDone(date,totalDistance, HR));
         }
         return daysanddistance;
     }
@@ -305,20 +324,15 @@ public class graphActivity extends AppCompatActivity {
         int numberOf = daysanddistance.size();
 
         DataPoint[] datapoints = new DataPoint[numberOf];
+        DataPoint[] hrDataPoints=new DataPoint[numberOf];
         for (int i = 0; i < numberOf; i++) {
             datapoints[i] = new DataPoint(daysanddistance.get(i).getDateTime().toDate(), daysanddistance.get(i).getDistance());
+            hrDataPoints[i]=new DataPoint(daysanddistance.get(i).getDateTime().toDate(), daysanddistance.get(i).getHR());
         }
         /**************************HR GRAPH*******************************************/
         //compute data points: all HR information for all attempts
-        ArrayList<Attempt> allAttempts=dbhandler.getAttempts("");
-        DataPoint[] hrDataPoints=new DataPoint[allAttempts.size()];
-        for (int i=0;i<allAttempts.size();i++){
-            int HR=allAttempts.get(i).getAverageHeartRate();
-            DateTime attemptDate=allAttempts.get(i).getDateofAttemptAsDateTime();
-            Date date=attemptDate.toDate();
-            Log.d("graphActivity", "Adding data points to HR graph, date: "+date.toString());
-            hrDataPoints[i]=new DataPoint(date, HR);
-        }
+
+
 
         if (numberOf > 1) {
             LineGraphSeries<DataPoint> series_line = new LineGraphSeries<>(datapoints);
@@ -352,6 +366,7 @@ public class graphActivity extends AppCompatActivity {
             HRgraph.addSeries(hr_series);
             HRgraph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(graphActivity.this));
             HRgraph.getGridLabelRenderer().setHumanRounding(false);
+            HRgraph.getGridLabelRenderer().setVerticalAxisTitle("Average heart rate (bpm)");
 
 
 
@@ -368,10 +383,12 @@ public class graphActivity extends AppCompatActivity {
 
         private DateTime date;
         private float distance;
+        private int HR;
 
-        public dayWhenSomethingWasDone(DateTime date, float distance) {
+        public dayWhenSomethingWasDone(DateTime date, float distance, int heartrate) {
             this.date = date;
             this.distance = distance;
+            this.HR=heartrate;
         }
 
         public DateTime getDateTime() {
@@ -389,6 +406,10 @@ public class graphActivity extends AppCompatActivity {
         public void setDistance(float distance) {
             this.distance = distance;
         }
+
+        public void setHR(int hr){this.HR=hr;}
+
+        public int getHR(){return HR;}
     }
 
 
@@ -478,4 +499,5 @@ public class graphActivity extends AppCompatActivity {
         bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_DOWN);
         return bd.floatValue();
     }
+
 }
