@@ -409,7 +409,7 @@ public class loggerActivity extends AppCompatActivity implements
                             showStatsDialog(timelastSample, FinalDistance);
                         }
                         else {
-                            Toast.makeText(loggerActivity.this, "Logging cancelled", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(loggerActivity.this, "Logging cancelled: no data logged", Toast.LENGTH_SHORT).show();
                         }
                     }
                 })
@@ -436,7 +436,7 @@ public class loggerActivity extends AppCompatActivity implements
                 int totaltime = (int) activityhelper.getTimeLastsample() / 1000;
                 java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyyMMdd_HHmm");//added start time so that attempts made on the same day can be differentiated in historyActivity
                 String currentDateandTime = sdf.format(new Date());
-                String snapshotURL = route.getStaticAPIURL(loggerActivity.this, 250, 250);
+                String snapshotURL = route.getStaticAPIURL(loggerActivity.this, 225, 140);
                 imagefilename = sdf.format(new Date()) + ".JPEG";
                 imageDownload(loggerActivity.this, snapshotURL, imagefilename);
                 attempt = new Attempt(route, totaltime, activityhelper.getTotalDistance(), currentDateandTime, snapshotURL, totalBMP / counter, (int) totalCaloriesBurnt, imagefilename);

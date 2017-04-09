@@ -353,6 +353,7 @@ public class graphActivity extends AppCompatActivity {
         if (numberOf > 1) {
             LineGraphSeries<DataPoint> series_line = new LineGraphSeries<>(datapoints);
             //series_line.setColor(Color.GREEN);
+            series_line.setAnimated(true);
             graph.addSeries(series_line);
             graph.getGridLabelRenderer().setLabelFormatter(new DateSATformatter(this));
             graph.getGridLabelRenderer().setNumHorizontalLabels(numberOf);
@@ -379,6 +380,7 @@ public class graphActivity extends AppCompatActivity {
             /********************HR GRAPH*******************************/
             LineGraphSeries<DataPoint> hr_series=new LineGraphSeries<>(hrDataPoints);
             hr_series.setColor(Color.parseColor("#3CA508"));
+            hr_series.setAnimated(true);
             HRgraph.addSeries(hr_series);
             HRgraph.getGridLabelRenderer().setLabelFormatter(new DateSATformatter(graphActivity.this));
             HRgraph.getGridLabelRenderer().setHumanRounding(false);
@@ -389,7 +391,7 @@ public class graphActivity extends AppCompatActivity {
 
 
             /*******************CALORIES GRAPH*********************/
-            BarGraphSeries<DataPoint> cal_series=new BarGraphSeries<>(calDataPoints);
+           /* BarGraphSeries<DataPoint> cal_series=new BarGraphSeries<>(calDataPoints);
             cal_series.setDrawValuesOnTop(true);
             cal_series.setValuesOnTopColor(Color.parseColor("#FF9933"));
             cal_series.setValueDependentColor(new ValueDependentColor<DataPoint>() {
@@ -399,6 +401,8 @@ public class graphActivity extends AppCompatActivity {
                 }
             });
             cal_series.setValuesOnTopSize(50);
+            cal_series.setSpacing(50);
+            cal_series.setAnimated(true);
 
             CALgraph.addSeries(cal_series);
             CALgraph.getGridLabelRenderer().setLabelFormatter(new DateSATformatter(graphActivity.this));
@@ -407,6 +411,11 @@ public class graphActivity extends AppCompatActivity {
             CALgraph.getGridLabelRenderer().setTextSize(25);
             CALgraph.getGridLabelRenderer().setHorizontalAxisTitle("");
             CALgraph.getGridLabelRenderer().setNumHorizontalLabels(numberOf);
+            CALgraph.getViewport().setMinX(0d);
+            CALgraph.getViewport().setMaxX(4d);
+            CALgraph.getViewport().setXAxisBoundsManual(true);
+           // CALgraph.setBackgroundColor(Color.parseColor("#000000"));*/
+           CALgraph.setVisibility(View.GONE);
 
 
 

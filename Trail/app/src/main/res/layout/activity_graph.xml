@@ -99,6 +99,7 @@
                 android:textAlignment="center"
                 android:textColor="@color/heartrategraphtitle"
                 android:textSize="18sp"
+                android:visibility="gone"
                 android:textStyle="bold" />
 
             <com.jjoe64.graphview.GraphView

@@ -148,6 +148,7 @@ public class historyAdapter extends BaseAdapter {
 
         try {
             setter.snapshot.setImageBitmap(BitmapFactory.decodeFile(fulldirectory));
+            setter.snapshot.setScaleType(ImageView.ScaleType.FIT_XY);
         }catch (RuntimeException e){
             Log.d("historyActivity-ImgView", e.getMessage());
         }
