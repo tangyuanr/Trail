@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
         bikeButtonlink = (Button) findViewById(R.id.bikingButton);
         historyButtonlink = (Button) findViewById(R.id.historyButton);
         runButtonlink = (Button) findViewById(R.id.runningButton);
-        //mapButtonlink = (Button) findViewById(R.id.mapButton);
+        mapButtonlink = (Button) findViewById(R.id.mapbutton);
         graphButton = (Button) findViewById(R.id.statsButton);
         //sensorButtonlink = (Button) findViewById(R.id.sensorButton);
         dbhandler = new DBHandler(this);
@@ -96,11 +96,11 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
                 goToHistoryActivity();
             }
         });
-    /*    mapButtonlink.setOnClickListener(new View.OnClickListener() {
+      mapButtonlink.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 goToMapActivity();
             }
-        });*/
+        });
 
         runButtonlink.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:background="@drawable/splash"
               android:gravity="center_horizontal"
@@ -31,6 +32,7 @@
         android:gravity="center_vertical">
 
         <Button
+            android:id="@+id/hikingButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -39,11 +41,11 @@
             android:drawableTop="@drawable/hiking"
             android:gravity="center"
             android:padding="5dp"
-            android:id="@+id/hikingButton"
             android:text="Hiking"
-            android:textColor="#FFFFFF"/>
+            android:textColor="#FFFFFF" />
 
         <Button
+            android:id="@+id/bikingButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
@@ -52,10 +54,9 @@
             android:drawablePadding="5dp"
             android:drawableTop="@drawable/biking"
             android:gravity="center"
-            android:id="@+id/bikingButton"
             android:padding="5dp"
             android:text="Biking"
-            android:textColor="#FFFFFF"/>
+            android:textColor="#FFFFFF" />
     </LinearLayout>
 
     <LinearLayout
@@ -129,4 +130,18 @@
             android:text="User profile"
             android:textColor="#FFFFFF"/>
     </LinearLayout>
+
+    <Button
+        android:id="@+id/mapbutton"
+        android:layout_width="261dp"
+        android:layout_height="80dp"
+        android:background="#80669900"
+        android:drawablePadding="5dp"
+        android:drawableTop="@android:drawable/ic_dialog_map"
+        android:gravity="center"
+        android:padding="5dp"
+        android:text="Take Me Back To Starting Point"
+        android:textColor="#FFFFFF"
+        tools:drawableTop="@android:drawable/ic_dialog_map" />
+
 </LinearLayout>
