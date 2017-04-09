@@ -217,7 +217,7 @@ public class ServiceGPS extends Service implements LocationListener, GoogleApiCl
             out.write(string);
             out.write('\n');
             out.close();
-            Toast.makeText(this, "ADDED 1 ENTRY", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "ADDED 1 ENTRY", Toast.LENGTH_SHORT).show();
 
         } catch (java.io.IOException e) {
             //if caught

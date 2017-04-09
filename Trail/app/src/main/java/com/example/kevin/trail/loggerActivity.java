@@ -445,6 +445,8 @@ public class loggerActivity extends AppCompatActivity implements
                 String snapshotURL = route.getStaticAPIURL(loggerActivity.this, 225, 140);
                 imagefilename = sdf.format(new Date()) + ".JPEG";
                 imageDownload(loggerActivity.this, snapshotURL, imagefilename);
+                if (counter==0)
+                    counter++;
                 attempt = new Attempt(route, totaltime, activityhelper.getTotalDistance(), currentDateandTime, snapshotURL, totalBMP / counter, (int) totalCaloriesBurnt, imagefilename);
                 dbHandler.addAttempt(attempt); //save the attempt to the database
                 Log.d(TAG, "Attempt added to the database");
@@ -501,6 +503,8 @@ public class loggerActivity extends AppCompatActivity implements
                                 route = new Route(inputRouteName, activityType, activityhelper.getTotalDistance(), totaltime, currentDateandTime, activityhelper.getCoordinatesFileName(), locality, imagefilename);
                                 dbHandler.addRoute(route);
                                 Log.d(TAG, "Route object added to ROUTE_TABLE");
+                                if (counter==0)
+                                    counter++;
                                 attempt = new Attempt(route, totaltime, activityhelper.getTotalDistance(), currentDateandTime, snapshotURL, totalBMP / counter, (int) totalCaloriesBurnt, imagefilename);
                                 dbHandler.addAttempt(attempt); //adding the attempt
                                 Log.d(TAG, "Attempt object built and added to database");
@@ -863,7 +867,8 @@ public class loggerActivity extends AppCompatActivity implements
         helpDialog.setMessage("Check if your Zephyr HxM is paired with your phone via bluetooth\n" +
                 "Make sure your HxM is charged\n" +
                 "Make sure the probes on the strap are placed onto your chest\n" +
-                "Moisten the strap probes with a bit of water"
+                "Moisten the strap probes with a bit of water\n"+
+                "Connection is most stable when the strap is in contact with skin"
         );
         helpDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                 new DialogInterface.OnClickListener() {

@@ -74,7 +74,7 @@ public class infoActivity extends AppCompatActivity {
                         Toast savetoast = Toast.makeText(getApplicationContext(), "Profile Saved", Toast.LENGTH_LONG);                         //create successful save message
                         savetoast.show();
 
-                        goTomainActivity();
+                        finish();
                         //show the saved toast message
                     }
                 } else {
