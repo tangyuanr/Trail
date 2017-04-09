@@ -43,10 +43,12 @@
 </RelativeLayout>
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:id="@+id/HRAvg"
         android:textColor="#fa0000"
-        android:textSize="16sp"
+        android:layout_marginRight="10dp"
+        android:gravity="right|center"
+        android:textSize="18sp"
         android:layout_height="wrap_content"/>
 
 </LinearLayout>
