@@ -1,8 +1,13 @@
 package com.example.kevin.trail;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,6 +21,7 @@ public class infoActivity extends AppCompatActivity {
     protected EditText genderEditText;                //Declare variables
     protected EditText ageEditText;
     protected EditText weightEditNum;
+    Toolbar toolbar;
 
     private sharedPreferenceHelper sharedPreferenceHelper;
 
@@ -23,6 +29,21 @@ public class infoActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_info);
+
+        toolbar=(Toolbar)findViewById(R.id.InfoActionBar);
+        setSupportActionBar(toolbar);
+
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+            getSupportActionBar().setTitle("Profile");
+            toolbar.setTitleTextColor(Color.parseColor("#FFFFFF"));
+
+            final Drawable upArrow = ContextCompat.getDrawable(this, R.drawable.abc_ic_ab_back_material);
+            upArrow.setColorFilter(Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_ATOP);
+            getSupportActionBar().setHomeAsUpIndicator(upArrow);
+        }
+
         sharedPreferenceHelper = new sharedPreferenceHelper(infoActivity.this);
         genderEditText = (EditText) findViewById(R.id.genderEditText);
         ageEditText = (EditText) findViewById(R.id.ageEditText);
@@ -93,5 +114,12 @@ public class infoActivity extends AppCompatActivity {
     void goTomainActivity() {
         Intent intent = new Intent(infoActivity.this, MainActivity.class);
         startActivity(intent);
+    }
+
+    public boolean onOptionsItemSelected(MenuItem menuItem) {
+        if (menuItem.getItemId() == android.R.id.home)
+            finish();
+
+        return super.onOptionsItemSelected(menuItem);
     }
 }
