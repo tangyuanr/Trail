@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/activity_profile"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.kevin.trail.infoActivity"
     android:scrollbarSize="100dp">
 
@@ -18,51 +16,49 @@
         android:id="@+id/saveButton"
         android:layout_below="@+id/weightEditNum"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="43dp" />
+        android:layout_marginTop="48dp" />
 
     <EditText
+        android:id="@+id/ageEditText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:inputType="number"
-        android:ems="10"
-        android:maxLength="2"
+        android:layout_above="@+id/weightEditNum"
+        android:layout_alignLeft="@+id/weightEditNum"
+        android:layout_alignStart="@+id/weightEditNum"
         android:digits="0123456789 "
-        android:id="@+id/ageEditText"
-        android:hint="Age"
         android:editable="true"
-        android:layout_below="@+id/genderEditText"
-        android:layout_alignLeft="@+id/genderEditText"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginTop="12dp" />
+        android:ems="10"
+        android:hint="12 to 99"
+        android:inputType="number"
+        android:maxLength="2" />
 
     <EditText
         android:id="@+id/weightEditNum"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/ageEditText"
-        android:layout_alignLeft="@+id/genderEditText"
+        android:layout_alignLeft="@+id/saveButton"
+        android:layout_alignStart="@+id/saveButton"
+        android:layout_centerVertical="true"
         android:editable="true"
         android:ems="10"
-        android:hint="Lbs"
+        android:hint="50 to 450"
         android:inputType="number"
-        android:maxLength="6" />
+        android:maxLength="3"
+        android:textAlignment="viewStart" />
 
     <TextView
         android:id="@+id/gender"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/genderEditText"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignTop="@+id/genderEditText"
         android:layout_marginLeft="34dp"
         android:layout_marginStart="34dp"
         android:scrollbarSize="10dp"
         android:text="Gender"
-        android:textSize="18sp" />
+        android:textSize="18sp"
+        android:layout_alignBaseline="@+id/genderEditText"
+        android:layout_alignBottom="@+id/genderEditText"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
     <TextView
         android:text="Age"
@@ -83,21 +79,42 @@
         android:layout_alignBottom="@+id/weightEditNum"
         android:layout_alignLeft="@+id/textView10"
         android:layout_alignStart="@+id/textView10"
-        android:text="Weight" />
+        android:text="Weight"
+        android:textSize="18sp" />
 
     <EditText
         android:id="@+id/genderEditText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/saveButton"
-        android:layout_alignParentTop="true"
-        android:layout_alignStart="@+id/saveButton"
-        android:layout_marginTop="24dp"
         android:digits="mfMF"
         android:editable="true"
         android:maxLength="1"
         android:ems="10"
         android:hint="M/F"
-        android:inputType="textPersonName" />
+        android:inputType="textPersonName"
+        android:layout_above="@+id/ageEditText"
+        android:layout_alignLeft="@+id/ageEditText"
+        android:layout_alignStart="@+id/ageEditText" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/weightEditNum"
+        android:layout_alignRight="@+id/weightEditNum"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="10dp"
+        android:layout_marginRight="10dp"
+        android:text="Lbs" />
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/InfoActionBar"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/holo_green_light"
+        android:elevation="4dp"
+        android:adjustViewBounds="false"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+
 
 </RelativeLayout>

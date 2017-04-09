@@ -71,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
 
         hikeButtonlink.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
+
                 if (dbhandler.isRouteTableEmpty("Hiking")) {
                     Intent intent = new Intent(MainActivity.this, loggerActivity.class);
                     intent.putExtra("activityType", "Hiking");
@@ -80,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
                     intent.putExtra("activityType", "Hiking");
                     startActivity(intent);
                 }
+
             }
         });
 
@@ -104,6 +106,7 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
 
         runButtonlink.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
+
                 if (dbhandler.isRouteTableEmpty("Running")) {
                     Intent intent = new Intent(MainActivity.this, loggerActivity.class);
                     intent.putExtra("activityType", "Running");
@@ -114,11 +117,13 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
                     startActivity(intent);
                     ;
                 }
+
             }
         });
 
         bikeButtonlink.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
+
                 if (dbhandler.isRouteTableEmpty("Biking")) {
                     Intent intent = new Intent(MainActivity.this, loggerActivity.class);
                     intent.putExtra("activityType", "Biking");
@@ -129,6 +134,7 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
                     startActivity(intent);
                     ;
                 }
+
             }
         });
 
@@ -147,6 +153,24 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
         String weight = sharedPreferenceHelper.getProfileWeight();
         if (gender == "" || weight == "") {
             goToinfoActivity();
+        }
+    }
+
+    protected void onResume(){
+        super.onResume();
+        String gender = sharedPreferenceHelper.getProfileGender();
+        String weight = sharedPreferenceHelper.getProfileWeight();
+        if (gender == "" || weight == "") {
+            goToinfoActivity();
+        }
+    }
+
+    public void onBackPressed(){
+        super.onBackPressed();
+        String gender = sharedPreferenceHelper.getProfileGender();
+        String weight = sharedPreferenceHelper.getProfileWeight();
+        String age = sharedPreferenceHelper.getProfileAge();
+        if (gender.length()<0 || weight.length() < 0 || age.length()<0){
         }
     }
 
