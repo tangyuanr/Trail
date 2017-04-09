@@ -10,7 +10,7 @@
         android:id="@+id/loggerActionBar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@android:color/holo_green_light"
+        android:background="@color/colorPrimary"
         android:elevation="4dp"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
@@ -183,8 +183,8 @@
             android:textSize="24sp"
             android:visibility="invisible"
             android:layout_below="@+id/HeartRateLabelText"
-            android:layout_alignLeft="@+id/paceOrSpeedLabel"
-            android:layout_alignStart="@+id/paceOrSpeedLabel" />
+            android:layout_alignRight="@+id/paceOrSpeedLabel"
+            android:layout_alignEnd="@+id/paceOrSpeedLabel" />
 
     </RelativeLayout>
 
@@ -230,6 +230,8 @@
             android:layout_alignParentTop="true"
             android:checked="true"
             android:text="Show trail"
+            android:textSize="18sp"
+            android:padding="10dp"
             android:textColor="#FFF"
             android:textOff="No"
             android:textOn="Yes" />
@@ -243,6 +245,8 @@
             android:layout_below="@+id/showPreviousRoute"
             android:checked="true"
             android:text="Show selected route"
+            android:padding="10dp"
+            android:textSize="18sp"
             android:textColor="#FFF"
             android:textOff="No"
             android:textOn="Yes"

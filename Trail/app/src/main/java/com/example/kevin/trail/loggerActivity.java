@@ -672,7 +672,7 @@ public class loggerActivity extends AppCompatActivity implements
                     }
                 });
 
-        }
+    }
 
     private void getLocationUpdates() {
         LocationServices.FusedLocationApi.requestLocationUpdates(googleAPIclient, locrequest, this);
@@ -681,90 +681,90 @@ public class loggerActivity extends AppCompatActivity implements
 
 
 
-        @Override
-        public void onConnectionSuspended ( int i){
+    @Override
+    public void onConnectionSuspended ( int i){
+    }
+
+    @Override
+    public void onConnectionFailed (ConnectionResult connectionResult){
+    }
+
+    @Override
+    public void onLocationChanged (Location location){
+        if (lastLocation == null) {
+            lastLocation = location;
         }
-
-        @Override
-        public void onConnectionFailed (ConnectionResult connectionResult){
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        if (followUser) {
+            googleMAP.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
         }
-
-        @Override
-        public void onLocationChanged (Location location){
-            if (lastLocation == null) {
-                lastLocation = location;
-            }
-            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-            if (followUser) {
-                googleMAP.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
-            }
-            Log.d(TAG, String.valueOf(location.getAccuracy()));
-            if (location.getAccuracy() < 15 && lastLocation.distanceTo(location) > 10) {
-                List<LatLng> points = previousTrail.getPoints();
-                points.add(latLng);
-                previousTrail.setPoints(points);
-                lastLocation = location;
-            }
-
-
-            if(!isOnline() && (mapHeadLayout.getVisibility() == View.VISIBLE)) {
-                mapHeadLayout.setVisibility(View.INVISIBLE);
-                showSelectedRoute.setVisibility(View.INVISIBLE);
-                resetTrailButton.setVisibility(View.INVISIBLE);
-                toStats.setVisibility(View.INVISIBLE);
-                headerLayout.setVisibility(View.VISIBLE);
-                Toast.makeText(loggerActivity.this, "Trail needs internet connection to display the map.", Toast.LENGTH_SHORT).show();
-            }
-        }
-
-        @Override
-        public boolean onMyLocationButtonClick () {
-            followUser = true;
-            return false;
-        }
-
-        @Override
-        public void onCameraMoveStarted ( int reason){
-            if (reason == GoogleMap.OnCameraMoveStartedListener.REASON_GESTURE) {
-                //Log.d(TAG, "GESTURE LISTENER");
-                followUser = false;
-            } else if (reason == GoogleMap.OnCameraMoveStartedListener.REASON_API_ANIMATION) { //Google documentation: indicates that the API has moved the camera in response to a non-gesture user action, such as tapping the zoom button, tapping the My Location button, or clicking a marker.
-                //Log.d(TAG, "NONGESTURE LISTENER");
-            } else if (reason == GoogleMap.OnCameraMoveStartedListener.REASON_DEVELOPER_ANIMATION) {
-                //Log.d(TAG, "DEVELOPER_ANIMATION LISTENER");
-            }
-        }
-
-        @Override
-        public void onCameraMove () {
-            //Log.d(TAG, "ONCAMERAMOVE");
-        }
-
-        @Override
-        public void onCameraMoveCanceled () {
-            //Log.d(TAG, "ONCAMERAMOVECANCELED");
-        }
-
-        @Override
-        public void onCameraIdle () {
-            //Log.d(TAG, "ONCAMERAIDLE");
+        Log.d(TAG, String.valueOf(location.getAccuracy()));
+        if (location.getAccuracy() < 15 && lastLocation.distanceTo(location) > 10) {
+            List<LatLng> points = previousTrail.getPoints();
+            points.add(latLng);
+            previousTrail.setPoints(points);
+            lastLocation = location;
         }
 
 
-        @Override
-        protected void onDestroy () {
-            googleAPIclient.disconnect();
-            super.onDestroy();
-            if (logging)// if logging is still true
-            {
-                activityhelper.stopActivity();
-                //disconnectClicked();//disconnect from HxM
+        if(!isOnline() && (mapHeadLayout.getVisibility() == View.VISIBLE)) {
+            mapHeadLayout.setVisibility(View.INVISIBLE);
+            showSelectedRoute.setVisibility(View.INVISIBLE);
+            resetTrailButton.setVisibility(View.INVISIBLE);
+            toStats.setVisibility(View.INVISIBLE);
+            headerLayout.setVisibility(View.VISIBLE);
+            Toast.makeText(loggerActivity.this, "Trail needs internet connection to display the map.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public boolean onMyLocationButtonClick () {
+        followUser = true;
+        return false;
+    }
+
+    @Override
+    public void onCameraMoveStarted ( int reason){
+        if (reason == GoogleMap.OnCameraMoveStartedListener.REASON_GESTURE) {
+            //Log.d(TAG, "GESTURE LISTENER");
+            followUser = false;
+        } else if (reason == GoogleMap.OnCameraMoveStartedListener.REASON_API_ANIMATION) { //Google documentation: indicates that the API has moved the camera in response to a non-gesture user action, such as tapping the zoom button, tapping the My Location button, or clicking a marker.
+            //Log.d(TAG, "NONGESTURE LISTENER");
+        } else if (reason == GoogleMap.OnCameraMoveStartedListener.REASON_DEVELOPER_ANIMATION) {
+            //Log.d(TAG, "DEVELOPER_ANIMATION LISTENER");
+        }
+    }
+
+    @Override
+    public void onCameraMove () {
+        //Log.d(TAG, "ONCAMERAMOVE");
+    }
+
+    @Override
+    public void onCameraMoveCanceled () {
+        //Log.d(TAG, "ONCAMERAMOVECANCELED");
+    }
+
+    @Override
+    public void onCameraIdle () {
+        //Log.d(TAG, "ONCAMERAIDLE");
+    }
+
+
+    @Override
+    protected void onDestroy () {
+        googleAPIclient.disconnect();
+        super.onDestroy();
+        if (logging)// if logging is still true
+        {
+            activityhelper.stopActivity();
+            //disconnectClicked();//disconnect from HxM
             timerHandler.removeCallbacks(timerRunnable);
             this.finish();
             NotificationManager NM = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
             NM.cancelAll();
-            }
         }
+    }
 
     @Override
     protected void onStop() {
@@ -773,16 +773,16 @@ public class loggerActivity extends AppCompatActivity implements
     }
 
     @Override
-        public void heartRateReceived ( int heartRate){
-            Message msg = new Message();
-            msg.getData().putInt("HeartRate", heartRate);
-            newHandler.sendMessage(msg);
-        }
-    
-        //disconnectClicked();//disconnect from HxM
+    public void heartRateReceived ( int heartRate){
+        Message msg = new Message();
+        msg.getData().putInt("HeartRate", heartRate);
+        newHandler.sendMessage(msg);
+    }
+
+    //disconnectClicked();//disconnect from HxM
 
 
-        //connect with HxM HR Sensor
+    //connect with HxM HR Sensor
 
     private void connectClicked() {
         try {

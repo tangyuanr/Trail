@@ -72,15 +72,15 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
         hikeButtonlink.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
 
-                    if (dbhandler.isRouteTableEmpty("Hiking")) {
-                        Intent intent = new Intent(MainActivity.this, loggerActivity.class);
-                        intent.putExtra("activityType", "Hiking");
-                        startActivity(intent);
-                    } else {
-                        Intent intent = new Intent(MainActivity.this, routeManager.class);
-                        intent.putExtra("activityType", "Hiking");
-                        startActivity(intent);
-                    }
+                if (dbhandler.isRouteTableEmpty("Hiking")) {
+                    Intent intent = new Intent(MainActivity.this, loggerActivity.class);
+                    intent.putExtra("activityType", "Hiking");
+                    startActivity(intent);
+                } else {
+                    Intent intent = new Intent(MainActivity.this, routeManager.class);
+                    intent.putExtra("activityType", "Hiking");
+                    startActivity(intent);
+                }
 
             }
         });
@@ -107,16 +107,16 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
         runButtonlink.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
 
-                    if (dbhandler.isRouteTableEmpty("Running")) {
-                        Intent intent = new Intent(MainActivity.this, loggerActivity.class);
-                        intent.putExtra("activityType", "Running");
-                        startActivity(intent);
-                    } else {
-                        Intent intent = new Intent(MainActivity.this, routeManager.class);
-                        intent.putExtra("activityType", "Running");
-                        startActivity(intent);
-                        ;
-                    }
+                if (dbhandler.isRouteTableEmpty("Running")) {
+                    Intent intent = new Intent(MainActivity.this, loggerActivity.class);
+                    intent.putExtra("activityType", "Running");
+                    startActivity(intent);
+                } else {
+                    Intent intent = new Intent(MainActivity.this, routeManager.class);
+                    intent.putExtra("activityType", "Running");
+                    startActivity(intent);
+                    ;
+                }
 
             }
         });
@@ -124,16 +124,16 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
         bikeButtonlink.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
 
-                    if (dbhandler.isRouteTableEmpty("Biking")) {
-                        Intent intent = new Intent(MainActivity.this, loggerActivity.class);
-                        intent.putExtra("activityType", "Biking");
-                        startActivity(intent);
-                    } else {
-                        Intent intent = new Intent(MainActivity.this, routeManager.class);
-                        intent.putExtra("activityType", "Biking");
-                        startActivity(intent);
-                        ;
-                    }
+                if (dbhandler.isRouteTableEmpty("Biking")) {
+                    Intent intent = new Intent(MainActivity.this, loggerActivity.class);
+                    intent.putExtra("activityType", "Biking");
+                    startActivity(intent);
+                } else {
+                    Intent intent = new Intent(MainActivity.this, routeManager.class);
+                    intent.putExtra("activityType", "Biking");
+                    startActivity(intent);
+                    ;
+                }
 
             }
         });
