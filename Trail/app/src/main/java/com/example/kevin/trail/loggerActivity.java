@@ -322,6 +322,7 @@ public class loggerActivity extends AppCompatActivity implements
                                     activityhelper = new activityHelper(loggerActivity.this, activityType);
                                     activityhelper.startActivity(null); //start logging samples
                                     connectClicked();
+                                    counter = 0;
                                     startTime = System.currentTimeMillis();
                                     timerHandler.postDelayed(timerRunnable, 0);
                                     startStopButton.setText("Stop logging");
