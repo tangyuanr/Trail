@@ -113,6 +113,7 @@ public class loggerActivity extends AppCompatActivity implements
     private long lastTimeForSpeed = 0;
     private int totalBMP = 0;
     private int counter = 0;
+    private long counterStandingStill = 0;
     private float speedGoogleApi;
     protected TextView hrTextView = null;
     //private HRSensorHandler hrHandler;
@@ -667,7 +668,6 @@ public class loggerActivity extends AppCompatActivity implements
 
     private void getLocationUpdates() {
         LocationServices.FusedLocationApi.requestLocationUpdates(googleAPIclient, locrequest, this);
-        lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleAPIclient);
     }
 
 
@@ -689,8 +689,10 @@ public class loggerActivity extends AppCompatActivity implements
             if (followUser) {
                 googleMAP.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
             }
+
             Log.d(TAG, String.valueOf(location.getAccuracy()));
-            if (location.getAccuracy() < 20 && lastLocation.distanceTo(location) > 20) {
+            Log.d(TAG, "DISTANCE TO: "+ String.valueOf(lastLocation.distanceTo(location)));
+            if (lastLocation.distanceTo(location) > 10) {
                 List<LatLng> points = previousTrail.getPoints();
                 points.add(latLng);
                 previousTrail.setPoints(points);
@@ -701,12 +703,6 @@ public class loggerActivity extends AppCompatActivity implements
                 lastLocation = location;
                 oldTimeForSpeed = newTimeForSpeed;
             }
-            else if(lastLocation.distanceTo(location) < 0.5) {
-                speedGoogleApi = 0;
-                lastLocation = location;
-                oldTimeForSpeed = System.currentTimeMillis();
-            }
-
 
             if(!isOnline() && (mapHeadLayout.getVisibility() == View.VISIBLE)) {
                 mapHeadLayout.setVisibility(View.INVISIBLE);
@@ -851,19 +847,43 @@ public class loggerActivity extends AppCompatActivity implements
                             //Log.d(TAG, "TOTAL DISTANCE " + String.valueOf(activityhelper.getTotalDistance()));
                             totalDistanceTravelledTextView.setText(String.format("%.2f", totalDistanceGoogleAPI) + " km");
 
+
+
                             float speed = speedGoogleApi;
                             if(activityType.equals("Biking")) {
-                                if(speed > 1) { //km/h
-                                    paceOrSpeedText.setText(String.format("%.1f", speed) + " km/h");
-                                }
-                                else {
+                                if(speed < 1) {
                                     paceOrSpeedText.setText("0 km/h");
+                                }
+                                else{
+                                    if(paceOrSpeedText.getText().toString().equals(String.format("%.1f", speed) + " km/h")) {
+                                        counterStandingStill++;
+
+                                        if(counterStandingStill > 10) {
+                                            paceOrSpeedText.setText("0 km/h");
+                                            speedGoogleApi = 0;
+                                        }
+                                    }
+                                    else {
+                                        paceOrSpeedText.setText(String.format("%.1f", speed) + " km/h");
+                                        counterStandingStill = 0;
+                                    }
                                 }
                             }
                             else if(activityType.equals("Running")) {
                                 if(speed > 1) { //km/h
                                     float pace = 60/speed; //min/km
-                                    paceOrSpeedText.setText(String.format("%.1f", pace) + " min/km");
+
+                                    if(paceOrSpeedText.getText().toString().equals(String.format("%.1f", pace) + " min/km")) {
+                                        counterStandingStill++;
+
+                                        if(counterStandingStill > 10) {
+                                            paceOrSpeedText.setText("--");
+                                            speedGoogleApi = 0;
+                                        }
+                                    } else {
+                                        paceOrSpeedText.setText(String.format("%.1f", pace) + " min/km");
+                                        counterStandingStill = 0;
+                                    }
                                 }
                                 else {
                                     paceOrSpeedText.setText("--");
