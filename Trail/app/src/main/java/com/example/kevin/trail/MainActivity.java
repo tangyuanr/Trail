@@ -41,9 +41,7 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
 
 
         sharedPreferenceHelper = new sharedPreferenceHelper(MainActivity.this);
-        final String gender = sharedPreferenceHelper.getProfileGender();
-        final String weight = sharedPreferenceHelper.getProfileWeight();
-        final String age = sharedPreferenceHelper.getProfileAge();
+
         hrHandler=new HRSensorHandler(this);
         try {
             hrHandler.Connect();
@@ -73,9 +71,7 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
 
         hikeButtonlink.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                if (gender.equals("") || age.equals("") || weight.equals("")) {
-                    goToinfoActivity();
-                } else {
+
                     if (dbhandler.isRouteTableEmpty("Hiking")) {
                         Intent intent = new Intent(MainActivity.this, loggerActivity.class);
                         intent.putExtra("activityType", "Hiking");
@@ -85,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
                         intent.putExtra("activityType", "Hiking");
                         startActivity(intent);
                     }
-                }
+
             }
         });
 
@@ -110,9 +106,7 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
 
         runButtonlink.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                if (gender.equals("") || age.equals("") || weight.equals("")) {
-                    goToinfoActivity();
-                } else {
+
                     if (dbhandler.isRouteTableEmpty("Running")) {
                         Intent intent = new Intent(MainActivity.this, loggerActivity.class);
                         intent.putExtra("activityType", "Running");
@@ -123,15 +117,13 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
                         startActivity(intent);
                         ;
                     }
-                }
+
             }
         });
 
         bikeButtonlink.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                if (gender.equals("") || age.equals("") || weight.equals("")) {
-                    goToinfoActivity();
-                } else {
+
                     if (dbhandler.isRouteTableEmpty("Biking")) {
                         Intent intent = new Intent(MainActivity.this, loggerActivity.class);
                         intent.putExtra("activityType", "Biking");
@@ -142,7 +134,7 @@ public class MainActivity extends AppCompatActivity implements IHeartRateRecieve
                         startActivity(intent);
                         ;
                     }
-                }
+
             }
         });
 
