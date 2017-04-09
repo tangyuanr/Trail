@@ -26,7 +26,9 @@ import android.widget.Toast;
 
 import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.ValueDependentColor;
 import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
+import com.jjoe64.graphview.series.BarGraphSeries;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.DataPointInterface;
 import com.jjoe64.graphview.series.LineGraphSeries;
@@ -66,7 +68,9 @@ public class graphActivity extends AppCompatActivity {
     private TextView showingTextView;
     private GraphView graph;
     private GraphView HRgraph;
+    private GraphView CALgraph;
     private TextView hrGraphText;
+    private TextView calGraphText;
     private BottomBar mBottomBar;
     protected Toolbar graphToolbar;
     private LinearLayout graphLayout;
@@ -114,6 +118,8 @@ public class graphActivity extends AppCompatActivity {
         graph = (GraphView) findViewById(R.id.graph);
         HRgraph=(GraphView)findViewById(R.id.hrGraph);
         hrGraphText=(TextView)findViewById(R.id.hrGraphInfo);
+        CALgraph=(GraphView)findViewById(R.id.calGraph);
+        calGraphText=(TextView)findViewById(R.id.caloriesGraphInfo) ;
         selectedPoint = (TextView) findViewById(R.id.selectedPoint);
 
         // selectedRoute spinner dynamic fill
@@ -164,6 +170,8 @@ public class graphActivity extends AppCompatActivity {
             showingTextView.setVisibility(View.GONE);
             HRgraph.setVisibility(View.GONE);
             hrGraphText.setVisibility(View.GONE);
+            CALgraph.setVisibility(View.GONE);
+            calGraphText.setVisibility(View.GONE);
             sinceTextView.setText("There is no data to display.");
             bottomBar.setVisibility(View.GONE);
         }
@@ -331,9 +339,11 @@ public class graphActivity extends AppCompatActivity {
 
         DataPoint[] datapoints = new DataPoint[numberOf];
         DataPoint[] hrDataPoints=new DataPoint[numberOf];
+        DataPoint[] calDataPoints=new DataPoint[numberOf];
         for (int i = 0; i < numberOf; i++) {
             datapoints[i] = new DataPoint(daysanddistance.get(i).getDateTime().toDate(), daysanddistance.get(i).getDistance());
             hrDataPoints[i]=new DataPoint(daysanddistance.get(i).getDateTime().toDate(), daysanddistance.get(i).getHR());
+            calDataPoints[i]=new DataPoint(daysanddistance.get(i).getDateTime().toDate(), daysanddistance.get(i).getCalories());
         }
         /**************************HR GRAPH*******************************************/
         //compute data points: all HR information for all attempts
@@ -374,12 +384,28 @@ public class graphActivity extends AppCompatActivity {
             HRgraph.getGridLabelRenderer().setHumanRounding(false);
             HRgraph.getGridLabelRenderer().setVerticalAxisTitle("Average heart rate (bpm)");
             HRgraph.getGridLabelRenderer().setTextSize(25);
-            HRgraph.getGridLabelRenderer().setHumanRounding(false);
             HRgraph.getGridLabelRenderer().setHorizontalAxisTitle("");
             HRgraph.getGridLabelRenderer().setNumHorizontalLabels(numberOf);
 
 
             /*******************CALORIES GRAPH*********************/
+            BarGraphSeries<DataPoint> cal_series=new BarGraphSeries<>(calDataPoints);
+            cal_series.setDrawValuesOnTop(true);
+            cal_series.setValuesOnTopColor(Color.parseColor("#FF9933"));
+            cal_series.setValueDependentColor(new ValueDependentColor<DataPoint>() {
+                @Override
+                public int get(DataPoint data) {
+                    return Color.parseColor("#FF9966");
+                }
+            });
+            //cal_series.setSpacing(50);
+            CALgraph.addSeries(cal_series);
+            CALgraph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(graphActivity.this));
+            CALgraph.getGridLabelRenderer().setHumanRounding(false);
+            CALgraph.getGridLabelRenderer().setVerticalAxisTitle("Calories burnt (Cal)");
+            CALgraph.getGridLabelRenderer().setTextSize(25);
+            CALgraph.getGridLabelRenderer().setHorizontalAxisTitle("");
+            CALgraph.getGridLabelRenderer().setNumHorizontalLabels(numberOf);
 
 
 

@@ -90,6 +90,24 @@
                 android:layout_marginTop="6dp"
                 app:seriesColor="#3CA508"
                 app:seriesType="line" />
+            <TextView
+                android:id="@+id/caloriesGraphInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="26dp"
+                android:text="Daily Calories Burnt"
+                android:textAlignment="center"
+                android:textColor="@color/heartrategraphtitle"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <com.jjoe64.graphview.GraphView
+                android:id="@+id/calGraph"
+                android:layout_width="match_parent"
+                android:layout_height="200dip"
+                android:layout_marginTop="6dp"
+                app:seriesColor="#3CA508"
+                app:seriesType="bar" />
 
         </LinearLayout>
     </ScrollView>
