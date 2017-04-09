@@ -112,8 +112,6 @@ public class loggerActivity extends AppCompatActivity implements
     private String imagefilename;
     private long totalBMP = 0;
     private int counter = 0;
-    private long counterStandingStill = 0;
-    private float speedGoogleApi;
     protected TextView hrTextView = null;
     //private HRSensorHandler hrHandler;
     protected Button sensorReconnect = null;
@@ -819,7 +817,7 @@ public class loggerActivity extends AppCompatActivity implements
             public void run() {
                 while (logging == true) {
                     try {
-                        Thread.sleep(2000);
+                        Thread.sleep(5000);
                         totalBMP += MainActivity.heartRate;
                         counter++;
                         totalCaloriesBurnt += caloriesCalculator(MainActivity.heartRate);
@@ -829,43 +827,24 @@ public class loggerActivity extends AppCompatActivity implements
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            //Log.d(TAG, "TOTAL DISTANCE " + String.valueOf(activityhelper.getTotalDistance()));
-                            totalDistanceTravelledTextView.setText(String.format("%.2f", activityhelper.getTotalDistance()) + " km");
+                            Log.d(TAG, "TOTAL DISTANCE " + String.valueOf(activityhelper.getTotalDistance()));
+                            totalDistanceTravelledTextView.setText(String.format("%.1f", activityhelper.getTotalDistance()) + " km");
 
-
-                            float speed = speedGoogleApi;
-                            if (activityType.equals("Biking")) {
-                                if (speed < 1) {
-                                    paceOrSpeedText.setText("0 km/h");
-                                } else {
-                                    if (paceOrSpeedText.getText().toString().equals(String.format("%.1f", speed) + " km/h")) {
-                                        counterStandingStill++;
-
-                                        if (counterStandingStill > 10) {
-                                            paceOrSpeedText.setText("0 km/h");
-                                            speedGoogleApi = 0;
-                                        }
-                                    } else {
-                                        paceOrSpeedText.setText(String.format("%.1f", speed) + " km/h");
-                                        counterStandingStill = 0;
-                                    }
+                            float speed = activityhelper.getSpeed();
+                            if(activityType.equals("Biking")) {
+                                if(speed > 1) { //km/h
+                                    paceOrSpeedText.setText(String.format("%.1f", speed) + " km/h");
                                 }
-                            } else if (activityType.equals("Running")) {
-                                if (speed > 1) { //km/h
-                                    float pace = 60 / speed; //min/km
-
-                                    if (paceOrSpeedText.getText().toString().equals(String.format("%.1f", pace) + " min/km")) {
-                                        counterStandingStill++;
-
-                                        if (counterStandingStill > 10) {
-                                            paceOrSpeedText.setText("--");
-                                            speedGoogleApi = 0;
-                                        }
-                                    } else {
-                                        paceOrSpeedText.setText(String.format("%.1f", pace) + " min/km");
-                                        counterStandingStill = 0;
-                                    }
-                                } else {
+                                else {
+                                    paceOrSpeedText.setText("0 km/h");
+                                }
+                            }
+                            else if(activityType.equals("Running")) {
+                                if(speed > 1) { //km/h
+                                    float pace = 60/speed; //min/km
+                                    paceOrSpeedText.setText(String.format("%.1f", pace) + " min/km");
+                                }
+                                else {
                                     paceOrSpeedText.setText("--");
                                 }
                             }
