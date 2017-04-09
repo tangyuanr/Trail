@@ -103,7 +103,11 @@ public class AttemptsListAdapter extends BaseAdapter {
         }
 
         long averageHR = attemptArray.get(position).getAverageHeartRate();
-        holder.averageHR.setText("Avg. HR\n" + Long.toString(averageHR) + " BPM");
+        if(averageHR == 0) {
+            holder.averageHR.setText("Avg. HR\n" + "N/A");
+        } else {
+            holder.averageHR.setText("Avg. HR\n" + Long.toString(averageHR) + " BPM");
+        }
 
 
         return convertView;

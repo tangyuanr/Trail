@@ -345,6 +345,7 @@ public class graphActivity extends AppCompatActivity {
             hrDataPoints[i]=new DataPoint(daysanddistance.get(i).getDateTime().toDate(), daysanddistance.get(i).getHR());
             calDataPoints[i]=new DataPoint(daysanddistance.get(i).getDateTime().toDate(), daysanddistance.get(i).getCalories());
         }
+        //add extra dummy datapoint
         /**************************HR GRAPH*******************************************/
         //compute data points: all HR information for all attempts
 
@@ -361,6 +362,8 @@ public class graphActivity extends AppCompatActivity {
             graph.getGridLabelRenderer().setHumanRounding(false);
             graph.getGridLabelRenderer().setHorizontalAxisTitle("");
             graph.getGridLabelRenderer().setVerticalAxisTitle("distance travelled (km)");
+           // graph.getViewport().setMinX(0d);
+            graph.getViewport().setMaxX((graph.getViewport().getMaxX(true))+(21600000));
 
             PointsGraphSeries<DataPoint> series_points = new PointsGraphSeries<>(datapoints);
             series_points.setSize(7);
@@ -388,6 +391,9 @@ public class graphActivity extends AppCompatActivity {
             HRgraph.getGridLabelRenderer().setTextSize(25);
             HRgraph.getGridLabelRenderer().setHorizontalAxisTitle("");
             HRgraph.getGridLabelRenderer().setNumHorizontalLabels(numberOf);
+            HRgraph.getViewport().setXAxisBoundsManual(true);
+            HRgraph.getViewport().setMaxX((graph.getViewport().getMaxX(true))+(21600000));
+            //HRgraph.setPadding(0, 0, 20, 0);
 
 
             /*******************CALORIES GRAPH*********************/
