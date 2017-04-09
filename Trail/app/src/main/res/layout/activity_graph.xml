@@ -65,7 +65,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="26dp"
-                android:text="Average Heart Rate (BMP)"
+                android:text="Average Heart Rate of Each Session"
                 android:textAlignment="center"
                 android:textColor="@color/heartrategraphtitle"
                 android:textSize="18sp"

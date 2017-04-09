@@ -849,7 +849,7 @@ public class loggerActivity extends AppCompatActivity implements
                             }
 
                             //paceOrSpeedText.setText(String.format("%.2f", activityhelper.getTotalDistance() / 0.14));//0.14minutes=5s
-                            caloriesTxtView.setText(String.format("%.2f", totalCaloriesBurnt) + " KCal");
+                            caloriesTxtView.setText(String.format("%.2f", totalCaloriesBurnt) + " Cal");
                             if (MainActivity.heartRate == 0) {
                                 sensorReconnect.setVisibility(View.VISIBLE);
                                 sensorHelp.setVisibility(View.VISIBLE);

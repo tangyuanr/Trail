@@ -52,7 +52,7 @@ public class DBHandler extends SQLiteOpenHelper {
     private static final String DATE_OF_ATTEMPT = "DateOfAttempt"; //yyyyMMdd_HHmm
     private static final String MAP_SCREENSHOT = "LinkToMapScreenshot";
     private static final String AVG_HR="AverageHeartRate";//in BMP
-    private static final String CALORIES="CaloriesBurnt";//in KCal
+    private static final String CALORIES="CaloriesBurnt";//in Cal
     private static final String TOTAL_DISTANCE="TotalDistance";//in km
     private static final String IMAGEFILENAME="ImageFileName";//ending in .jpg
     private static final String ROUTELOCALITY="RouteLocality";
@@ -421,7 +421,7 @@ public class DBHandler extends SQLiteOpenHelper {
 
                 placeholder = cursor.getString(cursor.getColumnIndex(CALORIES));
                 Log.d(TAG, "read CALORIES BURNT from TABLE ATTEMPTS: " + placeholder);
-                dataHolder.add("Calories burnt: " + placeholder+"KCAL");
+                dataHolder.add("Calories burnt: " + placeholder+"CAL");
 
                 placeholder=cursor.getString(cursor.getColumnIndex(IMAGEFILENAME));
                 Log.d(TAG, "read IMAGEFILENAME from TABLE ATTEMPTS: "+placeholder);
