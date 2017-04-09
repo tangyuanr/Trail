@@ -13,10 +13,13 @@ import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
@@ -26,6 +29,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -95,7 +99,9 @@ public class loggerActivity extends AppCompatActivity implements
     private boolean logging = false;
     private String activityType = null;
     private Switch showSelectedRoute;
+    private boolean locationFlag = false;
     private Switch showPreviousRoute;
+    String carriagereturn;
     private float totalDistanceHiked;
     DBHandler dbHandler = new DBHandler(this);
     GoogleMap googleMAP;
@@ -140,6 +146,7 @@ public class loggerActivity extends AppCompatActivity implements
             seconds = seconds % 60;
             timerTextViewL.setText("Time elapsed: " + String.format("%d:%02d", minutes, seconds));
             String holder = MainActivity.heartRate + " BPM";
+            hrTextView.setText(holder);
             notificationOp(noti_id, String.format("%d:%02d", minutes, seconds), holder, String.format("%.2f", activityhelper.getTotalDistance()) + " km");
             timerHandler.postDelayed(this, 500);
         }
@@ -158,6 +165,8 @@ public class loggerActivity extends AppCompatActivity implements
         sensorHelp = (FloatingActionButton) findViewById(R.id.hrReconectHelp);
         sharedPref = new sharedPreferenceHelper(loggerActivity.this);
         caloriesTxtView = (TextView) findViewById(R.id.caloriesTextView);
+
+        carriagereturn =  System.getProperty("line.separator");
 
 
         //action bar
@@ -474,7 +483,7 @@ public class loggerActivity extends AppCompatActivity implements
                     @Override
                     public void onClick(View view) {
                         String inputRouteName = input.getText().toString();
-                        if (inputRouteName.matches("^.*[^a-zA-Z0-9 ].*$")) {
+                        if (inputRouteName.matches("^.*[^a-zA-Z0-9 ].*$")||inputRouteName.contains(carriagereturn)) {
                             Toast.makeText(loggerActivity.this, "The route name can only contain alphanumeric characters", Toast.LENGTH_SHORT).show();
                         } else {
                             boolean routeNameExists = dbHandler.doesRouteNameExist(inputRouteName);
@@ -691,15 +700,34 @@ public class loggerActivity extends AppCompatActivity implements
 
     @Override
     public void onConnectionSuspended ( int i){
+
+        Log.d("DJDJD", "ENTERED ONCojfdjf");
     }
 
     @Override
     public void onConnectionFailed (ConnectionResult connectionResult){
     }
 
+    public boolean isLocationServiceEnabled(){
+        LocationManager locationManager = null;
+        boolean gps_enabled= false;
+
+        if(locationManager ==null)
+            locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        try{
+            gps_enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        }catch(Exception ex){
+            //do nothing...
+        }
+
+        return gps_enabled;
+
+    }
+
     @Override
-    public void onLocationChanged (Location location){
+    public void onLocationChanged (Location location){;
         if (lastLocation == null) {
+            Log.d("fdjkfdjkd", "location is null");
             lastLocation = location;
         }
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
@@ -707,7 +735,7 @@ public class loggerActivity extends AppCompatActivity implements
             googleMAP.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
         }
         Log.d(TAG, String.valueOf(location.getAccuracy()));
-        if (location.getAccuracy() < 15 && lastLocation.distanceTo(location) > 10) {
+        if (location.getAccuracy() < 30 && lastLocation.distanceTo(location) > 5) {
             List<LatLng> points = previousTrail.getPoints();
             points.add(latLng);
             previousTrail.setPoints(points);
@@ -766,12 +794,12 @@ public class loggerActivity extends AppCompatActivity implements
         if (logging)// if logging is still true
         {
             activityhelper.stopActivity();
-            //disconnectClicked();//disconnect from HxM
-            timerHandler.removeCallbacks(timerRunnable);
-            this.finish();
-            NotificationManager NM = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
-            NM.cancelAll();
         }
+
+        NotificationManager NM = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+        NM.cancelAll();
+        timerHandler.removeCallbacks(timerRunnable);
+        finish();
     }
 
     @Override
@@ -846,6 +874,19 @@ public class loggerActivity extends AppCompatActivity implements
         helpDialog.show();
     }
 
+    private void noGPSDialog() {
+        AlertDialog helpDialog = new AlertDialog.Builder(this).create();
+        helpDialog.setMessage("Warning: gps disabled!"
+        );
+        helpDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        helpDialog.show();
+    }
+
     //thread that receives distance updates from the service
     private void startUpdateStatsThread() {
         Thread th = new Thread(new Runnable() {
@@ -870,7 +911,16 @@ public class loggerActivity extends AppCompatActivity implements
                         @Override
                         public void run() {
                             Log.d(TAG, "TOTAL DISTANCE " + String.valueOf(activityhelper.getTotalDistance()));
-                            totalDistanceTravelledTextView.setText(String.format("%.1f", activityhelper.getTotalDistance()) + " km");
+                            totalDistanceTravelledTextView.setText(String.format("%.2f", activityhelper.getTotalDistance()) + " km");
+
+                            if(isLocationServiceEnabled()) {locationFlag = false;}
+
+                            if(!isLocationServiceEnabled() && !locationFlag) {
+                                //show the dialog
+                                noGPSDialog();
+                                locationFlag = true;
+                            }
+
 
                             float speed = activityhelper.getSpeed();
                             if(activityType.equals("Biking")) {
