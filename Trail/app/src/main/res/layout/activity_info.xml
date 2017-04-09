@@ -111,9 +111,9 @@
         android:id="@+id/InfoActionBar"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/holo_green_light"
-        android:elevation="4dp"
         android:adjustViewBounds="false"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
 

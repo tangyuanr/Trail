@@ -535,6 +535,17 @@ public class graphActivity extends AppCompatActivity {
         return date;
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d("GRAPH", "ONDESTROY");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d("GRAPH", "onstop");
+    }
 
     public static float round(float d, int decimalPlace) {
         BigDecimal bd = new BigDecimal(Float.toString(d));

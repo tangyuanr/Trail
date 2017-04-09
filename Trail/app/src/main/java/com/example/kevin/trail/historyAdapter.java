@@ -133,7 +133,7 @@ public class historyAdapter extends BaseAdapter {
                 //build url by first building a dummy Route object to use getStaticAPIURL method
                 Route route = new Route("dummy route name", "dummy activity type", 0, 0, "dummy time", coordinatesFile, "dummy locality", "dummy filename");
                 Log.d("historyActivity", "dummy route created, with coordinates filename: "+coordinatesFile);
-                String url=route.getStaticAPIURL(context, 250, 250);
+                String url=route.getStaticAPIURL(context, 225, 140);
                 //download the image to internal storage
                 imageDownload(context, url, imageFileName);
 

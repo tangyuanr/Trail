@@ -65,6 +65,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Andre & Jiayin
@@ -487,7 +488,7 @@ public class loggerActivity extends AppCompatActivity implements
                                 String currentDateandTime = sdf.format(new Date());
                                 String locality = getLocality();
                                 Route route_dummy = new Route("dummy route name", "dummy activity type", 0, 0, "dummy time", activityhelper.getCoordinatesFileName(), "dummy locality", "dummy filename");
-                                String snapshotURL = route_dummy.getStaticAPIURL(loggerActivity.this, 250, 250);
+                                String snapshotURL = route_dummy.getStaticAPIURL(loggerActivity.this, 225, 140);
                                 imagefilename = sdf.format(new Date()) + ".JPEG";
                                 imageDownload(loggerActivity.this, snapshotURL, imagefilename);
                                 //instantiating a new route object with the constructor for the case in which we have no rowID yet
@@ -548,9 +549,11 @@ public class loggerActivity extends AppCompatActivity implements
     }
 
 
+
     private void showStatsDialog(long timeLastSample, double FinalDistance) {
 
-        long time = timeLastSample / (60000); //in minutes
+        String time = String.format("%2d minutes and %2d seconds", TimeUnit.MILLISECONDS.toMinutes(timeLastSample), TimeUnit.MILLISECONDS.toSeconds(timeLastSample) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(timeLastSample)));
+
         AlertDialog alertDialog = new AlertDialog.Builder(this).create();
         String string = null;
         switch (activityType) {
@@ -576,7 +579,7 @@ public class loggerActivity extends AppCompatActivity implements
                 string = "biked";
                 break;
         }
-        alertDialog.setMessage("You have " + string + " " + String.format("%.2f", FinalDistance) + " km in " + (time) + " minutes.\n");
+        alertDialog.setMessage("You have " + string + " " + String.format("%.2f", FinalDistance) + " km in " + time);
         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {

@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.support.v7.widget.ActionMenuView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -185,8 +186,15 @@ public class routeManager extends AppCompatActivity implements GoogleApiClient.C
             Log.d("routeManager", "home clicked");
             finish();
         }
-        return super.onOptionsItemSelected(item);
+        return true;
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d("ROUTEMANAGER", "ENTERED ONDESTROY");
+    }
+
 
     public void onDeleteAction(MenuItem mi) {
         if(!(routeNameSelected==null)) {
@@ -241,6 +249,7 @@ public class routeManager extends AppCompatActivity implements GoogleApiClient.C
     protected void onStop() {
         googleAPIclient.disconnect();
         super.onStop();
+        Log.d("ROUTEMANAGER", "ONSTOP");
     }
 
     @Override
