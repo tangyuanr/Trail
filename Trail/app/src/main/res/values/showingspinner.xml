@@ -2,9 +2,5 @@
 <resources>
     <string-array name="showingspinner_array">
         <item>stats for the last 7 days</item>
-        <item>stats for the last month </item>
-        <item>stats for the last 3 months</item>
-        <item>stats for the last 6 months</item>
-        <item>stats for the last year</item>
     </string-array>
 </resources>

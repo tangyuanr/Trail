@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
@@ -65,6 +66,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Andre & Jiayin
@@ -108,9 +110,7 @@ public class loggerActivity extends AppCompatActivity implements
     Location lastLocation;
     ArrayList<Location> locationArray = new ArrayList<Location>();
     private String imagefilename;
-
-
-    private int totalBMP = 0;
+    private long totalBMP = 0;
     private int counter = 0;
     protected TextView hrTextView = null;
     //private HRSensorHandler hrHandler;
@@ -124,8 +124,6 @@ public class loggerActivity extends AppCompatActivity implements
     private RelativeLayout mapHeadLayout;
     private Button toStats;
     private RelativeLayout headerLayout;
-
-
     TextView timerTextViewL;
     long startTime = 0;
     int noti_id = 1;
@@ -142,7 +140,6 @@ public class loggerActivity extends AppCompatActivity implements
             timerHandler.postDelayed(this, 500);
         }
     };
-
 
 
     @Override
@@ -162,6 +159,10 @@ public class loggerActivity extends AppCompatActivity implements
         //action bar
         Toolbar loggerToolbar = (Toolbar) findViewById(R.id.loggerActionBar);
         setSupportActionBar(loggerToolbar);
+        loggerToolbar.setTitleTextColor(Color.parseColor("#FFFFFF"));
+        final Drawable upArrow = ContextCompat.getDrawable(this, R.drawable.abc_ic_ab_back_material);
+        upArrow.setColorFilter(Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_ATOP);
+        getSupportActionBar().setHomeAsUpIndicator(upArrow);
         headerLayout = (RelativeLayout) findViewById(R.id.relativeLayout2);
         mapHeadLayout = (RelativeLayout) findViewById(R.id.relativeLayout3);
         //UI ENHANCEMENT OBJECTS
@@ -267,15 +268,14 @@ public class loggerActivity extends AppCompatActivity implements
         toMap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(isOnline()) {
+                if (isOnline()) {
                     headerLayout.setVisibility(View.INVISIBLE);
                     //display layer 2
                     mapHeadLayout.setVisibility(View.VISIBLE);
                     showSelectedRoute.setVisibility(View.VISIBLE);
                     resetTrailButton.setVisibility(View.VISIBLE);
                     toStats.setVisibility(View.VISIBLE);
-                }
-                else {
+                } else {
                     Toast.makeText(loggerActivity.this, "Trail needs internet connection to display the map.", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -309,6 +309,7 @@ public class loggerActivity extends AppCompatActivity implements
                                 public void onGranted() {
 
                                     logging = true;
+                                    totalDistanceTravelledTextView.setText("0.00 km");
                                     activityhelper = new activityHelper(loggerActivity.this, activityType);
                                     activityhelper.startActivity(null); //start logging samples
                                     connectClicked();
@@ -395,7 +396,7 @@ public class loggerActivity extends AppCompatActivity implements
                         timerHandler.removeCallbacks(timerRunnable);
                         startStopButton.setText("Start logging");
                         loggingText.setVisibility(View.INVISIBLE);
-                        if(activityhelper.getCurrentNumberOfSamples() > 0) {
+                        if (activityhelper.getCurrentNumberOfSamples() > 0) {
                             if (!(route == null)) {
                                 SaveAttemptDialog();
 
@@ -405,8 +406,7 @@ public class loggerActivity extends AppCompatActivity implements
                             long timelastSample = activityhelper.getTimeLastsample();    //get final stats for display
                             float FinalDistance = activityhelper.getTotalDistance();    //get final stats for display
                             showStatsDialog(timelastSample, FinalDistance);
-                        }
-                        else {
+                        } else {
                             Toast.makeText(loggerActivity.this, "Logging cancelled", Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -484,7 +484,7 @@ public class loggerActivity extends AppCompatActivity implements
                                 String currentDateandTime = sdf.format(new Date());
                                 String locality = getLocality();
                                 Route route_dummy = new Route("dummy route name", "dummy activity type", 0, 0, "dummy time", activityhelper.getCoordinatesFileName(), "dummy locality", "dummy filename");
-                                String snapshotURL = route_dummy.getStaticAPIURL(loggerActivity.this, 250, 250);
+                                String snapshotURL = route_dummy.getStaticAPIURL(loggerActivity.this, 225, 140);
                                 imagefilename = sdf.format(new Date()) + ".JPEG";
                                 imageDownload(loggerActivity.this, snapshotURL, imagefilename);
                                 //instantiating a new route object with the constructor for the case in which we have no rowID yet
@@ -534,10 +534,12 @@ public class loggerActivity extends AppCompatActivity implements
         try {
             addresses = geocoder.getFromLocation(lastLocation.getLatitude(), lastLocation.getLongitude(), 1);
             city = addresses.get(0).getLocality();
+            if (city == null) {
+                city = "Montreal";
+            }
             province = addresses.get(0).getAdminArea();
             locality = city + ", " + province;
-        }
-        catch(IOException ex) {
+        } catch (IOException ex) {
         }
         return locality;
     }
@@ -545,7 +547,8 @@ public class loggerActivity extends AppCompatActivity implements
 
     private void showStatsDialog(long timeLastSample, double FinalDistance) {
 
-        long time = timeLastSample / (60000); //in minutes
+        String time = String.format("%2d minutes and %2d seconds", TimeUnit.MILLISECONDS.toMinutes(timeLastSample), TimeUnit.MILLISECONDS.toSeconds(timeLastSample) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(timeLastSample)));
+
         AlertDialog alertDialog = new AlertDialog.Builder(this).create();
         String string = null;
         switch (activityType) {
@@ -571,7 +574,7 @@ public class loggerActivity extends AppCompatActivity implements
                 string = "biked";
                 break;
         }
-        alertDialog.setMessage("You have " + string + " " + String.format("%.2f", FinalDistance) + " km in " + (time) + " minutes.\n");
+        alertDialog.setMessage("You have " + string + " " + String.format("%.2f", FinalDistance) + " km in " + time);
         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
@@ -651,94 +654,92 @@ public class loggerActivity extends AppCompatActivity implements
                     }
                 });
 
-        }
+    }
 
     private void getLocationUpdates() {
         LocationServices.FusedLocationApi.requestLocationUpdates(googleAPIclient, locrequest, this);
-        lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleAPIclient);
     }
 
 
+    @Override
+    public void onConnectionSuspended(int i) {
+    }
 
-        @Override
-        public void onConnectionSuspended ( int i){
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        if (lastLocation == null) {
+            lastLocation = location;
+        }
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        if (followUser) {
+            googleMAP.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
+        }
+        Log.d(TAG, String.valueOf(location.getAccuracy()));
+        if (location.getAccuracy() < 15 && lastLocation.distanceTo(location) > 10) {
+            List<LatLng> points = previousTrail.getPoints();
+            points.add(latLng);
+            previousTrail.setPoints(points);
+            lastLocation = location;
         }
 
-        @Override
-        public void onConnectionFailed (ConnectionResult connectionResult){
+
+        if (!isOnline() && (mapHeadLayout.getVisibility() == View.VISIBLE)) {
+            mapHeadLayout.setVisibility(View.INVISIBLE);
+            showSelectedRoute.setVisibility(View.INVISIBLE);
+            resetTrailButton.setVisibility(View.INVISIBLE);
+            toStats.setVisibility(View.INVISIBLE);
+            headerLayout.setVisibility(View.VISIBLE);
+            Toast.makeText(loggerActivity.this, "Trail needs internet connection to display the map.", Toast.LENGTH_SHORT).show();
         }
+    }
 
-        @Override
-        public void onLocationChanged (Location location){
-            if (lastLocation == null) {
-                lastLocation = location;
-            }
-            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-            if (followUser) {
-                googleMAP.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
-            }
-            Log.d(TAG, String.valueOf(location.getAccuracy()));
-            if (location.getAccuracy() < 15 && lastLocation.distanceTo(location) > 10) {
-                List<LatLng> points = previousTrail.getPoints();
-                points.add(latLng);
-                previousTrail.setPoints(points);
-                lastLocation = location;
-            }
+    @Override
+    public boolean onMyLocationButtonClick() {
+        followUser = true;
+        return false;
+    }
 
-
-            if(!isOnline() && (mapHeadLayout.getVisibility() == View.VISIBLE)) {
-                mapHeadLayout.setVisibility(View.INVISIBLE);
-                showSelectedRoute.setVisibility(View.INVISIBLE);
-                resetTrailButton.setVisibility(View.INVISIBLE);
-                toStats.setVisibility(View.INVISIBLE);
-                headerLayout.setVisibility(View.VISIBLE);
-                Toast.makeText(loggerActivity.this, "Trail needs internet connection to display the map.", Toast.LENGTH_SHORT).show();
-            }
+    @Override
+    public void onCameraMoveStarted(int reason) {
+        if (reason == GoogleMap.OnCameraMoveStartedListener.REASON_GESTURE) {
+            //Log.d(TAG, "GESTURE LISTENER");
+            followUser = false;
+        } else if (reason == GoogleMap.OnCameraMoveStartedListener.REASON_API_ANIMATION) { //Google documentation: indicates that the API has moved the camera in response to a non-gesture user action, such as tapping the zoom button, tapping the My Location button, or clicking a marker.
+            //Log.d(TAG, "NONGESTURE LISTENER");
+        } else if (reason == GoogleMap.OnCameraMoveStartedListener.REASON_DEVELOPER_ANIMATION) {
+            //Log.d(TAG, "DEVELOPER_ANIMATION LISTENER");
         }
+    }
 
-        @Override
-        public boolean onMyLocationButtonClick () {
-            followUser = true;
-            return false;
-        }
+    @Override
+    public void onCameraMove() {
+        //Log.d(TAG, "ONCAMERAMOVE");
+    }
 
-        @Override
-        public void onCameraMoveStarted ( int reason){
-            if (reason == GoogleMap.OnCameraMoveStartedListener.REASON_GESTURE) {
-                //Log.d(TAG, "GESTURE LISTENER");
-                followUser = false;
-            } else if (reason == GoogleMap.OnCameraMoveStartedListener.REASON_API_ANIMATION) { //Google documentation: indicates that the API has moved the camera in response to a non-gesture user action, such as tapping the zoom button, tapping the My Location button, or clicking a marker.
-                //Log.d(TAG, "NONGESTURE LISTENER");
-            } else if (reason == GoogleMap.OnCameraMoveStartedListener.REASON_DEVELOPER_ANIMATION) {
-                //Log.d(TAG, "DEVELOPER_ANIMATION LISTENER");
-            }
-        }
+    @Override
+    public void onCameraMoveCanceled() {
+        //Log.d(TAG, "ONCAMERAMOVECANCELED");
+    }
 
-        @Override
-        public void onCameraMove () {
-            //Log.d(TAG, "ONCAMERAMOVE");
-        }
+    @Override
+    public void onCameraIdle() {
+        //Log.d(TAG, "ONCAMERAIDLE");
+    }
 
-        @Override
-        public void onCameraMoveCanceled () {
-            //Log.d(TAG, "ONCAMERAMOVECANCELED");
+    @Override
+    protected void onDestroy() {
+        googleAPIclient.disconnect();
+        super.onDestroy();
+        if (logging)// if logging is still true
+        {
+            activityhelper.stopActivity();
+            //disconnectClicked();//disconnect from HxM
         }
-
-        @Override
-        public void onCameraIdle () {
-            //Log.d(TAG, "ONCAMERAIDLE");
-        }
-
-        @Override
-        protected void onDestroy () {
-            googleAPIclient.disconnect();
-            super.onDestroy();
-            if (logging)// if logging is still true
-            {
-                activityhelper.stopActivity();
-                //disconnectClicked();//disconnect from HxM
-            }
-        }
+    }
 
     @Override
     protected void onStop() {
@@ -747,13 +748,13 @@ public class loggerActivity extends AppCompatActivity implements
     }
 
     @Override
-        public void heartRateReceived ( int heartRate){
-            Message msg = new Message();
-            msg.getData().putInt("HeartRate", heartRate);
-            newHandler.sendMessage(msg);
-        }
+    public void heartRateReceived(int heartRate) {
+        Message msg = new Message();
+        msg.getData().putInt("HeartRate", heartRate);
+        newHandler.sendMessage(msg);
+    }
 
-        //connect with HxM HR Sensor
+    //connect with HxM HR Sensor
 
     private void connectClicked() {
         try {
@@ -786,7 +787,7 @@ public class loggerActivity extends AppCompatActivity implements
     final Handler newHandler = new Handler() {
         public void handleMessage(Message msg) {
             MainActivity.heartRate = msg.getData().getInt("HeartRate");
-            String holder=MainActivity.heartRate + " BPM";
+            String holder = MainActivity.heartRate + " BPM";
             hrTextView.setText(holder);
         }
     };
@@ -827,7 +828,7 @@ public class loggerActivity extends AppCompatActivity implements
                         @Override
                         public void run() {
                             Log.d(TAG, "TOTAL DISTANCE " + String.valueOf(activityhelper.getTotalDistance()));
-                            totalDistanceTravelledTextView.setText(String.format("%.1f", activityhelper.getTotalDistance()) + " km");
+                            totalDistanceTravelledTextView.setText(String.format("%.2f", activityhelper.getTotalDistance()) + " km");
 
                             float speed = activityhelper.getSpeed();
                             if(activityType.equals("Biking")) {
@@ -893,7 +894,7 @@ public class loggerActivity extends AppCompatActivity implements
             Log.e(TAG, "Weight: " + weight + ", Age: " + age + ", Gender: " + gender + ". With heart rate " + HR + ", calories calculated: " + calories);
         }
 
-        if (calories < 0 || MainActivity.heartRate<40)
+        if (calories < 0 || MainActivity.heartRate < 40)
             calories = 0;
 
 
