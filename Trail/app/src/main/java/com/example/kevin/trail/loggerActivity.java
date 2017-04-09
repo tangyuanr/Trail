@@ -138,7 +138,8 @@ public class loggerActivity extends AppCompatActivity implements
             int minutes = seconds / 60;
             seconds = seconds % 60;
             timerTextViewL.setText("Time elapsed: " + String.format("%d:%02d", minutes, seconds));
-            notificationOp(noti_id, String.format("%d:%02d", minutes, seconds), Integer.toString(MainActivity.heartRate) + " BPM", String.format("%.2f", activityhelper.getTotalDistance()) + " km");
+            String holder=MainActivity.heartRate + " BPM";
+            notificationOp(noti_id, String.format("%d:%02d", minutes, seconds), holder, String.format("%.2f", activityhelper.getTotalDistance()) + " km");
             timerHandler.postDelayed(this, 500);
         }
     };
@@ -815,7 +816,8 @@ public class loggerActivity extends AppCompatActivity implements
     final Handler newHandler = new Handler() {
         public void handleMessage(Message msg) {
             MainActivity.heartRate = msg.getData().getInt("HeartRate");
-            hrTextView.setText(Integer.toString(MainActivity.heartRate) + " BPM");
+            String holder=MainActivity.heartRate+" BPM";
+            hrTextView.setText(holder);
         }
     };
 
