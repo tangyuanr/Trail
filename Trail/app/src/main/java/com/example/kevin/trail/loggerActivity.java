@@ -139,12 +139,11 @@ public class loggerActivity extends AppCompatActivity implements
             int minutes = seconds / 60;
             seconds = seconds % 60;
             timerTextViewL.setText("Time elapsed: " + String.format("%d:%02d", minutes, seconds));
-            String holder=MainActivity.heartRate + " BPM";
+            String holder = MainActivity.heartRate + " BPM";
             notificationOp(noti_id, String.format("%d:%02d", minutes, seconds), holder, String.format("%.2f", activityhelper.getTotalDistance()) + " km");
             timerHandler.postDelayed(this, 500);
         }
     };
-
 
 
     @Override
@@ -269,15 +268,14 @@ public class loggerActivity extends AppCompatActivity implements
         toMap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(isOnline()) {
+                if (isOnline()) {
                     headerLayout.setVisibility(View.INVISIBLE);
                     //display layer 2
                     mapHeadLayout.setVisibility(View.VISIBLE);
                     showSelectedRoute.setVisibility(View.VISIBLE);
                     resetTrailButton.setVisibility(View.VISIBLE);
                     toStats.setVisibility(View.VISIBLE);
-                }
-                else {
+                } else {
                     Toast.makeText(loggerActivity.this, "Trail needs internet connection to display the map.", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -397,7 +395,7 @@ public class loggerActivity extends AppCompatActivity implements
                         timerHandler.removeCallbacks(timerRunnable);
                         startStopButton.setText("Start logging");
                         loggingText.setVisibility(View.INVISIBLE);
-                        if(activityhelper.getCurrentNumberOfSamples() > 0) {
+                        if (activityhelper.getCurrentNumberOfSamples() > 0) {
                             if (!(route == null)) {
                                 SaveAttemptDialog();
 
@@ -407,8 +405,7 @@ public class loggerActivity extends AppCompatActivity implements
                             long timelastSample = activityhelper.getTimeLastsample();    //get final stats for display
                             float FinalDistance = activityhelper.getTotalDistance();    //get final stats for display
                             showStatsDialog(timelastSample, FinalDistance);
-                        }
-                        else {
+                        } else {
                             Toast.makeText(loggerActivity.this, "Logging cancelled: no data logged", Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -542,12 +539,10 @@ public class loggerActivity extends AppCompatActivity implements
             city = addresses.get(0).getLocality();
             province = addresses.get(0).getAdminArea();
             locality = city + ", " + province;
-        }
-        catch(IOException ex) {
+        } catch (IOException ex) {
         }
         return locality;
     }
-
 
 
     private void showStatsDialog(long timeLastSample, double FinalDistance) {
@@ -590,7 +585,6 @@ public class loggerActivity extends AppCompatActivity implements
     }
 
 
-
 //    @Override
 //    public void onPause() {
 //        super.onPause();
@@ -599,14 +593,24 @@ public class loggerActivity extends AppCompatActivity implements
 //        }
 //    }
 
+    @Override
     public void onBackPressed() {
-        super.onBackPressed();
-        timerHandler.removeCallbacks(timerRunnable);
-        this.finish();
-        NotificationManager NM = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
-        NM.cancelAll();
-    }
+        if (logging) {
+            new AlertDialog.Builder(this)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setTitle("Are you sure you want to quit?")
+                    .setMessage("All data will be lost")
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            finish();
+                        }
 
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
+        } else {finish();}
+    }
     @Override
     public void onMapLongClick(LatLng latLng) {
 
@@ -986,8 +990,7 @@ public class loggerActivity extends AppCompatActivity implements
     @Override
     public boolean onOptionsItemSelected(MenuItem menuItem) {
         if (menuItem.getItemId() == android.R.id.home)
-            finish();
-
+            onBackPressed();
         return super.onOptionsItemSelected(menuItem);
     }
 
