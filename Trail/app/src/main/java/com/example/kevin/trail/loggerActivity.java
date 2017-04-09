@@ -131,6 +131,7 @@ public class loggerActivity extends AppCompatActivity implements
     private RelativeLayout mapHeadLayout;
     private Button toStats;
     private RelativeLayout headerLayout;
+    private long millis = 1;
 
 
     TextView timerTextViewL;
@@ -140,7 +141,7 @@ public class loggerActivity extends AppCompatActivity implements
     Runnable timerRunnable = new Runnable() {
         @Override
         public void run() {
-            long millis = System.currentTimeMillis() - startTime;
+            millis = System.currentTimeMillis() - startTime;
             int seconds = (int) (millis / 1000);
             int minutes = seconds / 60;
             seconds = seconds % 60;
@@ -413,7 +414,7 @@ public class loggerActivity extends AppCompatActivity implements
                             }
                             long timelastSample = activityhelper.getTimeLastsample();    //get final stats for display
                             float FinalDistance = activityhelper.getTotalDistance();    //get final stats for display
-                            showStatsDialog(timelastSample, FinalDistance);
+                            showStatsDialog(millis, FinalDistance);
                         } else {
                             Toast.makeText(loggerActivity.this, "Logging cancelled: no data logged", Toast.LENGTH_SHORT).show();
                         }
@@ -808,7 +809,7 @@ public class loggerActivity extends AppCompatActivity implements
 
     @Override
     protected void onStop() {
-        googleAPIclient.disconnect();
+        //googleAPIclient.disconnect();
         super.onStop();
     }
 
