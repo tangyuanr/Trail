@@ -818,9 +818,15 @@ public class loggerActivity extends AppCompatActivity implements
                 while (logging == true) {
                     try {
                         Thread.sleep(5000);
-                        totalBMP += MainActivity.heartRate;
-                        counter++;
-                        totalCaloriesBurnt += caloriesCalculator(MainActivity.heartRate);
+                        if (MainActivity.heartRate!=0) {
+                            totalBMP += MainActivity.heartRate;
+                            counter++;
+                            totalCaloriesBurnt += caloriesCalculator(MainActivity.heartRate);
+                        }
+                        else{
+                            sensorHelp.setVisibility(View.VISIBLE);
+                            sensorReconnect.setVisibility(View.VISIBLE);
+                        }
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

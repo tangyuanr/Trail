@@ -204,6 +204,7 @@ public class graphActivity extends AppCompatActivity {
             float totalDistance = 0;
             int HR=0;
             int count=0;
+            double calories=0;
             if (!(attemptsforoneday.isEmpty())) {
                 for (int j = 0; j < attemptsforoneday.size(); j++) {
                     totalDistance += attemptsforoneday.get(j).getTotalDistance();
@@ -212,11 +213,13 @@ public class graphActivity extends AppCompatActivity {
                         HR+=hr;
                         count++;
                     }
+                    calories+=attemptsforoneday.get(j).getCaloriesBurnt();
                 }
             }
             if (count!=0)
                 HR=HR/count;
-            daysanddistance.add(new dayWhenSomethingWasDone(date,totalDistance, HR));
+            daysanddistance.add(new dayWhenSomethingWasDone(date,totalDistance, HR, calories));
+            Log.d("GRAPH", "HR added: "+HR);
         }
         return daysanddistance;
     }
@@ -283,6 +286,7 @@ public class graphActivity extends AppCompatActivity {
             float totalDistance = 0;
             int HR=0;
             int count=0;
+            double calories=0;
             if (!(attemptsforoneday.isEmpty())) {
                 for (int j = 0; j < attemptsforoneday.size(); j++) {
                     totalDistance += attemptsforoneday.get(j).getTotalDistance();
@@ -291,11 +295,13 @@ public class graphActivity extends AppCompatActivity {
                         HR+=hr;
                         count++;
                     }
+                    calories+=attemptsforoneday.get(j).getCaloriesBurnt();
                 }
             }
             if (count!=0)
                 HR=HR/count;
-            daysanddistance.add(new dayWhenSomethingWasDone(date,totalDistance, HR));
+            daysanddistance.add(new dayWhenSomethingWasDone(date,totalDistance, HR, calories));
+            Log.d("GRAPH", "HR added: "+HR);
         }
         return daysanddistance;
     }
@@ -367,8 +373,13 @@ public class graphActivity extends AppCompatActivity {
             HRgraph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(graphActivity.this));
             HRgraph.getGridLabelRenderer().setHumanRounding(false);
             HRgraph.getGridLabelRenderer().setVerticalAxisTitle("Average heart rate (bpm)");
+            HRgraph.getGridLabelRenderer().setTextSize(25);
+            HRgraph.getGridLabelRenderer().setHumanRounding(false);
+            HRgraph.getGridLabelRenderer().setHorizontalAxisTitle("");
+            HRgraph.getGridLabelRenderer().setNumHorizontalLabels(numberOf);
 
 
+            /*******************CALORIES GRAPH*********************/
 
 
 
@@ -384,11 +395,13 @@ public class graphActivity extends AppCompatActivity {
         private DateTime date;
         private float distance;
         private int HR;
+        private double calories;
 
-        public dayWhenSomethingWasDone(DateTime date, float distance, int heartrate) {
+        public dayWhenSomethingWasDone(DateTime date, float distance, int heartrate, double cal) {
             this.date = date;
             this.distance = distance;
             this.HR=heartrate;
+            this.calories=cal;
         }
 
         public DateTime getDateTime() {
@@ -410,6 +423,8 @@ public class graphActivity extends AppCompatActivity {
         public void setHR(int hr){this.HR=hr;}
 
         public int getHR(){return HR;}
+
+        public double getCalories(){return calories;}
     }
 
 
