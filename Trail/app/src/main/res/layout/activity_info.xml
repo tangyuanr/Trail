@@ -43,9 +43,9 @@
         android:layout_centerVertical="true"
         android:editable="true"
         android:ems="10"
-        android:hint="50 to 300"
+        android:hint="50 to 450"
         android:inputType="number"
-        android:maxLength="7"
+        android:maxLength="3"
         android:textAlignment="viewStart" />
 
     <TextView
