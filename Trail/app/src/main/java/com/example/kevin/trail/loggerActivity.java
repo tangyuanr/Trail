@@ -828,7 +828,7 @@ public class loggerActivity extends AppCompatActivity implements
                         @Override
                         public void run() {
                             Log.d(TAG, "TOTAL DISTANCE " + String.valueOf(activityhelper.getTotalDistance()));
-                            totalDistanceTravelledTextView.setText(String.format("%.1f", activityhelper.getTotalDistance()) + " km");
+                            totalDistanceTravelledTextView.setText(String.format("%.2f", activityhelper.getTotalDistance()) + " km");
 
                             float speed = activityhelper.getSpeed();
                             if(activityType.equals("Biking")) {
