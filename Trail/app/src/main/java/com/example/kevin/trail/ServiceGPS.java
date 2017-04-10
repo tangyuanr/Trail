@@ -229,7 +229,7 @@ public class ServiceGPS extends Service implements LocationListener, GoogleApiCl
     public void onDestroy() {
         handler.removeCallbacks(sendUpdates);
         googleApi.disconnect();
-        Toast.makeText(this, "Service stopped", Toast.LENGTH_SHORT).show();   //displaying this for debug purposes
+        //Toast.makeText(this, "Service stopped", Toast.LENGTH_SHORT).show();   //displaying this for debug purposes
         super.onDestroy();
     }
 
