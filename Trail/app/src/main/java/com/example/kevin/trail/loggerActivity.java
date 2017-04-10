@@ -29,6 +29,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
+import android.text.InputFilter;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
@@ -70,6 +71,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+
+import static android.R.attr.maxLength;
 
 /**
  * Created by Andre & Jiayin
@@ -469,6 +472,7 @@ public class loggerActivity extends AppCompatActivity implements
 
     private void NewRouteDialog() {
         final EditText input = new EditText(this);
+        input.setFilters(new InputFilter[] {new InputFilter.LengthFilter(20)});
         final AlertDialog dialog = new AlertDialog.Builder(this)
                 .setView(input)
                 .setTitle("Enter route name:")

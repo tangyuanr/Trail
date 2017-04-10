@@ -214,6 +214,7 @@ public class routeManager extends AppCompatActivity implements GoogleApiClient.C
             listviewadapter = new RouteAdapter(routeManager.this, listOfRoutes);
             listview.setAdapter(listviewadapter);
             routeNameSelected = null;
+            Toast.makeText(routeManager.this, "Route deleted", Toast.LENGTH_SHORT).show();
         }
     }
 
