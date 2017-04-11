@@ -123,6 +123,7 @@ public class ServiceGPS extends Service implements LocationListener, GoogleApiCl
     @Override
     public void onLocationChanged(Location location) {
         //Log.d(TAG, "onLocationChanged googleAPI");
+        Toast.makeText(this, "Location changed, accuracy: "+location.getAccuracy(), Toast.LENGTH_SHORT).show();
         currentLocation = location;
 
         //if we have enough subsamples to get an average sample

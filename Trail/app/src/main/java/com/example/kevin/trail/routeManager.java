@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
+import android.renderscript.Script;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -109,9 +110,10 @@ public class routeManager extends AppCompatActivity implements GoogleApiClient.C
             public boolean shouldInterceptTabSelection(@IdRes int oldTabId, @IdRes int newTabId) {
                 if (newTabId == R.id.tab_Nearby && (currentLocation == null)) {
                     Toast.makeText(routeManager.this, "Cannot get current location.", Toast.LENGTH_SHORT).show();
+
                     return true;
                 }
-
+                deleteButton.setVisible(false);
                 return false;
             }
         });
@@ -193,6 +195,12 @@ public class routeManager extends AppCompatActivity implements GoogleApiClient.C
     protected void onDestroy() {
         super.onDestroy();
         Log.d("ROUTEMANAGER", "ENTERED ONDESTROY");
+    }
+    @Override
+    protected void onPause(){
+        super.onPause();
+
+        deleteButton.setVisible(false);
     }
 
 
